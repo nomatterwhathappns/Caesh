@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+/* System fonts keep the app independent from third-party font requests. */
 
 :root{--ink:#202820;--muted:#899087;--line:#e9ece6;--paper:#f6f7f4;--green:#a9c9a0;--deep:#243a2c;--mint:#e6efe2;--white:#fff;--orange:#d58b63}
 *{box-sizing:border-box}
