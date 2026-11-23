@@ -34,29 +34,37 @@ export default function CaeshApp() {
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState(categories.expense[0]);
   const [note, setNote] = useState("");
-  const [date, setDate] = useState(today());
+  const [date, setDate] = useState("");
+  const [todayLabel, setTodayLabel] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [period, setPeriod] = useState("month");
   const [error, setError] = useState("");
 
   useEffect(() => {
+    setDate(today());
+    setTodayLabel(new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }));
     getTransactions()
       .then(setTransactions)
       .catch((reason: unknown) => setError(reason instanceof Error ? reason.message : "Database lokal tidak dapat dibuka."))
       .finally(() => setReady(true));
   }, []);
 
-  const totals = useMemo(() => {
+  const periodTransactions = useMemo(() => {
     const now = new Date();
-    const filtered = transactions.filter((item) => {
+    return transactions.filter((item) => {
       if (period === "all") return true;
       const itemDate = new Date(item.date + "T00:00:00");
       return itemDate.getFullYear() === now.getFullYear() && (period === "year" || itemDate.getMonth() === now.getMonth());
     });
-    const income = filtered.filter((item) => item.kind === "income").reduce((sum, item) => sum + item.amount, 0);
-    const expense = filtered.filter((item) => item.kind === "expense").reduce((sum, item) => sum + item.amount, 0);
-    return { income, expense, balance: income - expense };
   }, [transactions, period]);
+
+  const totals = useMemo(() => {
+    const income = periodTransactions.filter((item) => item.kind === "income").reduce((sum, item) => sum + item.amount, 0);
+    const expense = periodTransactions.filter((item) => item.kind === "expense").reduce((sum, item) => sum + item.amount, 0);
+    return { income, expense, balance: income - expense };
+  }, [periodTransactions]);
+
+  const expenseCount = periodTransactions.filter((item) => item.kind === "expense").length;
 
   const recent = transactions.slice(0, 6);
 
@@ -135,7 +143,7 @@ export default function CaeshApp() {
       <section className="main-panel" id="overview">
         <header className="topbar">
           <div className="breadcrumb">Workspace <span>/</span> Ringkasan</div>
-          <div className="topbar-right"><span className="local-indicator"><i /> Offline-ready</span><span className="top-date">{new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</span></div>
+          <div className="topbar-right"><span className="local-indicator"><i /> Data tersimpan lokal</span><span className="top-date">{todayLabel}</span></div>
         </header>
 
         <div className="content">
@@ -209,8 +217,8 @@ export default function CaeshApp() {
               <div className="section-kicker">KEBIASAAN FINANSIAL</div>
               <h2>Ringkasan aktivitas</h2>
               <p className="insight-description">Gambaran sederhana dari transaksi pada periode yang dipilih.</p>
-              <div className="insight-metric"><span>Jumlah transaksi</span><strong>{transactions.filter((item) => period === "all" || (period === "year" ? item.date.startsWith(String(new Date().getFullYear())) : item.date.startsWith(today().slice(0, 7)))).length}</strong></div>
-              <div className="insight-metric"><span>Rata-rata pengeluaran</span><strong>{rupiah(transactions.filter((item) => item.kind === "expense" && (period === "all" || (period === "year" ? item.date.startsWith(String(new Date().getFullYear())) : item.date.startsWith(today().slice(0, 7)))).length ? totals.expense / transactions.filter((item) => item.kind === "expense" && (period === "all" || (period === "year" ? item.date.startsWith(String(new Date().getFullYear())) : item.date.startsWith(today().slice(0, 7))))).length : 0)}</strong></div>
+              <div className="insight-metric"><span>Jumlah transaksi</span><strong>{periodTransactions.length}</strong></div>
+              <div className="insight-metric"><span>Rata-rata pengeluaran</span><strong>{rupiah(expenseCount ? totals.expense / expenseCount : 0)}</strong></div>
               <div className="insight-note"><span>✳</span><p>Catat transaksi secara rutin agar ringkasan keuanganmu semakin akurat.</p></div>
             </article>
           </section>
