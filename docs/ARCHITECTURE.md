@@ -1,32 +1,32 @@
-# Architecture Notes
+# Caesh — Architecture
 
-## Initial direction
+## Current direction
 
-Caesh is a single-user, offline-first Android application. The initial app uses Kotlin and Jetpack Compose. The planned application structure follows MVVM with clear boundaries between presentation, domain rules, and local data access.
+Caesh is a single-user web application built with Next.js App Router, React, and TypeScript. Vercel hosts the application. Transaction records are stored in the user's browser using IndexedDB.
 
-## Planned layers
+## Components
 
-- **Presentation:** Compose screens, reusable UI components, navigation, ViewModels, and UI state.
-- **Domain:** finance entities, validation, balance rules, and use cases.
-- **Data:** Room database, DAOs, repository implementations, and local backup/restore.
-- **Core:** currency/date formatting, input validation, and security helpers.
+- **Presentation:** React client components and responsive CSS.
+- **Local data:** IndexedDB database `caesh-local`, object store `transactions`.
+- **Domain:** transaction kind, integer rupiah amounts, period totals.
+- **Hosting:** Vercel serves the web application; no financial-data backend is configured.
 
-## Finance invariants
+## Data rules
 
-- Store IDR amounts as integer rupiah (Long), never floating-point values.
-- An income increases its source account balance.
-- An expense decreases its source account balance.
-- A transfer decreases the source account and increases the destination account by the same amount.
-- Transfers are excluded from income and expense totals.
-- Dashboard totals must be derived from persisted local data, not hardcoded sample data.
+- Store IDR amounts as safe integer rupiah values, not floating-point currency.
+- Income increases net cash flow.
+- Expense decreases net cash flow.
+- Totals are derived from locally stored transaction records.
+- Data is scoped to the browser origin and browser profile. It is not shared between devices or browsers.
 
-## Privacy constraints
+## Privacy boundaries
 
-- No account registration, backend, cloud sync, analytics, ads, or external AI.
-- Do not request Android's INTERNET permission.
-- Keep financial data in app-private local storage.
-- Encryption is a release requirement for real personal financial data; it must be implemented and tested before claiming the app is secure.
+- No account registration or server-side financial database in this initial version.
+- Vercel Deployment Protection is an access gate for the website, not encryption for browser storage.
+- IndexedDB is local browser storage and is not encrypted by this application.
+- Clearing browser site data can remove transactions.
+- Backup/restore, application lock, and security review are not implemented yet.
 
-## Current implementation status
+## Current implementation
 
-This document describes the intended architecture. The current initial commit contains only the Android shell and a static dashboard. Database persistence and finance features are not implemented yet.
+Dashboard, period filters, income/expense entry, recent transactions, and transaction deletion are implemented in the initial web conversion. Build and browser testing must still be run before treating the deployment as verified.
