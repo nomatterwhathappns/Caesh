@@ -1,0 +1,10 @@
+{
+  "name": "Caesh Personal Finance",
+  "short_name": "Caesh",
+  "description": "Catatan keuangan pribadi yang privat.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f6f7f4",
+  "theme_color": "#f6f7f4",
+  "lang": "id"
+}
