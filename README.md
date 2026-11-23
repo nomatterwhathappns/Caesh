@@ -1,57 +1,54 @@
 # Caesh
 
-**Caesh** adalah aplikasi Android pengelola keuangan pribadi (*personal finance manager*) yang dirancang untuk penggunaan satu pengguna, sepenuhnya offline, dan menyimpan data secara lokal di perangkat.
+**Caesh** adalah aplikasi pengelola keuangan pribadi berbasis web untuk penggunaan pribadi. Aplikasi menggunakan Next.js dan menyimpan transaksi di browser melalui IndexedDB.
 
-> Status: tahap fondasi awal. Fitur yang belum diimplementasikan atau diuji tidak dianggap selesai.
+## Menjalankan secara lokal
 
-## Tujuan
+Persyaratan: Node.js 20.9 atau lebih baru.
 
-- Mencatat pemasukan, pengeluaran, dan transfer.
-- Mengelola akun/dompet, kategori, anggaran, dan target tabungan.
-- Menampilkan ringkasan serta laporan berdasarkan transaksi nyata.
-- Menjaga data tetap berada di perangkat tanpa akun, backend, sinkronisasi cloud, iklan, atau analitik eksternal.
+```bash
+npm install
+npm run dev
+```
 
-## Prinsip utama
+Buka http://localhost:3000.
 
-1. **Offline-first:** aplikasi tidak memerlukan koneksi internet saat digunakan.
-2. **Privasi:** tidak ada permission `INTERNET` dan tidak ada pengiriman data finansial ke layanan pihak ketiga.
-3. **Akurasi:** nominal uang disimpan sebagai bilangan bulat rupiah (`Long`), bukan `Float`/`Double`.
-4. **Integritas:** transfer antar-akun bukan pemasukan atau pengeluaran baru.
-5. **Transparansi:** status implementasi dan hasil pengujian dicatat apa adanya.
+Periksa build produksi dengan:
 
-## Teknologi
+```bash
+npm run build
+npm run start
+```
 
-- Kotlin
-- Android / Jetpack Compose
-- MVVM dengan pemisahan domain dan data secara proporsional
-- Room untuk penyimpanan lokal
-- Kotlin Coroutines dan Flow
-- DataStore untuk preferensi aplikasi
+## Deploy ke Vercel
 
-Enkripsi database, backup terenkripsi, autentikasi lokal, OCR, dan fitur lanjutan akan ditambahkan melalui tahap implementasi dan verifikasi terpisah. Jangan menganggap data sudah terenkripsi sebelum fitur tersebut benar-benar tersedia dan diuji.
+1. Import repository GitHub `nomatterwhathappns/Caesh` ke Vercel.
+2. Framework Preset: Next.js.
+3. Root Directory: `./`.
+4. Build Command: `npm run build`.
+5. Output Directory: biarkan default.
+6. Deploy.
 
-## Menjalankan proyek
+Tidak ada environment variable wajib untuk versi awal ini.
 
-1. Install Android Studio versi stabil.
-2. Buka folder repository ini sebagai proyek Gradle.
-3. Tunggu Gradle Sync selesai.
-4. Jalankan konfigurasi `app` pada Android Emulator atau perangkat Android melalui USB debugging.
+## Privasi dan penyimpanan
 
-Untuk membuat APK debug: **Build → Build Bundle(s) / APK(s) → Build APK(s)**. APK debug biasanya tersedia di `app/build/outputs/apk/debug/` setelah build berhasil.
+- Data transaksi disimpan di IndexedDB browser pada perangkat dan profil browser yang digunakan.
+- Tidak ada backend, API keuangan, akun pengguna, database cloud, atau sinkronisasi antarperangkat pada versi awal.
+- Vercel meng-host kode aplikasi; transaksi tidak dikirim ke Vercel oleh fitur pencatatan versi awal.
+- Data tidak terenkripsi oleh aplikasi. Menghapus data situs/browser dapat menghapus transaksi.
+- Gunakan browser dan perangkat yang sama untuk mengakses data yang sama.
+- Deployment Protection mengatur akses ke situs, bukan mengenkripsi data lokal.
+- Jangan jadikan aplikasi ini satu-satunya catatan keuangan sebelum backup/restore dan pengujian keamanan tersedia.
 
-## Roadmap
+## Fitur versi awal
 
-- [x] Menetapkan identitas dan prinsip proyek.
-- [ ] Fondasi Android dan tema UI.
-- [ ] Database lokal dan model akun/transaksi/kategori.
-- [ ] Dashboard dan pencatatan transaksi.
-- [ ] Transfer dan kalkulasi saldo yang konsisten.
-- [ ] Budget dan target tabungan.
-- [ ] Statistik, pencarian, dan insight lokal.
-- [ ] Backup/restore terenkripsi dan pengamanan aplikasi.
-- [ ] OCR lokal, notifikasi, dan fitur tambahan.
-- [ ] Pengujian, audit privasi, dan APK.
+- Dashboard ringkasan pemasukan, pengeluaran, dan arus bersih.
+- Catat pemasukan dan pengeluaran.
+- Kategori dasar dan tanggal transaksi.
+- Daftar transaksi terbaru dan hapus transaksi.
+- Filter ringkasan bulan ini, tahun ini, dan semua transaksi.
 
-## Keamanan dan batasan
+## Belum tersedia
 
-Caesh masih dalam tahap pengembangan dan belum layak dipakai sebagai satu-satunya catatan keuangan. Jangan masukkan data finansial sensitif sebelum penyimpanan terenkripsi, backup/restore, dan pengujian keamanan selesai.
+Akun/dompet, transfer, edit transaksi, kategori kustom, anggaran, target tabungan, ekspor/impor backup, app lock, grafik analisis, dan dukungan offline penuh (PWA/service worker) masih dalam roadmap.
