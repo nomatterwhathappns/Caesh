@@ -1,45 +1,41 @@
-# Caesh — Roadmap
+# Caesh — Web Roadmap
 
-## Milestone 0: Project foundation
-- [x] Android project skeleton (Kotlin + Jetpack Compose)
-- [x] Initial dashboard layout
-- [x] No INTERNET permission in manifest
-- [ ] Verify Gradle build in Android Studio or CI
+## Milestone 0: Web foundation
+- [x] Replace Android project direction with Next.js
+- [x] Add responsive dashboard
+- [x] Add IndexedDB transaction storage
+- [x] Add income and expense form
+- [x] Add monthly, yearly, and all-time summaries
+- [ ] Verify production build and browser behavior
 
-## Milestone 1: Local finance core
-- [ ] Room database and migrations
-- [ ] Accounts and wallets
-- [ ] Income, expense, and transfer transactions
+## Milestone 1: Finance core
+- [ ] Wallets/accounts
+- [ ] Transfers between accounts
+- [ ] Editable transactions
 - [ ] Category management
 - [ ] Balance calculation tests
 
-## Milestone 2: Money management
+## Milestone 2: Planning
 - [ ] Budgets
-- [ ] Savings goals and contributions
+- [ ] Savings goals
 - [ ] Debt and receivables
 
 ## Milestone 3: Insights
-- [ ] Transaction search and filters
-- [ ] Statistics and charts
-- [ ] Rule-based offline financial insights
+- [ ] Search and filters
+- [ ] Charts and category breakdowns
+- [ ] Monthly comparisons
 
-## Milestone 4: Privacy and resilience
-- [ ] Database encryption with a maintained, verified solution
-- [ ] Encrypted backup and restore
-- [ ] App lock and biometric unlock
-- [ ] Privacy and permission review
+## Milestone 4: Data safety
+- [ ] Export and import backup
+- [ ] Backup format versioning and validation
+- [ ] Optional app lock
+- [ ] Privacy and security review
 
-## Milestone 5: Advanced features
-- [ ] Recurring transactions
-- [ ] Calendar
-- [ ] On-device receipt OCR
-- [ ] Local notifications and optional achievements
+## Milestone 5: Offline and release
+- [ ] PWA service worker and offline shell
+- [ ] Cross-browser testing
+- [ ] Accessibility review
+- [ ] Vercel deployment protection setup
+- [ ] Deployment verification
 
-## Milestone 6: Release readiness
-- [ ] Unit, database, and UI tests
-- [ ] Offline behavior verification
-- [ ] Build and install debug APK
-- [ ] Release signing configured by the owner
-- [ ] User and technical documentation
-
-A checklist item is only marked complete after implementation and verification.
+A feature is complete only after implementation and testing. IndexedDB is browser-local storage, not encrypted storage or a backup.
