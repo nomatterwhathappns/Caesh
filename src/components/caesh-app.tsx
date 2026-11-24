@@ -35,8 +35,11 @@ export default function CaeshApp() {
   const [showWalletForm, setShowWalletForm] = useState(false);
   const [period, setPeriod] = useState("month");
   const [error, setError] = useState("");
+  const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
+    const savedTheme = window.localStorage.getItem("caesh-theme");
+    if (savedTheme === "dark" || savedTheme === "light") setTheme(savedTheme);
     setDate(today());
     setTodayLabel(new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }));
     Promise.all([getTransactions(), getWallets()])
@@ -48,6 +51,11 @@ export default function CaeshApp() {
       .catch((reason: unknown) => setError(reason instanceof Error ? reason.message : "Database lokal tidak dapat dibuka."))
       .finally(() => setReady(true));
   }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    window.localStorage.setItem("caesh-theme", theme);
+  }, [theme]);
 
   const walletBalances = useMemo(() => wallets.map((wallet) => {
     const movement = transactions.filter((item) => item.walletId === wallet.id)
@@ -127,7 +135,7 @@ export default function CaeshApp() {
   function changeKind(next: TransactionKind) { setKind(next); setCategory(categories[next][0]); }
 
   return (
-    <main className="app-shell">
+    <main className="app-shell" data-theme={theme}>
       <aside className="sidebar">
         <a className="brand" href="#" aria-label="Caesh beranda"><span className="brand-mark">c</span><span>caesh<span className="brand-period">.</span></span></a>
         <div className="side-label">WORKSPACE</div>
@@ -144,7 +152,7 @@ export default function CaeshApp() {
       </aside>
 
       <section className="main-panel" id="overview">
-        <header className="topbar"><div className="breadcrumb">Workspace <span>/</span> Ringkasan</div><div className="topbar-right"><span className="local-indicator"><i /> Data tersimpan lokal</span><span className="top-date">{todayLabel}</span></div></header>
+        <header className="topbar"><div className="breadcrumb">Workspace <span>/</span> Ringkasan</div><div className="topbar-right"><span className="local-indicator"><i /> Data tersimpan lokal</span><span className="top-date">{todayLabel}</span><button className="theme-toggle" onClick={() => setTheme((current) => current === "light" ? "dark" : "light")} aria-label={theme === "light" ? "Aktifkan tema gelap" : "Aktifkan tema terang"} title={theme === "light" ? "Tema gelap" : "Tema terang"}><span aria-hidden="true">{theme === "light" ? "☾" : "☀"}</span><span>{theme === "light" ? "Gelap" : "Terang"}</span></button></div></header>
         <div className="content">
           <div className="welcome-row"><div><div className="eyebrow">PERSONAL FINANCE OVERVIEW</div><h1>Uangmu, lebih <em>terarah.</em></h1><p className="welcome-copy">Pantau arus uang dan bangun kebiasaan finansial yang lebih baik.</p></div><button className="primary-button" onClick={() => setShowForm(true)}><span>＋</span> Tambah transaksi</button></div>
           {error && <div className="error-banner" role="alert">{error}<button onClick={() => setError("")}>Tutup</button></div>}
