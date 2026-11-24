@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   getTransactions, getWallets, removeTransaction, saveTransaction, saveWallet,
   Transaction, TransactionKind, Wallet,
@@ -48,7 +48,6 @@ export default function CaeshApp() {
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [activeNav, setActiveNav] = useState<"overview" | "wallets" | "transactions" | "transfer" | "insights">("overview");
   const [walletPreviewOpen, setWalletPreviewOpen] = useState(false);
-  const walletPreviewTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [transactionSearch, setTransactionSearch] = useState("");
   const [transactionFilter, setTransactionFilter] = useState<"all" | TransactionKind>("all");
 
@@ -212,12 +211,12 @@ export default function CaeshApp() {
         <div className="side-label">WORKSPACE</div>
         <nav className="side-nav" aria-label="Navigasi utama">
           <button type="button" className={activeNav === "overview" ? "nav-link active" : "nav-link"} aria-current={activeNav === "overview" ? "page" : undefined} onClick={() => setActiveNav("overview")}><span className="nav-icon">▦</span> Ringkasan</button>
-          <div className="wallet-nav-item" onMouseEnter={() => { if (window.matchMedia("(min-width: 621px)").matches) { if (walletPreviewTimer.current) clearTimeout(walletPreviewTimer.current); walletPreviewTimer.current = setTimeout(() => setWalletPreviewOpen(true), 1500); } }} onMouseLeave={() => { if (walletPreviewTimer.current) clearTimeout(walletPreviewTimer.current); walletPreviewTimer.current = null; setWalletPreviewOpen(false); }}>
-            <button type="button" className={activeNav === "wallets" ? "nav-link active" : "nav-link"} aria-current={activeNav === "wallets" ? "page" : undefined} aria-expanded={walletPreviewOpen} onClick={() => { if (window.matchMedia("(max-width: 620px)").matches) { setWalletPreviewOpen((open) => !open); } else { setActiveNav("wallets"); setWalletPreviewOpen(false); } }}><span className="nav-icon">▣</span> Wallet</button>
+          <div className="wallet-nav-item">
+            <button type="button" className="nav-link" aria-expanded={walletPreviewOpen} onClick={() => { if (window.matchMedia("(max-width: 620px)").matches) setWalletPreviewOpen((open) => !open); }}><span className="nav-icon">▣</span> Wallet</button>
             {walletPreviewOpen && <div className="wallet-preview" role="dialog" aria-label="Daftar wallet">
               <div className="wallet-preview-heading"><strong>Wallet kamu</strong><span>{wallets.length} wallet</span></div>
-              {walletBalances.length ? walletBalances.map((wallet) => <button type="button" className="wallet-preview-row" key={wallet.id} onClick={() => { setActiveNav("wallets"); setWalletPreviewOpen(false); }}><span><strong>{wallet.name}</strong><small>Saldo tersedia</small></span><b>{rupiah(wallet.balance)}</b></button>) : <p className="wallet-preview-empty">Belum ada wallet.</p>}
-              <button type="button" className="wallet-preview-manage" onClick={() => { setActiveNav("wallets"); setWalletPreviewOpen(false); }}>Kelola wallet <span>→</span></button>
+              {walletBalances.length ? walletBalances.map((wallet) => <button type="button" className="wallet-preview-row" key={wallet.id} onClick={() => setWalletPreviewOpen(false)}><span><strong>{wallet.name}</strong><small>Saldo tersedia</small></span><b>{rupiah(wallet.balance)}</b></button>) : <p className="wallet-preview-empty">Belum ada wallet.</p>}
+              <button type="button" className="wallet-preview-manage" onClick={() => { setWalletPreviewOpen(false); setShowWalletForm(true); }}>＋ Tambah wallet <span>→</span></button>
             </div>}
           </div>
           <button type="button" className={activeNav === "transactions" ? "nav-link active" : "nav-link"} aria-current={activeNav === "transactions" ? "page" : undefined} onClick={() => setActiveNav("transactions")}><span className="nav-icon">↕</span> Transaksi</button>
@@ -238,22 +237,22 @@ export default function CaeshApp() {
 
           {activeNav === "overview" && <>
           <div className="period-row"><span className="section-kicker">RINGKASAN KEUANGAN</span><div className="period-tabs" aria-label="Periode ringkasan"><button className={period === "month" ? "selected" : ""} onClick={() => setPeriod("month")}>Bulan ini</button><button className={period === "year" ? "selected" : ""} onClick={() => setPeriod("year")}>Tahun ini</button><button className={period === "all" ? "selected" : ""} onClick={() => setPeriod("all")}>Semua</button></div></div>
-          <section className="stats-grid" aria-label="Ringkasan saldo">
-            <article className="stat-card balance-card"><div className="stat-top"><span>Total saldo semua wallet</span><span className="stat-symbol">↗</span></div><div className="stat-value">{ready ? rupiah(totalBalance) : "Memuat..."}</div><div className="stat-foot"><span className="balance-dot" /> Gabungan saldo seluruh wallet</div><div className="balance-decoration">CAESH</div></article>
-            <article className="stat-card"><div className="stat-top"><span>Total pemasukan</span><span className="stat-icon income-icon">↙</span></div><div className="stat-value">{ready ? rupiah(totals.income) : "Memuat..."}</div><div className="stat-foot">Uang yang masuk pada periode ini</div></article>
-            <article className="stat-card"><div className="stat-top"><span>Total pengeluaran</span><span className="stat-icon expense-icon">↗</span></div><div className="stat-value">{ready ? rupiah(totals.expense) : "Memuat..."}</div><div className="stat-foot">Uang yang digunakan pada periode ini</div></article>
-          </section>
+          <div className="overview-top-grid">
+            <section className="stats-grid" aria-label="Ringkasan saldo">
+              <article className="stat-card balance-card"><div className="stat-top"><span>Total saldo semua wallet</span><span className="stat-symbol">↗</span></div><div className="stat-value">{ready ? rupiah(totalBalance) : "Memuat..."}</div><div className="stat-foot"><span className="balance-dot" /> Gabungan saldo seluruh wallet</div><div className="balance-decoration">CAESH</div></article>
+              <article className="stat-card"><div className="stat-top"><span>Total pemasukan</span><span className="stat-icon income-icon">↙</span></div><div className="stat-value">{ready ? rupiah(totals.income) : "Memuat..."}</div><div className="stat-foot">Uang yang masuk pada periode ini</div></article>
+              <article className="stat-card"><div className="stat-top"><span>Total pengeluaran</span><span className="stat-icon expense-icon">↗</span></div><div className="stat-value">{ready ? rupiah(totals.expense) : "Memuat..."}</div><div className="stat-foot">Uang yang digunakan pada periode ini</div></article>
+            </section>
+            <aside className="overview-wallet-panel" aria-label="Wallet">
+              <div className="overview-wallet-heading"><div><span className="section-kicker">WALLET</span><strong>Wallet kamu</strong></div><button type="button" aria-label="Tambah wallet" onClick={() => setShowWalletForm(true)}>＋</button></div>
+              <div className="overview-wallet-list">
+                {walletBalances.map((wallet) => <article className="overview-wallet-item" key={wallet.id}><div className="overview-wallet-item-top"><span className="wallet-symbol">▣</span><span className="wallet-caption">WALLET</span></div><strong className="wallet-name">{wallet.name}</strong><div className="wallet-balance">{ready ? rupiah(wallet.balance) : "Memuat..."}</div><div className="wallet-start">Saldo awal {rupiah(wallet.initialBalance)}</div></article>)}
+                {wallets.length === 0 && ready && <div className="wallet-empty">Belum ada wallet. Tambahkan wallet pertamamu.</div>}
+              </div>
+            </aside>
+          </div>
 
           </>}
-
-          {activeNav === "wallets" && <section className="wallet-section page-section" id="wallets">
-            <div className="wallet-section-heading"><div><div className="section-kicker">TEMPAT PENYIMPANAN UANG</div><h2>Wallet kamu</h2></div><button className="outline-button" onClick={() => setShowWalletForm(true)}>＋ Tambah wallet</button></div>
-            <div className="wallet-grid">
-              {walletBalances.map((wallet) => <article className="wallet-card" key={wallet.id}><div className="wallet-card-top"><span className="wallet-symbol">▣</span><span className="wallet-caption">WALLET</span></div><strong className="wallet-name">{wallet.name}</strong><div className="wallet-balance">{ready ? rupiah(wallet.balance) : "Memuat..."}</div><div className="wallet-start">Saldo awal {rupiah(wallet.initialBalance)}</div></article>)}
-              {wallets.length === 0 && ready && <div className="wallet-empty">Belum ada wallet. Tambahkan wallet pertamamu.</div>}
-              <button className="wallet-add-card" onClick={() => setShowWalletForm(true)}><span>＋</span><strong>Buat wallet baru</strong><small>Pisahkan uang berdasarkan tempatnya</small></button>
-            </div>
-          </section>}
 
           {activeNav === "overview" && <section className="lower-grid" id="transactions">
             <article className="panel-card transactions-card"><div className="panel-heading"><div><div className="section-kicker">CATATAN TERBARU</div><h2>Aktivitas transaksi</h2></div><button className="text-button" onClick={() => setShowForm(true)}>＋ Catat baru</button></div>
