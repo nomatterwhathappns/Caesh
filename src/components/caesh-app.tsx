@@ -2,6 +2,8 @@
 
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Capacitor } from "@capacitor/core";
+import { App } from "@capacitor/app";
+import { Browser } from "@capacitor/browser";
 import { Directory, Filesystem } from "@capacitor/filesystem";
 import {
   getTransactions, getWallets, removeTransaction, removeWallet, saveTransaction, saveWallet,
@@ -23,6 +25,17 @@ const parseRupiahInput = (value: string) => Number(value.replace(/\D/g, ""));
 const rupiah = (value: number) => new Intl.NumberFormat("id-ID", {
   style: "currency", currency: "IDR", maximumFractionDigits: 0,
 }).format(value);
+type CaeshUpdate = { version: string; apkUrl: string; notes?: string };
+const UPDATE_MANIFEST_URL = "https://raw.githubusercontent.com/nomatterwhathappns/Caesh/android-apk-preview/update.json";
+function compareVersions(left: string, right: string) {
+  const a = left.split(".").map((part) => Number.parseInt(part, 10) || 0);
+  const b = right.split(".").map((part) => Number.parseInt(part, 10) || 0);
+  for (let index = 0; index < Math.max(a.length, b.length); index += 1) {
+    const difference = (a[index] ?? 0) - (b[index] ?? 0);
+    if (difference !== 0) return difference;
+  }
+  return 0;
+}
 const today = () => {
   const date = new Date();
   return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
@@ -109,6 +122,8 @@ export default function CaeshApp() {
   const [activeNav, setActiveNav] = useState<"overview" | "wallets" | "transactions" | "insights" | "wishlist">("overview");
   const [transactionSearch, setTransactionSearch] = useState("");
   const [transactionFilter, setTransactionFilter] = useState<"all" | TransactionKind>("all");
+  const [availableUpdate, setAvailableUpdate] = useState<CaeshUpdate | null>(null);
+  const [updateLoading, setUpdateLoading] = useState(false);
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem("caesh-theme");
@@ -135,6 +150,30 @@ export default function CaeshApp() {
       .catch((reason: unknown) => setError(reason instanceof Error ? reason.message : "Database lokal tidak dapat dibuka."))
       .finally(() => setReady(true));
   }, []);
+
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    let cancelled = false;
+    async function checkForUpdate() {
+      try {
+        const [appInfo, response] = await Promise.all([App.getInfo(), fetch(UPDATE_MANIFEST_URL, { cache: "no-store" })]);
+        if (!response.ok) return;
+        const manifest = await response.json() as Partial<CaeshUpdate>;
+        if (cancelled || typeof manifest.version !== "string" || typeof manifest.apkUrl !== "string" || !/^https:\/\//i.test(manifest.apkUrl)) return;
+        if (compareVersions(manifest.version, appInfo.version) > 0) setAvailableUpdate({ version: manifest.version, apkUrl: manifest.apkUrl, notes: typeof manifest.notes === "string" ? manifest.notes : undefined });
+      } catch { /* Offline: do not interrupt normal app usage. */ }
+    }
+    void checkForUpdate();
+    return () => { cancelled = true; };
+  }, []);
+
+  async function openUpdateDownload() {
+    if (!availableUpdate) return;
+    setUpdateLoading(true);
+    try { await Browser.open({ url: availableUpdate.apkUrl }); }
+    catch { window.open(availableUpdate.apkUrl, "_blank", "noopener,noreferrer"); }
+    finally { setUpdateLoading(false); }
+  }
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -557,6 +596,8 @@ export default function CaeshApp() {
         {pendingPhoto && <div className="photo-adjustments"><label>Geser horizontal <input className="photo-range" type="range" min="0" max="100" value={photoX} onChange={(event) => setPhotoX(Number(event.target.value))} /></label><label>Geser vertikal <input className="photo-range" type="range" min="0" max="100" value={photoY} onChange={(event) => setPhotoY(Number(event.target.value))} /></label><label>Zoom <input className="photo-range" type="range" min="1" max="2.5" step="0.05" value={photoZoom} onChange={(event) => setPhotoZoom(Number(event.target.value))} /></label></div>}
         <div className="modal-actions">{pendingPhoto && <button type="button" className="cancel-button" onClick={() => setPendingPhoto("")}>Hapus foto</button>}<button type="button" className="cancel-button" onClick={() => setShowPhotoEditor(false)}>Batal</button><button type="button" className="primary-button" onClick={handlePhotoSave}>Simpan foto</button></div>
       </section></div>}
+      {availableUpdate && <div className="modal-backdrop update-backdrop" role="presentation"><section className="modal-card update-modal" role="dialog" aria-modal="true" aria-labelledby="update-modal-title"><div className="update-mark" aria-hidden="true">↻</div><div className="section-kicker">PEMBARUAN CAESH</div><h2 id="update-modal-title">Update CAESH tersedia</h2><p>Versi baru <strong>{availableUpdate.version}</strong> sudah tersedia. Lu bisa update sekarang atau nanti.</p>{availableUpdate.notes && <div className="update-notes">{availableUpdate.notes}</div>}<div className="modal-actions update-actions"><button type="button" className="cancel-button" onClick={() => setAvailableUpdate(null)}>Nanti saja</button><button type="button" className="primary-button" onClick={openUpdateDownload} disabled={updateLoading}>{updateLoading ? "Membuka..." : "Update"}</button></div><small>Data CAESH tetap tersimpan selama pembaruan dipasang sebagai update, bukan instalasi baru.</small></section></div>}
+
       {showWalletForm && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowWalletForm(false); }}><section className="modal-card" role="dialog" aria-modal="true" aria-labelledby="wallet-modal-title"><div className="modal-heading"><div><div className="section-kicker">WALLET BARU</div><h2 id="wallet-modal-title">Tambah wallet</h2></div><button className="modal-close" onClick={() => setShowWalletForm(false)} aria-label="Tutup">×</button></div>
         <form onSubmit={handleWalletSubmit}><label className="field-label" htmlFor="wallet-name">Nama wallet</label><input id="wallet-name" type="text" maxLength={32} placeholder="Contoh: BCA, Cash, DANA" value={newWalletName} onChange={(event) => setNewWalletName(event.target.value)} required />
           <div className="wallet-photo-picker-row"><div><strong>Foto wallet</strong><span>{newWalletPhoto ? "Foto sudah dipilih" : "Opsional · JPG, PNG, atau WebP"}</span></div><button type="button" className="outline-button" onClick={() => { setPhotoTargetWalletId(null); photoPickerRef.current?.click(); }}>{newWalletPhoto ? "Ganti foto" : "Upload foto"}</button></div>
