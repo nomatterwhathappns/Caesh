@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-apk:
@@ -52,3 +52,13 @@ jobs:
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
+
+      - name: Publish direct APK download
+        if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/android-apk-preview'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: caesh-android-preview
+          name: Caesh Android Preview
+          prerelease: true
+          make_latest: false
+          files: android/app/build/outputs/apk/debug/app-debug.apk
