@@ -484,17 +484,8 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
 }
 
 
-/* Keep quick-add in the mobile dock visually consistent with other items. */
-.nav-add-transaction{display:none}
+/* Keep the quick-add action styled exactly like every other navigation link. */
 @media(max-width:620px){
-  .side-nav{grid-template-columns:repeat(5,minmax(0,1fr))}
-  .side-nav .nav-add-transaction{
-    display:flex;
-    grid-column:3;
-    grid-row:1;
-  }
-  .side-nav .nav-add-transaction .nav-icon{font-size:17px;line-height:1}
-  .side-nav .nav-add-label{font-size:9px;line-height:1.1}
   .welcome-row>.primary-button,
   .transactions-card .panel-heading>.text-button,
   .transactions-card .empty-state>.outline-button{display:none}
@@ -565,14 +556,12 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
 .overview-wallet-item{position:relative}
 
 
-/* Five-item mobile dock: two destinations on each side of the centered add action. */
+/* Five-item mobile dock: the third item is the centered, ordinary nav action. */
 @media(max-width:620px){
-  .side-nav{
-    grid-template-columns:repeat(5,minmax(0,1fr));
-  }
+  .side-nav{grid-template-columns:repeat(5,minmax(0,1fr))}
   .side-nav > .nav-link:nth-child(1){grid-column:1;grid-row:1}
   .side-nav > .nav-link:nth-child(2){grid-column:2;grid-row:1}
   .side-nav > .nav-link:nth-child(3){grid-column:4;grid-row:1}
-  .side-nav > .nav-add-transaction{grid-column:3;grid-row:1}
+  .side-nav > button[aria-label="Tambah transaksi"]{grid-column:3;grid-row:1}
   .side-nav > .nav-link:nth-child(5){grid-column:5;grid-row:1}
 }
