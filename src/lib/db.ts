@@ -418,7 +418,9 @@ function validateBackup(value: unknown): CaeshBackup {
   if (!isRecord(value) || value.format !== "caesh-backup" || value.formatVersion !== 1
     || !Array.isArray(value.transactions) || !Array.isArray(value.wallets) || !Array.isArray(value.wishlist)
     || !value.transactions.every(isTransaction) || !value.wallets.every(isWallet) || !value.wishlist.every(isWishlistItem)
-    || !isRecord(value.preferences)) {
+    || !isRecord(value.preferences)
+    || (value.preferences.theme !== undefined && value.preferences.theme !== null && value.preferences.theme !== "light" && value.preferences.theme !== "dark")
+    || (value.preferences.categories !== undefined && value.preferences.categories !== null && typeof value.preferences.categories !== "string")) {
     throw new Error("File backup tidak valid atau formatnya tidak didukung. Data yang sekarang tetap aman.");
   }
   const walletIds = new Set(value.wallets.map((wallet) => (wallet as Wallet).id));
@@ -454,11 +456,15 @@ export async function restoreBackup(input: unknown): Promise<CaeshBackup> {
       tx.onerror = () => reject(tx.error ?? new Error("Pemulihan gagal. Data sebelumnya tetap dipertahankan."));
     });
     if (typeof localStorage !== "undefined") {
-      if (backup.preferences.theme !== undefined && backup.preferences.theme !== null) {
-        localStorage.setItem("caesh-theme", backup.preferences.theme);
-      }
-      if (backup.preferences.categories !== undefined && backup.preferences.categories !== null) {
-        localStorage.setItem("caesh-categories", backup.preferences.categories);
+      try {
+        if (backup.preferences.theme !== undefined && backup.preferences.theme !== null) {
+          localStorage.setItem("caesh-theme", backup.preferences.theme);
+        }
+        if (backup.preferences.categories !== undefined && backup.preferences.categories !== null) {
+          localStorage.setItem("caesh-categories", backup.preferences.categories);
+        }
+      } catch {
+        // Financial records have already been restored atomically; preferences are optional.
       }
     }
     return backup;
