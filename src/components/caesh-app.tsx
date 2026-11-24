@@ -26,6 +26,18 @@ const today = () => {
   return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 };
 
+function downloadBackupFile(backup: Awaited<ReturnType<typeof createBackup>>, prefix = "caesh-backup") {
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${prefix}-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
 export default function CaeshApp() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [wallets, setWallets] = useState<Wallet[]>([]);
@@ -366,15 +378,7 @@ export default function CaeshApp() {
   async function handleBackupExport() {
     try {
       const backup = await createBackup();
-      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `caesh-backup-${new Date().toISOString().slice(0, 10)}.json`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
+      downloadBackupFile(backup);
       window.alert("Backup Caesh berhasil dibuat. Simpan file ini di tempat yang aman.");
       setError("");
     } catch (reason) {
@@ -396,6 +400,9 @@ export default function CaeshApp() {
         "Pulihkan backup ini? Seluruh transaksi, wallet, dan wishlist yang sekarang ada di perangkat ini akan diganti dengan isi backup. Ekspor backup kondisi sekarang terlebih dahulu jika masih dibutuhkan. Tindakan ini tidak bisa dibatalkan."
       );
       if (!confirmed) return;
+      // Download a safety copy first; if it cannot be read/exported, do not overwrite local data.
+      const currentBackup = await createBackup();
+      downloadBackupFile(currentBackup, "caesh-before-restore");
       const backup = await restoreBackup(parsed);
       setTransactions(backup.transactions);
       setWallets(backup.wallets);
