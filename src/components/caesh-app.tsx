@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import {
   getTransactions, getWallets, removeTransaction, removeWallet, saveTransaction, saveWallet,
   Transaction, TransactionKind, Wallet,
@@ -40,6 +40,17 @@ export default function CaeshApp() {
   const [toWalletId, setToWalletId] = useState("");
   const [newWalletName, setNewWalletName] = useState("");
   const [newWalletBalance, setNewWalletBalance] = useState("0");
+  const [newWalletPhoto, setNewWalletPhoto] = useState("");
+  const [newWalletPhotoX, setNewWalletPhotoX] = useState(50);
+  const [newWalletPhotoY, setNewWalletPhotoY] = useState(50);
+  const [newWalletPhotoZoom, setNewWalletPhotoZoom] = useState(1.15);
+  const [showPhotoEditor, setShowPhotoEditor] = useState(false);
+  const [photoTargetWalletId, setPhotoTargetWalletId] = useState<string | null>(null);
+  const [pendingPhoto, setPendingPhoto] = useState("");
+  const [photoX, setPhotoX] = useState(50);
+  const [photoY, setPhotoY] = useState(50);
+  const [photoZoom, setPhotoZoom] = useState(1.15);
+  const photoPickerRef = useRef<HTMLInputElement>(null);
   const [todayLabel, setTodayLabel] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [showWalletForm, setShowWalletForm] = useState(false);
@@ -177,6 +188,66 @@ export default function CaeshApp() {
     }
   }
 
+  function openWalletPhotoEditor(walletId?: string) {
+    setPhotoTargetWalletId(walletId ?? null);
+    if (walletId) {
+      const wallet = wallets.find((item) => item.id === walletId);
+      if (!wallet) return;
+      setPendingPhoto(wallet.photo ?? "");
+      setPhotoX(wallet.photoX ?? 50);
+      setPhotoY(wallet.photoY ?? 50);
+      setPhotoZoom(wallet.photoZoom ?? 1.15);
+    } else {
+      setPendingPhoto(newWalletPhoto);
+      setPhotoX(newWalletPhotoX);
+      setPhotoY(newWalletPhotoY);
+      setPhotoZoom(newWalletPhotoZoom);
+    }
+    setShowPhotoEditor(true);
+  }
+
+  async function handlePhotoFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.currentTarget.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { setError("Pilih file gambar seperti JPG, PNG, atau WebP."); return; }
+    if (file.size > 8 * 1024 * 1024) { setError("Ukuran foto maksimal 8 MB."); return; }
+    try {
+      const bitmap = await createImageBitmap(file);
+      const maxDimension = 1400;
+      const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+      canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+      const context = canvas.getContext("2d");
+      if (!context) { bitmap.close(); throw new Error("Foto tidak dapat diproses oleh browser."); }
+      context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      bitmap.close();
+      setPendingPhoto(canvas.toDataURL("image/jpeg", 0.84));
+      setPhotoX(50); setPhotoY(50); setPhotoZoom(1.15);
+      setShowPhotoEditor(true); setError("");
+    } catch (reason) { setError(reason instanceof Error ? reason.message : "Foto gagal dibuka."); }
+  }
+
+  async function handlePhotoSave() {
+    if (photoTargetWalletId) {
+      const wallet = wallets.find((item) => item.id === photoTargetWalletId);
+      if (!wallet) return;
+      const updatedWallet: Wallet = {
+        ...wallet,
+        ...(pendingPhoto ? { photo: pendingPhoto, photoX, photoY, photoZoom } : { photo: undefined, photoX: undefined, photoY: undefined, photoZoom: undefined }),
+      };
+      try {
+        await saveWallet(updatedWallet);
+        setWallets((current) => current.map((item) => item.id === updatedWallet.id ? updatedWallet : item));
+        setShowPhotoEditor(false); setError("");
+      } catch (reason) { setError(reason instanceof Error ? reason.message : "Foto wallet gagal disimpan."); }
+      return;
+    }
+    setNewWalletPhoto(pendingPhoto); setNewWalletPhotoX(photoX); setNewWalletPhotoY(photoY); setNewWalletPhotoZoom(photoZoom);
+    setShowPhotoEditor(false);
+  }
+
   async function handleWalletSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const name = newWalletName.trim();
@@ -186,12 +257,12 @@ export default function CaeshApp() {
     if (wallets.some((wallet) => wallet.name.toLocaleLowerCase() === name.toLocaleLowerCase())) {
       setError("Nama wallet tersebut sudah digunakan."); return;
     }
-    const wallet: Wallet = { id: crypto.randomUUID(), name, initialBalance: balance, createdAt: Date.now() };
+    const wallet: Wallet = { id: crypto.randomUUID(), name, initialBalance: balance, createdAt: Date.now(), ...(newWalletPhoto ? { photo: newWalletPhoto, photoX: newWalletPhotoX, photoY: newWalletPhotoY, photoZoom: newWalletPhotoZoom } : {}) };
     try {
       await saveWallet(wallet);
       setWallets((current) => [...current, wallet]);
       setWalletId(wallet.id);
-      setNewWalletName(""); setNewWalletBalance("0"); setShowWalletForm(false); setError("");
+      setNewWalletName(""); setNewWalletBalance("0"); setNewWalletPhoto(""); setNewWalletPhotoX(50); setNewWalletPhotoY(50); setNewWalletPhotoZoom(1.15); setShowWalletForm(false); setError("");
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Wallet gagal disimpan.");
     }
@@ -264,7 +335,7 @@ export default function CaeshApp() {
           <section className="overview-wallet-panel" aria-label="Wallet">
             <div className="overview-wallet-heading"><div><span className="section-kicker">TEMPAT PENYIMPANAN UANG</span><strong>Wallet kamu</strong></div><button type="button" aria-label="Tambah wallet" onClick={() => setShowWalletForm(true)}>＋</button></div>
             <div className="overview-wallet-list">
-              {walletBalances.map((wallet) => <article className="overview-wallet-item" key={wallet.id}><div className="overview-wallet-item-top"><strong className="wallet-name">{wallet.name}</strong><button type="button" className="wallet-delete-button" aria-label={`Hapus wallet ${wallet.name}`} title="Hapus wallet" onClick={() => handleWalletDelete(wallet.id)}>×</button></div><div className="overview-wallet-bottom"><div className="wallet-balance">{ready ? rupiah(wallet.balance) : "Memuat..."}</div><div className="wallet-start">Saldo awal {rupiah(wallet.initialBalance)}</div></div></article>)}
+              {walletBalances.map((wallet) => <article className={`overview-wallet-item${wallet.photo ? " has-photo" : ""}`} key={wallet.id}>{wallet.photo && <img className="wallet-card-photo" src={wallet.photo} alt="" style={{ objectPosition: `${wallet.photoX ?? 50}% ${wallet.photoY ?? 50}%`, transform: `scale(${wallet.photoZoom ?? 1.15})` }} />}<div className="overview-wallet-item-top"><strong className="wallet-name">{wallet.name}</strong><div className="wallet-card-actions"><button type="button" className="wallet-photo-button" aria-label={`Atur foto wallet ${wallet.name}`} title="Atur foto" onClick={() => openWalletPhotoEditor(wallet.id)}>Foto</button><button type="button" className="wallet-delete-button" aria-label={`Hapus wallet ${wallet.name}`} title="Hapus wallet" onClick={() => handleWalletDelete(wallet.id)}>×</button></div></div><div className="overview-wallet-bottom"><div className="wallet-balance">{ready ? rupiah(wallet.balance) : "Memuat..."}</div><div className="wallet-start">Saldo awal {rupiah(wallet.initialBalance)}</div></div></article>)}
               {wallets.length === 0 && ready && <div className="wallet-empty">Belum ada wallet. Tambahkan wallet pertamamu.</div>}
             </div>
           </section>
@@ -309,8 +380,18 @@ export default function CaeshApp() {
           <div className="modal-actions"><button type="button" className="cancel-button" onClick={() => setShowForm(false)}>Batal</button><button type="submit" className="primary-button">Simpan transaksi</button></div>
         </form></section></div>}
 
+      <input ref={photoPickerRef} className="visually-hidden-file" type="file" accept="image/*" onChange={handlePhotoFileChange} />
+
+      {showPhotoEditor && <div className="modal-backdrop photo-editor-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowPhotoEditor(false); }}><section className="modal-card photo-editor-card" role="dialog" aria-modal="true" aria-labelledby="photo-editor-title"><div className="modal-heading"><div><div className="section-kicker">ATUR FOTO WALLET</div><h2 id="photo-editor-title">Sesuaikan foto</h2></div><button className="modal-close" onClick={() => setShowPhotoEditor(false)} aria-label="Tutup">×</button></div>
+        {pendingPhoto ? <div className="photo-crop-preview"><img src={pendingPhoto} alt="Pratinjau foto wallet" style={{ objectPosition: `${photoX}% ${photoY}%`, transform: `scale(${photoZoom})` }} /></div> : <div className="photo-empty-preview"><span>▧</span><strong>Belum ada foto</strong><p>Pilih foto dari galeri atau perangkatmu.</p></div>}
+        <button type="button" className="outline-button photo-choose-button" onClick={() => photoPickerRef.current?.click()}>{pendingPhoto ? "Pilih foto lain" : "Pilih foto"}</button>
+        {pendingPhoto && <div className="photo-adjustments"><label>Geser horizontal <input className="photo-range" type="range" min="0" max="100" value={photoX} onChange={(event) => setPhotoX(Number(event.target.value))} /></label><label>Geser vertikal <input className="photo-range" type="range" min="0" max="100" value={photoY} onChange={(event) => setPhotoY(Number(event.target.value))} /></label><label>Zoom <input className="photo-range" type="range" min="1" max="2.5" step="0.05" value={photoZoom} onChange={(event) => setPhotoZoom(Number(event.target.value))} /></label></div>}
+        <div className="modal-actions">{pendingPhoto && <button type="button" className="cancel-button" onClick={() => setPendingPhoto("")}>Hapus foto</button>}<button type="button" className="cancel-button" onClick={() => setShowPhotoEditor(false)}>Batal</button><button type="button" className="primary-button" onClick={handlePhotoSave}>Simpan foto</button></div>
+      </section></div>}
       {showWalletForm && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowWalletForm(false); }}><section className="modal-card" role="dialog" aria-modal="true" aria-labelledby="wallet-modal-title"><div className="modal-heading"><div><div className="section-kicker">WALLET BARU</div><h2 id="wallet-modal-title">Tambah wallet</h2></div><button className="modal-close" onClick={() => setShowWalletForm(false)} aria-label="Tutup">×</button></div>
         <form onSubmit={handleWalletSubmit}><label className="field-label" htmlFor="wallet-name">Nama wallet</label><input id="wallet-name" type="text" maxLength={32} placeholder="Contoh: BCA, Cash, DANA" value={newWalletName} onChange={(event) => setNewWalletName(event.target.value)} required />
+          <div className="wallet-photo-picker-row"><div><strong>Foto wallet</strong><span>{newWalletPhoto ? "Foto sudah dipilih" : "Opsional · JPG, PNG, atau WebP"}</span></div><button type="button" className="outline-button" onClick={() => { setPhotoTargetWalletId(null); photoPickerRef.current?.click(); }}>{newWalletPhoto ? "Ganti foto" : "Upload foto"}</button></div>
+          {newWalletPhoto && <div className="wallet-photo-mini"><img src={newWalletPhoto} alt="Pratinjau foto wallet" style={{ objectPosition: `${newWalletPhotoX}% ${newWalletPhotoY}%`, transform: `scale(${newWalletPhotoZoom})` }} /><button type="button" className="text-button" onClick={() => openWalletPhotoEditor()}>Atur posisi foto</button><button type="button" className="text-button" onClick={() => setNewWalletPhoto("")}>Hapus foto</button></div>}
           <label className="field-label" htmlFor="wallet-balance">Saldo pertama kali (Rp)</label><div className="currency-input-wrap"><span>Rp</span><input id="wallet-balance" className="amount-input" inputMode="numeric" type="text" placeholder="0" value={newWalletBalance} onChange={(event) => setNewWalletBalance(formatRupiahInput(event.target.value))} required /></div>
           <p className="wallet-form-hint">Saldo ini menjadi saldo awal wallet. Transaksi berikutnya akan menambah atau menguranginya secara otomatis.</p>
           <div className="modal-actions"><button type="button" className="cancel-button" onClick={() => setShowWalletForm(false)}>Batal</button><button type="submit" className="primary-button">Simpan wallet</button></div>
