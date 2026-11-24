@@ -28,6 +28,7 @@ export default function CaeshApp() {
   const [note, setNote] = useState("");
   const [date, setDate] = useState("");
   const [walletId, setWalletId] = useState("");
+  const [toWalletId, setToWalletId] = useState("");
   const [newWalletName, setNewWalletName] = useState("");
   const [newWalletBalance, setNewWalletBalance] = useState("0");
   const [todayLabel, setTodayLabel] = useState("");
@@ -47,6 +48,7 @@ export default function CaeshApp() {
         setTransactions(savedTransactions);
         setWallets(savedWallets);
         setWalletId(savedWallets[0]?.id ?? "");
+        setToWalletId(savedWallets[1]?.id ?? "");
       })
       .catch((reason: unknown) => setError(reason instanceof Error ? reason.message : "Database lokal tidak dapat dibuka."))
       .finally(() => setReady(true));
@@ -58,8 +60,14 @@ export default function CaeshApp() {
   }, [theme]);
 
   const walletBalances = useMemo(() => wallets.map((wallet) => {
-    const movement = transactions.filter((item) => item.walletId === wallet.id)
-      .reduce((sum, item) => sum + (item.kind === "income" ? item.amount : -item.amount), 0);
+    const movement = transactions.reduce((sum, item) => {
+      if (item.kind === "transfer") {
+        if (item.walletId === wallet.id) return sum - item.amount;
+        if (item.toWalletId === wallet.id) return sum + item.amount;
+        return sum;
+      }
+      return item.walletId === wallet.id ? sum + (item.kind === "income" ? item.amount : -item.amount) : sum;
+    }, 0);
     return { ...wallet, balance: wallet.initialBalance + movement };
   }), [wallets, transactions]);
   const totalBalance = walletBalances.reduce((sum, wallet) => sum + wallet.balance, 0);
@@ -92,9 +100,22 @@ export default function CaeshApp() {
       setError("Buat atau pilih wallet terlebih dahulu.");
       return;
     }
+    if (kind === "transfer") {
+      if (!toWalletId || toWalletId === walletId) {
+        setError("Pilih wallet tujuan yang berbeda dari wallet sumber.");
+        return;
+      }
+      const source = walletBalances.find((wallet) => wallet.id === walletId);
+      if (!source || source.balance < value) {
+        setError("Saldo wallet sumber tidak mencukupi untuk transfer ini.");
+        return;
+      }
+    }
     const transaction: Transaction = {
-      id: crypto.randomUUID(), kind, amount: value, category, note: note.trim(),
-      date, walletId, createdAt: Date.now(),
+      id: crypto.randomUUID(), kind, amount: value,
+      category: kind === "transfer" ? "Transfer" : category,
+      note: note.trim(), date, walletId,
+      ...(kind === "transfer" ? { toWalletId } : {}), createdAt: Date.now(),
     };
     try {
       await saveTransaction(transaction);
@@ -132,7 +153,7 @@ export default function CaeshApp() {
       setTransactions((current) => current.filter((item) => item.id !== id));
     } catch { setError("Transaksi gagal dihapus."); }
   }
-  function changeKind(next: TransactionKind) { setKind(next); setCategory(categories[next][0]); }
+  function changeKind(next: TransactionKind) { setKind(next); if (next !== "transfer") setCategory(categories[next][0]); }
 
   return (
     <main className="app-shell" data-theme={theme}>
@@ -143,6 +164,7 @@ export default function CaeshApp() {
           <a className="nav-link active" href="#overview"><span className="nav-icon">▦</span> Ringkasan</a>
           <a className="nav-link" href="#wallets"><span className="nav-icon">▣</span> Wallet</a>
           <a className="nav-link" href="#transactions"><span className="nav-icon">↕</span> Transaksi</a>
+          <a className="nav-link" href="#transactions" onClick={() => setShowForm(true)}><span className="nav-icon">⇄</span> Transfer</a>
           <a className="nav-link" href="#insights"><span className="nav-icon">⌁</span> Analisis</a>
         </nav>
         <div className="sidebar-bottom">
@@ -185,9 +207,9 @@ export default function CaeshApp() {
       </section>
 
       {showForm && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowForm(false); }}><section className="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div className="modal-heading"><div><div className="section-kicker">CATATAN BARU</div><h2 id="modal-title">Tambah transaksi</h2></div><button className="modal-close" onClick={() => setShowForm(false)} aria-label="Tutup">×</button></div>
-        <form onSubmit={handleSubmit}><div className="kind-switch"><button type="button" className={kind === "expense" ? "active expense-choice" : ""} onClick={() => changeKind("expense")}>Pengeluaran</button><button type="button" className={kind === "income" ? "active income-choice" : ""} onClick={() => changeKind("income")}>Pemasukan</button></div>
+        <form onSubmit={handleSubmit}><div className="kind-switch"><button type="button" className={kind === "expense" ? "active expense-choice" : ""} onClick={() => changeKind("expense")}>Pengeluaran</button><button type="button" className={kind === "income" ? "active income-choice" : ""} onClick={() => changeKind("income")}>Pemasukan</button><button type="button" className={kind === "transfer" ? "active transfer-choice" : ""} onClick={() => changeKind("transfer")}>Transfer</button></div>
           <label className="field-label" htmlFor="amount">Nominal (Rp)</label><input id="amount" className="amount-input" inputMode="numeric" type="number" min="1" step="1" placeholder="0" value={amount} onChange={(event) => setAmount(event.target.value)} required />
-          <div className="form-grid"><div><label className="field-label" htmlFor="category">Kategori</label><select id="category" value={category} onChange={(event) => setCategory(event.target.value)}>{categories[kind].map((item) => <option key={item}>{item}</option>)}</select></div><div><label className="field-label" htmlFor="wallet">Wallet</label><select id="wallet" value={walletId} onChange={(event) => setWalletId(event.target.value)} required>{wallets.map((wallet) => <option key={wallet.id} value={wallet.id}>{wallet.name}</option>)}</select></div></div>
+          <div className="form-grid"><div>{kind !== "transfer" ? <><label className="field-label" htmlFor="category">Kategori</label><select id="category" value={category} onChange={(event) => setCategory(event.target.value)}>{categories[kind].map((item) => <option key={item}>{item}</option>)}</select></> : <><label className="field-label" htmlFor="source-wallet">Dari wallet</label><select id="source-wallet" value={walletId} onChange={(event) => setWalletId(event.target.value)} required>{wallets.map((wallet) => <option key={wallet.id} value={wallet.id}>{wallet.name} — {rupiah(walletBalances.find((entry) => entry.id === wallet.id)?.balance ?? 0)}</option>)}</select></>}</div><div><label className="field-label" htmlFor="wallet">{kind === "transfer" ? "Ke wallet" : "Wallet"}</label><select id="wallet" value={kind === "transfer" ? toWalletId : walletId} onChange={(event) => kind === "transfer" ? setToWalletId(event.target.value) : setWalletId(event.target.value)} required>{wallets.filter((wallet) => kind !== "transfer" || wallet.id !== walletId).map((wallet) => <option key={wallet.id} value={wallet.id}>{wallet.name}</option>)}</select></div></div>
           <label className="field-label" htmlFor="date">Tanggal</label><input id="date" type="date" value={date} onChange={(event) => setDate(event.target.value)} required />
           <label className="field-label" htmlFor="note">Catatan <span>(opsional)</span></label><input id="note" type="text" maxLength={80} placeholder="Contoh: makan siang" value={note} onChange={(event) => setNote(event.target.value)} />
           <div className="modal-actions"><button type="button" className="cancel-button" onClick={() => setShowForm(false)}>Batal</button><button type="submit" className="primary-button">Simpan transaksi</button></div>
