@@ -20,6 +20,22 @@ npm run build
 npm run start
 ```
 
+## Pengujian dan build
+
+Jalankan pengujian migrasi database dan backup:
+
+```bash
+npm test
+```
+
+Build produksi otomatis menjalankan pengujian tersebut terlebih dahulu:
+
+```bash
+npm run build
+```
+
+GitHub Actions juga menjalankan pengujian dan build pada setiap push ke `main` serta pull request.
+
 ## Deploy preview ke Vercel
 
 1. Import repository GitHub `nomatterwhathappns/Caesh` ke Vercel.
