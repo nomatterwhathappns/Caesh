@@ -1076,3 +1076,36 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
     stroke-linejoin: round;
   }
 }
+
+
+/* Keep icon-only labels on desktop, but show icon + text in the mobile bottom navigation. */
+@media (min-width: 621px) {
+  .desktop-icon-dock .nav-label { display: none; }
+}
+@media (max-width: 620px) {
+  .side-nav.desktop-icon-dock .nav-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    height: 48px;
+    min-height: 48px;
+    padding: 3px 2px;
+    font-size: 10px;
+    line-height: 1.1;
+  }
+
+  .side-nav.desktop-icon-dock .nav-icon {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+  }
+
+  .side-nav.desktop-icon-dock .nav-label {
+    display: block;
+    font-size: 9px;
+    line-height: 1.1;
+    white-space: nowrap;
+  }
+}
