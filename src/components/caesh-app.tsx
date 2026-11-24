@@ -10,6 +10,8 @@ const categories = {
   income: ["Gaji", "Freelance", "Hadiah", "Investasi", "Lainnya"],
   expense: ["Makanan", "Transportasi", "Belanja", "Tagihan", "Hiburan", "Kesehatan", "Lainnya"],
 };
+type CategoryKind = "income" | "expense";
+type CategoryOptions = Record<CategoryKind, string[]>;
 const formatRupiahInput = (value: string) => {
   const digits = value.replace(/\D/g, "");
   return digits ? new Intl.NumberFormat("id-ID", { maximumFractionDigits: 0 }).format(Number(digits)) : "";
@@ -30,6 +32,8 @@ export default function CaeshApp() {
   const [kind, setKind] = useState<TransactionKind>("expense");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState(categories.expense[0]);
+  const [otherCategory, setOtherCategory] = useState("");
+  const [categoryOptions, setCategoryOptions] = useState<CategoryOptions>({ income: categories.income.filter((item) => item !== "Lainnya"), expense: categories.expense.filter((item) => item !== "Lainnya") });
   const [note, setNote] = useState("");
   const [date, setDate] = useState("");
   const [walletId, setWalletId] = useState("");
@@ -50,6 +54,16 @@ export default function CaeshApp() {
     const savedTheme = window.localStorage.getItem("caesh-theme");
     if (savedTheme === "dark" || savedTheme === "light") setTheme(savedTheme);
     setDate(today());
+    try {
+      const savedCategories = window.localStorage.getItem("caesh-categories");
+      if (savedCategories) {
+        const parsed = JSON.parse(savedCategories) as Partial<CategoryOptions>;
+        setCategoryOptions({
+          income: Array.isArray(parsed.income) ? parsed.income.filter((item): item is string => typeof item === "string" && item.trim() && item !== "Lainnya") : categories.income.filter((item) => item !== "Lainnya"),
+          expense: Array.isArray(parsed.expense) ? parsed.expense.filter((item): item is string => typeof item === "string" && item.trim() && item !== "Lainnya") : categories.expense.filter((item) => item !== "Lainnya"),
+        });
+      }
+    } catch { /* Keep built-in categories if local settings are unreadable. */ }
     setTodayLabel(new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }));
     Promise.all([getTransactions(), getWallets()])
       .then(([savedTransactions, savedWallets]) => {
@@ -101,9 +115,28 @@ export default function CaeshApp() {
   const expenseByCategory = periodTransactions.filter((item) => item.kind === "expense").reduce<Record<string, number>>((result, item) => { result[item.category] = (result[item.category] ?? 0) + item.amount; return result; }, {});
   const largestExpense = Math.max(1, ...Object.values(expenseByCategory));
 
+  function persistCategoryOptions(next: CategoryOptions) {
+    setCategoryOptions(next);
+    window.localStorage.setItem("caesh-categories", JSON.stringify(next));
+  }
+
+  function removeSelectedCategory() {
+    if (kind === "transfer" || category === "Lainnya") return;
+    const confirmed = window.confirm(`Hapus kategori "${category}" dari daftar pilihan? Riwayat transaksi lama dengan kategori ini tetap tersimpan.`);
+    if (!confirmed) return;
+    const next = { ...categoryOptions, [kind]: categoryOptions[kind].filter((item) => item !== category) };
+    persistCategoryOptions(next);
+    setCategory(next[kind][0] ?? "Lainnya");
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const value = parseRupiahInput(amount);
+    const finalCategory = category === "Lainnya" ? otherCategory.trim() : category;
+    if (kind !== "transfer" && !finalCategory) {
+      setError("Isi nama kategori pada kolom Lainnya terlebih dahulu.");
+      return;
+    }
     if (!Number.isSafeInteger(value) || value <= 0) {
       setError("Masukkan nominal rupiah berupa angka bulat lebih dari nol.");
       return;
@@ -125,14 +158,17 @@ export default function CaeshApp() {
     }
     const transaction: Transaction = {
       id: crypto.randomUUID(), kind, amount: value,
-      category: kind === "transfer" ? "Transfer" : category,
+      category: kind === "transfer" ? "Transfer" : finalCategory,
       note: note.trim(), date, walletId,
       ...(kind === "transfer" ? { toWalletId } : {}), createdAt: Date.now(),
     };
     try {
       await saveTransaction(transaction);
+      if (kind !== "transfer" && category === "Lainnya" && !categoryOptions[kind].some((item) => item.toLocaleLowerCase() === finalCategory.toLocaleLowerCase())) {
+        persistCategoryOptions({ ...categoryOptions, [kind]: [...categoryOptions[kind], finalCategory] });
+      }
       setTransactions((current) => [transaction, ...current].sort((a, b) => b.date.localeCompare(a.date) || b.createdAt - a.createdAt));
-      setAmount(""); setNote(""); setDate(today()); setShowForm(false); setError("");
+      setAmount(""); setNote(""); setOtherCategory(""); setDate(today()); setShowForm(false); setError("");
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Transaksi gagal disimpan.");
     }
@@ -165,7 +201,7 @@ export default function CaeshApp() {
       setTransactions((current) => current.filter((item) => item.id !== id));
     } catch { setError("Transaksi gagal dihapus."); }
   }
-  function changeKind(next: TransactionKind) { setKind(next); if (next !== "transfer") setCategory(categories[next][0]); }
+  function changeKind(next: TransactionKind) { setKind(next); if (next !== "transfer") { setCategory(categoryOptions[next][0] ?? "Lainnya"); setOtherCategory(""); } }
 
   return (
     <main className="app-shell" data-theme={theme}>
@@ -242,7 +278,8 @@ export default function CaeshApp() {
       {showForm && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowForm(false); }}><section className="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div className="modal-heading"><div><div className="section-kicker">CATATAN BARU</div><h2 id="modal-title">Tambah transaksi</h2></div><button className="modal-close" onClick={() => setShowForm(false)} aria-label="Tutup">×</button></div>
         <form onSubmit={handleSubmit}><div className="kind-switch"><button type="button" className={kind === "expense" ? "active expense-choice" : ""} onClick={() => changeKind("expense")}>Pengeluaran</button><button type="button" className={kind === "income" ? "active income-choice" : ""} onClick={() => changeKind("income")}>Pemasukan</button><button type="button" className={kind === "transfer" ? "active transfer-choice" : ""} onClick={() => changeKind("transfer")}>Transfer</button></div>
           <label className="field-label" htmlFor="amount">Nominal (Rp)</label><div className="currency-input-wrap"><span>Rp</span><input id="amount" className="amount-input" inputMode="numeric" type="text" placeholder="0" value={amount} onChange={(event) => setAmount(formatRupiahInput(event.target.value))} required /></div>
-          <div className="form-grid"><div>{kind !== "transfer" ? <><label className="field-label" htmlFor="category">Kategori</label><select id="category" value={category} onChange={(event) => setCategory(event.target.value)}>{categories[kind].map((item) => <option key={item}>{item}</option>)}</select></> : <><label className="field-label" htmlFor="source-wallet">Dari wallet</label><select id="source-wallet" value={walletId} onChange={(event) => { const nextSource = event.target.value; setWalletId(nextSource); if (toWalletId === nextSource) setToWalletId(wallets.find((wallet) => wallet.id !== nextSource)?.id ?? ""); }} required>{wallets.map((wallet) => <option key={wallet.id} value={wallet.id}>{wallet.name} — {rupiah(walletBalances.find((entry) => entry.id === wallet.id)?.balance ?? 0)}</option>)}</select></>}</div><div><label className="field-label" htmlFor="wallet">{kind === "transfer" ? "Ke wallet" : "Wallet"}</label><select id="wallet" value={kind === "transfer" ? toWalletId : walletId} onChange={(event) => kind === "transfer" ? setToWalletId(event.target.value) : setWalletId(event.target.value)} required>{wallets.filter((wallet) => kind !== "transfer" || wallet.id !== walletId).map((wallet) => <option key={wallet.id} value={wallet.id}>{wallet.name}</option>)}</select></div></div>
+          <div className="form-grid"><div>{kind !== "transfer" ? <><label className="field-label" htmlFor="category">Kategori</label><select id="category" value={category} onChange={(event) => setCategory(event.target.value)}>{categoryOptions[kind].map((item) => <option key={item} value={item}>{item}</option>)}<option value="Lainnya">Lainnya</option></select>
+              {category === "Lainnya" ? <><label className="field-label" htmlFor="other-category">Nama kategori</label><input id="other-category" type="text" maxLength={32} placeholder="Contoh: Donasi, Perawatan, Langganan..." value={otherCategory} onChange={(event) => setOtherCategory(event.target.value)} required /></> : <button type="button" className="category-remove-button" onClick={removeSelectedCategory}>Hapus kategori ini</button>}</> : <><label className="field-label" htmlFor="source-wallet">Dari wallet</label><select id="source-wallet" value={walletId} onChange={(event) => { const nextSource = event.target.value; setWalletId(nextSource); if (toWalletId === nextSource) setToWalletId(wallets.find((wallet) => wallet.id !== nextSource)?.id ?? ""); }} required>{wallets.map((wallet) => <option key={wallet.id} value={wallet.id}>{wallet.name} — {rupiah(walletBalances.find((entry) => entry.id === wallet.id)?.balance ?? 0)}</option>)}</select></>}</div><div><label className="field-label" htmlFor="wallet">{kind === "transfer" ? "Ke wallet" : "Wallet"}</label><select id="wallet" value={kind === "transfer" ? toWalletId : walletId} onChange={(event) => kind === "transfer" ? setToWalletId(event.target.value) : setWalletId(event.target.value)} required>{wallets.filter((wallet) => kind !== "transfer" || wallet.id !== walletId).map((wallet) => <option key={wallet.id} value={wallet.id}>{wallet.name}</option>)}</select></div></div>
           <label className="field-label" htmlFor="date">Tanggal</label><input id="date" type="date" value={date} onChange={(event) => setDate(event.target.value)} required />
           <label className="field-label" htmlFor="note">Catatan <span>(opsional)</span></label><input id="note" type="text" maxLength={80} placeholder="Contoh: makan siang" value={note} onChange={(event) => setNote(event.target.value)} />
           <div className="modal-actions"><button type="button" className="cancel-button" onClick={() => setShowForm(false)}>Batal</button><button type="submit" className="primary-button">Simpan transaksi</button></div>
