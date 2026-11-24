@@ -827,3 +827,26 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
     transition-duration: .01ms !important;
   }
 }
+
+
+/* Desktop brand placement in the topbar */
+@media (min-width: 621px) {
+  .sidebar > .brand { display: none; }
+  .topbar .topbar-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    flex: 0 0 auto;
+    font-size: 23px;
+    line-height: 1;
+  }
+  .topbar .topbar-brand .brand-mark {
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+  }
+}
+@media (max-width: 620px) {
+  .topbar .topbar-brand { display: none; }
+}
