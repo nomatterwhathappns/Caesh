@@ -215,8 +215,8 @@ export default function CaeshApp() {
     const related = transactions.filter((item) => item.walletId === id || item.toWalletId === id);
     const balance = walletBalances.find((item) => item.id === id)?.balance ?? wallet.initialBalance;
     const message = related.length
-      ? `Hapus wallet "${wallet.name}" dengan saldo ${rupiah(balance)}? ${related.length} transaksi terkait akan tetap tersimpan di riwayat dengan nama wallet ini. Penghapusan wallet tidak bisa dibatalkan.`
-      : `Hapus wallet "${wallet.name}" dengan saldo ${rupiah(balance)}? Penghapusan wallet tidak bisa dibatalkan.`;
+      ? `Hapus wallet "${wallet.name}" dengan saldo ${rupiah(balance)}? Saldo ini akan dikeluarkan dari total saldo Caesh. ${related.length} transaksi terkait akan tetap tersimpan di riwayat dengan nama wallet ini. Jika masih ada uang, transfer dulu ke wallet lain. Penghapusan wallet tidak bisa dibatalkan.`
+      : `Hapus wallet "${wallet.name}" dengan saldo ${rupiah(balance)}? Saldo ini akan dikeluarkan dari total saldo Caesh. Jika masih ada uang, transfer dulu ke wallet lain. Penghapusan wallet tidak bisa dibatalkan.`;
     if (!window.confirm(message)) return;
     try {
       await removeWallet(id);
