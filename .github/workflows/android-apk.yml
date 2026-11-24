@@ -101,6 +101,11 @@ jobs:
       - name: Build signed release APK
         if: steps.signing_check.outputs.enabled == 'true'
         working-directory: android
+        env:
+          CAESH_KEYSTORE_FILE: ${{ runner.temp }}/caesh-release-key.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: ./gradlew assembleRelease
 
       - name: Name signed release APK
