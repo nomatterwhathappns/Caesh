@@ -10,6 +10,11 @@ const categories = {
   income: ["Gaji", "Freelance", "Hadiah", "Investasi", "Lainnya"],
   expense: ["Makanan", "Transportasi", "Belanja", "Tagihan", "Hiburan", "Kesehatan", "Lainnya"],
 };
+const formatRupiahInput = (value: string) => {
+  const digits = value.replace(/\\D/g, "");
+  return digits ? new Intl.NumberFormat("id-ID", { maximumFractionDigits: 0 }).format(Number(digits)) : "";
+};
+const parseRupiahInput = (value: string) => Number(value.replace(/\\D/g, ""));
 const rupiah = (value: number) => new Intl.NumberFormat("id-ID", {
   style: "currency", currency: "IDR", maximumFractionDigits: 0,
 }).format(value);
@@ -91,7 +96,7 @@ export default function CaeshApp() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const value = Number(amount);
+    const value = parseRupiahInput(amount);
     if (!Number.isSafeInteger(value) || value <= 0) {
       setError("Masukkan nominal rupiah berupa angka bulat lebih dari nol.");
       return;
@@ -129,7 +134,7 @@ export default function CaeshApp() {
   async function handleWalletSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const name = newWalletName.trim();
-    const balance = Number(newWalletBalance);
+    const balance = parseRupiahInput(newWalletBalance);
     if (!name) { setError("Nama wallet wajib diisi."); return; }
     if (!Number.isSafeInteger(balance) || balance < 0) { setError("Saldo awal harus berupa angka rupiah bulat, minimal nol."); return; }
     if (wallets.some((wallet) => wallet.name.toLocaleLowerCase() === name.toLocaleLowerCase())) {
@@ -208,7 +213,7 @@ export default function CaeshApp() {
 
       {showForm && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowForm(false); }}><section className="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div className="modal-heading"><div><div className="section-kicker">CATATAN BARU</div><h2 id="modal-title">Tambah transaksi</h2></div><button className="modal-close" onClick={() => setShowForm(false)} aria-label="Tutup">×</button></div>
         <form onSubmit={handleSubmit}><div className="kind-switch"><button type="button" className={kind === "expense" ? "active expense-choice" : ""} onClick={() => changeKind("expense")}>Pengeluaran</button><button type="button" className={kind === "income" ? "active income-choice" : ""} onClick={() => changeKind("income")}>Pemasukan</button><button type="button" className={kind === "transfer" ? "active transfer-choice" : ""} onClick={() => changeKind("transfer")}>Transfer</button></div>
-          <label className="field-label" htmlFor="amount">Nominal (Rp)</label><input id="amount" className="amount-input" inputMode="numeric" type="number" min="1" step="1" placeholder="0" value={amount} onChange={(event) => setAmount(event.target.value)} required />
+          <label className="field-label" htmlFor="amount">Nominal (Rp)</label><div className="currency-input-wrap"><span>Rp</span><input id="amount" className="amount-input" inputMode="numeric" type="text" placeholder="0" value={amount} onChange={(event) => setAmount(formatRupiahInput(event.target.value))} required /></div>
           <div className="form-grid"><div>{kind !== "transfer" ? <><label className="field-label" htmlFor="category">Kategori</label><select id="category" value={category} onChange={(event) => setCategory(event.target.value)}>{categories[kind].map((item) => <option key={item}>{item}</option>)}</select></> : <><label className="field-label" htmlFor="source-wallet">Dari wallet</label><select id="source-wallet" value={walletId} onChange={(event) => { const nextSource = event.target.value; setWalletId(nextSource); if (toWalletId === nextSource) setToWalletId(wallets.find((wallet) => wallet.id !== nextSource)?.id ?? ""); }} required>{wallets.map((wallet) => <option key={wallet.id} value={wallet.id}>{wallet.name} — {rupiah(walletBalances.find((entry) => entry.id === wallet.id)?.balance ?? 0)}</option>)}</select></>}</div><div><label className="field-label" htmlFor="wallet">{kind === "transfer" ? "Ke wallet" : "Wallet"}</label><select id="wallet" value={kind === "transfer" ? toWalletId : walletId} onChange={(event) => kind === "transfer" ? setToWalletId(event.target.value) : setWalletId(event.target.value)} required>{wallets.filter((wallet) => kind !== "transfer" || wallet.id !== walletId).map((wallet) => <option key={wallet.id} value={wallet.id}>{wallet.name}</option>)}</select></div></div>
           <label className="field-label" htmlFor="date">Tanggal</label><input id="date" type="date" value={date} onChange={(event) => setDate(event.target.value)} required />
           <label className="field-label" htmlFor="note">Catatan <span>(opsional)</span></label><input id="note" type="text" maxLength={80} placeholder="Contoh: makan siang" value={note} onChange={(event) => setNote(event.target.value)} />
@@ -217,7 +222,7 @@ export default function CaeshApp() {
 
       {showWalletForm && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowWalletForm(false); }}><section className="modal-card" role="dialog" aria-modal="true" aria-labelledby="wallet-modal-title"><div className="modal-heading"><div><div className="section-kicker">WALLET BARU</div><h2 id="wallet-modal-title">Tambah wallet</h2></div><button className="modal-close" onClick={() => setShowWalletForm(false)} aria-label="Tutup">×</button></div>
         <form onSubmit={handleWalletSubmit}><label className="field-label" htmlFor="wallet-name">Nama wallet</label><input id="wallet-name" type="text" maxLength={32} placeholder="Contoh: BCA, Cash, DANA" value={newWalletName} onChange={(event) => setNewWalletName(event.target.value)} required />
-          <label className="field-label" htmlFor="wallet-balance">Saldo pertama kali (Rp)</label><input id="wallet-balance" className="amount-input" type="number" min="0" step="1" placeholder="0" value={newWalletBalance} onChange={(event) => setNewWalletBalance(event.target.value)} required />
+          <label className="field-label" htmlFor="wallet-balance">Saldo pertama kali (Rp)</label><div className="currency-input-wrap"><span>Rp</span><input id="wallet-balance" className="amount-input" inputMode="numeric" type="text" placeholder="0" value={newWalletBalance} onChange={(event) => setNewWalletBalance(formatRupiahInput(event.target.value))} required /></div>
           <p className="wallet-form-hint">Saldo ini menjadi saldo awal wallet. Transaksi berikutnya akan menambah atau menguranginya secara otomatis.</p>
           <div className="modal-actions"><button type="button" className="cancel-button" onClick={() => setShowWalletForm(false)}>Batal</button><button type="submit" className="primary-button">Simpan wallet</button></div>
         </form></section></div>}
