@@ -94,12 +94,12 @@ export default function CaeshApp() {
     expense: periodTransactions.filter((item) => item.kind === "expense").reduce((sum, item) => sum + item.amount, 0),
   }), [periodTransactions]);
   const expenseCount = periodTransactions.filter((item) => item.kind === "expense").length;
+  const walletName = (id: string) => wallets.find((wallet) => wallet.id === id)?.name ?? "Wallet tidak ditemukan";
   const recent = transactions.slice(0, 6);
   const visibleTransactions = transactions.filter((item) => { const query = transactionSearch.trim().toLocaleLowerCase(); const matchesSearch = !query || [item.note, item.category, walletName(item.walletId), item.toWalletId ? walletName(item.toWalletId) : ""].join(" ").toLocaleLowerCase().includes(query); return matchesSearch && (transactionFilter === "all" || item.kind === transactionFilter); });
   const transferTransactions = transactions.filter((item) => item.kind === "transfer");
   const expenseByCategory = periodTransactions.filter((item) => item.kind === "expense").reduce<Record<string, number>>((result, item) => { result[item.category] = (result[item.category] ?? 0) + item.amount; return result; }, {});
   const largestExpense = Math.max(1, ...Object.values(expenseByCategory));
-  const walletName = (id: string) => wallets.find((wallet) => wallet.id === id)?.name ?? "Wallet tidak ditemukan";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
