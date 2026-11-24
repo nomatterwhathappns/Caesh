@@ -42,6 +42,7 @@ export default function CaeshApp() {
   const [period, setPeriod] = useState("month");
   const [error, setError] = useState("");
   const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [activeNav, setActiveNav] = useState<"overview" | "wallets" | "transactions" | "transfer" | "insights">("overview");
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem("caesh-theme");
@@ -166,11 +167,11 @@ export default function CaeshApp() {
         <a className="brand" href="#" aria-label="Caesh beranda"><span className="brand-mark">c</span><span>caesh<span className="brand-period">.</span></span></a>
         <div className="side-label">WORKSPACE</div>
         <nav className="side-nav" aria-label="Navigasi utama">
-          <a className="nav-link active" href="#overview"><span className="nav-icon">▦</span> Ringkasan</a>
-          <a className="nav-link" href="#wallets"><span className="nav-icon">▣</span> Wallet</a>
-          <a className="nav-link" href="#transactions"><span className="nav-icon">↕</span> Transaksi</a>
-          <a className="nav-link" href="#transactions" onClick={() => setShowForm(true)}><span className="nav-icon">⇄</span> Transfer</a>
-          <a className="nav-link" href="#insights"><span className="nav-icon">⌁</span> Analisis</a>
+          <a className={activeNav === "overview" ? "nav-link active" : "nav-link"} href="#overview" aria-current={activeNav === "overview" ? "page" : undefined} onClick={() => setActiveNav("overview")}><span className="nav-icon">▦</span> Ringkasan</a>
+          <a className={activeNav === "wallets" ? "nav-link active" : "nav-link"} href="#wallets" aria-current={activeNav === "wallets" ? "page" : undefined} onClick={() => setActiveNav("wallets")}><span className="nav-icon">▣</span> Wallet</a>
+          <a className={activeNav === "transactions" ? "nav-link active" : "nav-link"} href="#transactions" aria-current={activeNav === "transactions" ? "page" : undefined} onClick={() => setActiveNav("transactions")}><span className="nav-icon">↕</span> Transaksi</a>
+          <a className={activeNav === "transfer" ? "nav-link active" : "nav-link"} href="#transactions" aria-current={activeNav === "transfer" ? "page" : undefined} onClick={() => { setActiveNav("transfer"); setShowForm(true); }}><span className="nav-icon">⇄</span> Transfer</a>
+          <a className={activeNav === "insights" ? "nav-link active" : "nav-link"} href="#insights" aria-current={activeNav === "insights" ? "page" : undefined} onClick={() => setActiveNav("insights")}><span className="nav-icon">⌁</span> Analisis</a>
         </nav>
         <div className="sidebar-bottom">
           <div className="privacy-card"><span className="privacy-icon">◈</span><strong>Data milikmu.</strong><p>Disimpan di browser ini, bukan di server Caesh.</p><span className="privacy-status"><i /> Penyimpanan lokal aktif</span></div>
