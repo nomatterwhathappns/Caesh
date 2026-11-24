@@ -1,7 +1,7 @@
 "use client";
 
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import { Capacitor } from "@capacitor/core";
+import { Capacitor, CapacitorHttp } from "@capacitor/core";
 import { App } from "@capacitor/app";
 import { Directory, Filesystem } from "@capacitor/filesystem";
 import { FileTransfer } from "@capacitor/file-transfer";
@@ -120,9 +120,31 @@ export default function CaeshApp() {
     let cancelled = false;
     async function checkForUpdate() {
       try {
-        const [appInfo, response] = await Promise.all([App.getInfo(), fetch(`${UPDATE_MANIFEST_URL}?t=${Date.now()}`, { cache: "no-store", headers: { "Cache-Control": "no-cache" } })]);
-        if (!response.ok) return;
-        const manifest = await response.json() as Partial<CaeshUpdate>;
+        const appInfo = await App.getInfo();
+        const manifestUrl = `${UPDATE_MANIFEST_URL}?t=${Date.now()}`;
+        let manifest: Partial<CaeshUpdate>;
+        try {
+          const nativeResponse = await CapacitorHttp.get({
+            url: manifestUrl,
+            headers: { Accept: "application/json", "Cache-Control": "no-cache" },
+            connectTimeout: 10000,
+            readTimeout: 10000,
+          });
+          if (nativeResponse.status < 200 || nativeResponse.status >= 300) {
+            throw new Error(`GitHub manifest returned HTTP ${nativeResponse.status}`);
+          }
+          manifest = (typeof nativeResponse.data === "string"
+            ? JSON.parse(nativeResponse.data)
+            : nativeResponse.data) as Partial<CaeshUpdate>;
+        } catch (nativeError) {
+          console.warn("CAESH native update check failed; trying WebView fetch.", nativeError);
+          const response = await fetch(manifestUrl, {
+            cache: "no-store",
+            headers: { Accept: "application/json", "Cache-Control": "no-cache" },
+          });
+          if (!response.ok) throw new Error(`Update manifest returned HTTP ${response.status}`);
+          manifest = await response.json() as Partial<CaeshUpdate>;
+        }
         if (cancelled || typeof manifest.version !== "string" || typeof manifest.apkUrl !== "string" || !/^https:\/\//i.test(manifest.apkUrl)) return;
         if (compareVersions(manifest.version, appInfo.version) > 0) {
           setAvailableUpdate({ version: manifest.version, apkUrl: manifest.apkUrl, notes: typeof manifest.notes === "string" ? manifest.notes : undefined });
