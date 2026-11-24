@@ -413,3 +413,50 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
   .overview-wallet-item{flex-basis:min(76vw,230px);min-height:136px;padding:13px}
   .overview-wallet-item .wallet-balance{font-size:18px}
 }
+
+
+/* Desktop overview is designed to fit inside one viewport without page scrolling. */
+@media(min-width:1100px){
+  html:has(.overview-content),body:has(.overview-content){height:100%;overflow:hidden}
+  .app-shell:has(.overview-content){height:100vh;min-height:0;overflow:hidden}
+  .main-panel:has(.overview-content){height:100vh;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+  .main-panel:has(.overview-content) .topbar{flex:0 0 62px;height:62px}
+  .overview-content{
+    flex:1 1 auto;
+    min-height:0;
+    height:calc(100vh - 62px);
+    max-width:none;
+    width:100%;
+    overflow:hidden;
+    padding:20px clamp(24px,3vw,48px) 18px;
+    display:flex;
+    flex-direction:column;
+  }
+  .overview-content .welcome-row{flex:0 0 auto;margin-bottom:15px}
+  .overview-content .welcome-row h1{font-size:clamp(25px,2.2vw,32px);margin-bottom:5px}
+  .overview-content .welcome-copy{font-size:11px}
+  .overview-content .period-row{flex:0 0 auto;margin-bottom:9px}
+  .overview-content .stats-grid{flex:0 0 auto;gap:11px;margin-bottom:13px}
+  .overview-content .stat-card{min-height:112px;padding:15px 17px}
+  .overview-content .stat-top{margin-bottom:10px}
+  .overview-content .stat-value{font-size:clamp(18px,1.55vw,23px)}
+  .overview-content .stat-foot{margin-top:8px}
+  .overview-content .overview-wallet-panel{flex:0 0 auto;margin-bottom:13px;padding:12px 14px}
+  .overview-content .overview-wallet-heading{margin-bottom:8px}
+  .overview-content .overview-wallet-item{min-height:112px;padding:10px 13px}
+  .overview-content .overview-wallet-item-top{margin-bottom:6px}
+  .overview-content .overview-wallet-item .wallet-balance{font-size:17px}
+  .overview-content .overview-wallet-item .wallet-start{margin-top:4px}
+  .overview-content .lower-grid{flex:1 1 auto;min-height:0;overflow:hidden;gap:12px}
+  .overview-content .panel-card{min-height:0;overflow:hidden;padding:15px 18px}
+  .overview-content .transactions-card{display:flex;flex-direction:column}
+  .overview-content .transactions-card .panel-heading{flex:0 0 auto;margin-bottom:7px}
+  .overview-content .transactions-card .transaction-list{min-height:0;overflow-y:auto;scrollbar-width:thin}
+  .overview-content .transactions-card .empty-state{min-height:0;flex:1}
+  .overview-content .insight-card{overflow-y:auto}
+  .overview-content .insight-card .insight-metric{padding:10px 0}
+}
+@media(min-width:621px) and (max-width:1099px){
+  .overview-content{padding-top:25px}
+  .overview-content .welcome-row{margin-bottom:24px}
+}
