@@ -184,6 +184,13 @@ export default function CaeshApp() {
           <div className="welcome-row"><div><div className="eyebrow">PERSONAL FINANCE OVERVIEW</div><h1>Uangmu, lebih <em>terarah.</em></h1><p className="welcome-copy">Pantau arus uang dan bangun kebiasaan finansial yang lebih baik.</p></div><button className="primary-button" onClick={() => setShowForm(true)}><span>＋</span> Tambah transaksi</button></div>
           {error && <div className="error-banner" role="alert">{error}<button onClick={() => setError("")}>Tutup</button></div>}
 
+          <div className="period-row"><span className="section-kicker">RINGKASAN KEUANGAN</span><div className="period-tabs" aria-label="Periode ringkasan"><button className={period === "month" ? "selected" : ""} onClick={() => setPeriod("month")}>Bulan ini</button><button className={period === "year" ? "selected" : ""} onClick={() => setPeriod("year")}>Tahun ini</button><button className={period === "all" ? "selected" : ""} onClick={() => setPeriod("all")}>Semua</button></div></div>
+          <section className="stats-grid" aria-label="Ringkasan saldo">
+            <article className="stat-card balance-card"><div className="stat-top"><span>Total saldo semua wallet</span><span className="stat-symbol">↗</span></div><div className="stat-value">{ready ? rupiah(totalBalance) : "Memuat..."}</div><div className="stat-foot"><span className="balance-dot" /> Gabungan saldo seluruh wallet</div><div className="balance-decoration">CAESH</div></article>
+            <article className="stat-card"><div className="stat-top"><span>Total pemasukan</span><span className="stat-icon income-icon">↙</span></div><div className="stat-value">{ready ? rupiah(totals.income) : "Memuat..."}</div><div className="stat-foot">Uang yang masuk pada periode ini</div></article>
+            <article className="stat-card"><div className="stat-top"><span>Total pengeluaran</span><span className="stat-icon expense-icon">↗</span></div><div className="stat-value">{ready ? rupiah(totals.expense) : "Memuat..."}</div><div className="stat-foot">Uang yang digunakan pada periode ini</div></article>
+          </section>
+
           <section className="wallet-section" id="wallets">
             <div className="wallet-section-heading"><div><div className="section-kicker">TEMPAT PENYIMPANAN UANG</div><h2>Wallet kamu</h2></div><button className="outline-button" onClick={() => setShowWalletForm(true)}>＋ Tambah wallet</button></div>
             <div className="wallet-grid">
@@ -191,13 +198,6 @@ export default function CaeshApp() {
               {wallets.length === 0 && ready && <div className="wallet-empty">Belum ada wallet. Tambahkan wallet pertamamu.</div>}
               <button className="wallet-add-card" onClick={() => setShowWalletForm(true)}><span>＋</span><strong>Buat wallet baru</strong><small>Pisahkan uang berdasarkan tempatnya</small></button>
             </div>
-          </section>
-
-          <div className="period-row"><span className="section-kicker">RINGKASAN KEUANGAN</span><div className="period-tabs" aria-label="Periode ringkasan"><button className={period === "month" ? "selected" : ""} onClick={() => setPeriod("month")}>Bulan ini</button><button className={period === "year" ? "selected" : ""} onClick={() => setPeriod("year")}>Tahun ini</button><button className={period === "all" ? "selected" : ""} onClick={() => setPeriod("all")}>Semua</button></div></div>
-          <section className="stats-grid" aria-label="Ringkasan saldo">
-            <article className="stat-card balance-card"><div className="stat-top"><span>Total saldo semua wallet</span><span className="stat-symbol">↗</span></div><div className="stat-value">{ready ? rupiah(totalBalance) : "Memuat..."}</div><div className="stat-foot"><span className="balance-dot" /> Gabungan saldo seluruh wallet</div><div className="balance-decoration">CAESH</div></article>
-            <article className="stat-card"><div className="stat-top"><span>Total pemasukan</span><span className="stat-icon income-icon">↙</span></div><div className="stat-value">{ready ? rupiah(totals.income) : "Memuat..."}</div><div className="stat-foot">Uang yang masuk pada periode ini</div></article>
-            <article className="stat-card"><div className="stat-top"><span>Total pengeluaran</span><span className="stat-icon expense-icon">↗</span></div><div className="stat-value">{ready ? rupiah(totals.expense) : "Memuat..."}</div><div className="stat-foot">Uang yang digunakan pada periode ini</div></article>
           </section>
 
           <section className="lower-grid" id="transactions">
