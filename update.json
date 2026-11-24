@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
-  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-android-preview/app-debug.apk",
-  "notes": "Pembaruan CAESH akan menampilkan perbaikan dan fitur terbaru."
+  "version": "1.0.2",
+  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-android-preview/Caesh.apk",
+  "notes": "CAESH 1.0.2: Memperbaiki pengecekan update agar membaca manifest terbaru langsung dari GitHub tanpa Vercel."
 }
