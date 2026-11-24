@@ -59,8 +59,8 @@ export default function CaeshApp() {
       if (savedCategories) {
         const parsed = JSON.parse(savedCategories) as Partial<CategoryOptions>;
         setCategoryOptions({
-          income: Array.isArray(parsed.income) ? parsed.income.filter((item): item is string => typeof item === "string" && item.trim() && item !== "Lainnya") : categories.income.filter((item) => item !== "Lainnya"),
-          expense: Array.isArray(parsed.expense) ? parsed.expense.filter((item): item is string => typeof item === "string" && item.trim() && item !== "Lainnya") : categories.expense.filter((item) => item !== "Lainnya"),
+          income: Array.isArray(parsed.income) ? parsed.income.filter((item): item is string => typeof item === "string" && item.trim().length > 0 && item !== "Lainnya") : categories.income.filter((item) => item !== "Lainnya"),
+          expense: Array.isArray(parsed.expense) ? parsed.expense.filter((item): item is string => typeof item === "string" && item.trim().length > 0 && item !== "Lainnya") : categories.expense.filter((item) => item !== "Lainnya"),
         });
       }
     } catch { /* Keep built-in categories if local settings are unreadable. */ }
