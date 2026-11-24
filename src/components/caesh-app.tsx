@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import {
   getTransactions, getWallets, removeTransaction, saveTransaction, saveWallet,
   Transaction, TransactionKind, Wallet,
@@ -47,6 +47,8 @@ export default function CaeshApp() {
   const [error, setError] = useState("");
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [activeNav, setActiveNav] = useState<"overview" | "wallets" | "transactions" | "transfer" | "insights">("overview");
+  const [walletPreviewOpen, setWalletPreviewOpen] = useState(false);
+  const walletPreviewTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [transactionSearch, setTransactionSearch] = useState("");
   const [transactionFilter, setTransactionFilter] = useState<"all" | TransactionKind>("all");
 
@@ -210,7 +212,14 @@ export default function CaeshApp() {
         <div className="side-label">WORKSPACE</div>
         <nav className="side-nav" aria-label="Navigasi utama">
           <button type="button" className={activeNav === "overview" ? "nav-link active" : "nav-link"} aria-current={activeNav === "overview" ? "page" : undefined} onClick={() => setActiveNav("overview")}><span className="nav-icon">▦</span> Ringkasan</button>
-          <button type="button" className={activeNav === "wallets" ? "nav-link active" : "nav-link"} aria-current={activeNav === "wallets" ? "page" : undefined} onClick={() => setActiveNav("wallets")}><span className="nav-icon">▣</span> Wallet</button>
+          <div className="wallet-nav-item" onMouseEnter={() => { if (window.matchMedia("(min-width: 621px)").matches) { if (walletPreviewTimer.current) clearTimeout(walletPreviewTimer.current); walletPreviewTimer.current = setTimeout(() => setWalletPreviewOpen(true), 1500); } }} onMouseLeave={() => { if (walletPreviewTimer.current) clearTimeout(walletPreviewTimer.current); walletPreviewTimer.current = null; setWalletPreviewOpen(false); }}>
+            <button type="button" className={activeNav === "wallets" ? "nav-link active" : "nav-link"} aria-current={activeNav === "wallets" ? "page" : undefined} aria-expanded={walletPreviewOpen} onClick={() => { if (window.matchMedia("(max-width: 620px)").matches) { setWalletPreviewOpen((open) => !open); } else { setActiveNav("wallets"); setWalletPreviewOpen(false); } }}><span className="nav-icon">▣</span> Wallet</button>
+            {walletPreviewOpen && <div className="wallet-preview" role="dialog" aria-label="Daftar wallet">
+              <div className="wallet-preview-heading"><strong>Wallet kamu</strong><span>{wallets.length} wallet</span></div>
+              {walletBalances.length ? walletBalances.map((wallet) => <button type="button" className="wallet-preview-row" key={wallet.id} onClick={() => { setActiveNav("wallets"); setWalletPreviewOpen(false); }}><span><strong>{wallet.name}</strong><small>Saldo tersedia</small></span><b>{rupiah(wallet.balance)}</b></button>) : <p className="wallet-preview-empty">Belum ada wallet.</p>}
+              <button type="button" className="wallet-preview-manage" onClick={() => { setActiveNav("wallets"); setWalletPreviewOpen(false); }}>Kelola wallet <span>→</span></button>
+            </div>}
+          </div>
           <button type="button" className={activeNav === "transactions" ? "nav-link active" : "nav-link"} aria-current={activeNav === "transactions" ? "page" : undefined} onClick={() => setActiveNav("transactions")}><span className="nav-icon">↕</span> Transaksi</button>
           <button type="button" className={activeNav === "transfer" ? "nav-link active" : "nav-link"} aria-current={activeNav === "transfer" ? "page" : undefined} onClick={() => { setActiveNav("transfer"); setKind("transfer"); }}><span className="nav-icon">⇄</span> Transfer</button>
           <button type="button" className={activeNav === "insights" ? "nav-link active" : "nav-link"} aria-current={activeNav === "insights" ? "page" : undefined} onClick={() => setActiveNav("insights")}><span className="nav-icon">⌁</span> Analisis</button>
