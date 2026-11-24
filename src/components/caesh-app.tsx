@@ -228,20 +228,18 @@ export default function CaeshApp() {
 
           {activeNav === "overview" && <>
           <div className="period-row"><span className="section-kicker">RINGKASAN KEUANGAN</span><div className="period-tabs" aria-label="Periode ringkasan"><button className={period === "month" ? "selected" : ""} onClick={() => setPeriod("month")}>Bulan ini</button><button className={period === "year" ? "selected" : ""} onClick={() => setPeriod("year")}>Tahun ini</button><button className={period === "all" ? "selected" : ""} onClick={() => setPeriod("all")}>Semua</button></div></div>
-          <div className="overview-top-grid">
-            <section className="stats-grid" aria-label="Ringkasan saldo">
-              <article className="stat-card balance-card"><div className="stat-top"><span>Total saldo semua wallet</span><span className="stat-symbol">↗</span></div><div className="stat-value">{ready ? rupiah(totalBalance) : "Memuat..."}</div><div className="stat-foot"><span className="balance-dot" /> Gabungan saldo seluruh wallet</div><div className="balance-decoration">CAESH</div></article>
-              <article className="stat-card"><div className="stat-top"><span>Total pemasukan</span><span className="stat-icon income-icon">↙</span></div><div className="stat-value">{ready ? rupiah(totals.income) : "Memuat..."}</div><div className="stat-foot">Uang yang masuk pada periode ini</div></article>
-              <article className="stat-card"><div className="stat-top"><span>Total pengeluaran</span><span className="stat-icon expense-icon">↗</span></div><div className="stat-value">{ready ? rupiah(totals.expense) : "Memuat..."}</div><div className="stat-foot">Uang yang digunakan pada periode ini</div></article>
-            </section>
-            <aside className="overview-wallet-panel" aria-label="Wallet">
-              <div className="overview-wallet-heading"><div><span className="section-kicker">WALLET</span><strong>Wallet kamu</strong></div><button type="button" aria-label="Tambah wallet" onClick={() => setShowWalletForm(true)}>＋</button></div>
-              <div className="overview-wallet-list">
-                {walletBalances.map((wallet) => <article className="overview-wallet-item" key={wallet.id}><div className="overview-wallet-item-top"><span className="wallet-symbol">▣</span><span className="wallet-caption">WALLET</span></div><strong className="wallet-name">{wallet.name}</strong><div className="wallet-balance">{ready ? rupiah(wallet.balance) : "Memuat..."}</div><div className="wallet-start">Saldo awal {rupiah(wallet.initialBalance)}</div></article>)}
-                {wallets.length === 0 && ready && <div className="wallet-empty">Belum ada wallet. Tambahkan wallet pertamamu.</div>}
-              </div>
-            </aside>
-          </div>
+          <section className="stats-grid" aria-label="Ringkasan saldo">
+            <article className="stat-card balance-card"><div className="stat-top"><span>Total saldo semua wallet</span><span className="stat-symbol">↗</span></div><div className="stat-value">{ready ? rupiah(totalBalance) : "Memuat..."}</div><div className="stat-foot"><span className="balance-dot" /> Gabungan saldo seluruh wallet</div><div className="balance-decoration">CAESH</div></article>
+            <article className="stat-card"><div className="stat-top"><span>Total pemasukan</span><span className="stat-icon income-icon">↙</span></div><div className="stat-value">{ready ? rupiah(totals.income) : "Memuat..."}</div><div className="stat-foot">Uang yang masuk pada periode ini</div></article>
+            <article className="stat-card"><div className="stat-top"><span>Total pengeluaran</span><span className="stat-icon expense-icon">↗</span></div><div className="stat-value">{ready ? rupiah(totals.expense) : "Memuat..."}</div><div className="stat-foot">Uang yang digunakan pada periode ini</div></article>
+          </section>
+          <section className="overview-wallet-panel" aria-label="Wallet">
+            <div className="overview-wallet-heading"><div><span className="section-kicker">TEMPAT PENYIMPANAN UANG</span><strong>Wallet kamu</strong></div><button type="button" aria-label="Tambah wallet" onClick={() => setShowWalletForm(true)}>＋</button></div>
+            <div className="overview-wallet-list">
+              {walletBalances.map((wallet) => <article className="overview-wallet-item" key={wallet.id}><div className="overview-wallet-item-top"><span className="wallet-symbol">▣</span><span className="wallet-caption">WALLET</span></div><strong className="wallet-name">{wallet.name}</strong><div className="wallet-balance">{ready ? rupiah(wallet.balance) : "Memuat..."}</div><div className="wallet-start">Saldo awal {rupiah(wallet.initialBalance)}</div></article>)}
+              {wallets.length === 0 && ready && <div className="wallet-empty">Belum ada wallet. Tambahkan wallet pertamamu.</div>}
+            </div>
+          </section>
 
           </>}
 
