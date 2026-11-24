@@ -4,7 +4,7 @@ import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "re
 import { Capacitor } from "@capacitor/core";
 import { App } from "@capacitor/app";
 import { FileTransfer } from "@capacitor/file-transfer";
-import { AppInstallPlugin } from "@m430/capacitor-app-install";
+import { AppInstallPlugin } from "../lib/app-install-plugin";
 import { Directory, Filesystem } from "@capacitor/filesystem";
 import {
   getTransactions, getWallets, removeTransaction, removeWallet, saveTransaction, saveWallet,
