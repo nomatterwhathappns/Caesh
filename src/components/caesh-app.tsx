@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
-  getTransactions, getWallets, removeTransaction, saveTransaction, saveWallet,
+  getTransactions, getWallets, removeTransaction, removeWallet, saveTransaction, saveWallet,
   Transaction, TransactionKind, Wallet,
 } from "@/lib/db";
 
@@ -108,7 +108,10 @@ export default function CaeshApp() {
     expense: periodTransactions.filter((item) => item.kind === "expense").reduce((sum, item) => sum + item.amount, 0),
   }), [periodTransactions]);
   const expenseCount = periodTransactions.filter((item) => item.kind === "expense").length;
-  const walletName = (id: string) => wallets.find((wallet) => wallet.id === id)?.name ?? "Wallet tidak ditemukan";
+  const walletName = (id: string) => wallets.find((wallet) => wallet.id === id)?.name
+    ?? transactions.find((item) => item.walletId === id)?.walletName
+    ?? transactions.find((item) => item.toWalletId === id)?.toWalletName
+    ?? "Wallet tidak ditemukan";
   const recent = transactions.slice(0, 6);
   const visibleTransactions = transactions.filter((item) => { const query = transactionSearch.trim().toLocaleLowerCase(); const matchesSearch = !query || [item.note, item.category, walletName(item.walletId), item.toWalletId ? walletName(item.toWalletId) : ""].join(" ").toLocaleLowerCase().includes(query); return matchesSearch && (transactionFilter === "all" || item.kind === transactionFilter); });
   const transferTransactions = transactions.filter((item) => item.kind === "transfer");
@@ -201,6 +204,31 @@ export default function CaeshApp() {
       setTransactions((current) => current.filter((item) => item.id !== id));
     } catch { setError("Transaksi gagal dihapus."); }
   }
+
+  async function handleWalletDelete(id: string) {
+    if (wallets.length <= 1) {
+      setError("Caesh harus memiliki minimal satu wallet. Tambahkan wallet lain sebelum menghapus yang ini.");
+      return;
+    }
+    const wallet = wallets.find((item) => item.id === id);
+    if (!wallet) return;
+    const related = transactions.filter((item) => item.walletId === id || item.toWalletId === id);
+    const balance = walletBalances.find((item) => item.id === id)?.balance ?? wallet.initialBalance;
+    const message = related.length
+      ? `Hapus wallet "${wallet.name}" dengan saldo ${rupiah(balance)}? ${related.length} transaksi terkait akan tetap tersimpan di riwayat dengan nama wallet ini. Penghapusan wallet tidak bisa dibatalkan.`
+      : `Hapus wallet "${wallet.name}" dengan saldo ${rupiah(balance)}? Penghapusan wallet tidak bisa dibatalkan.`;
+    if (!window.confirm(message)) return;
+    try {
+      await removeWallet(id);
+      const nextWallets = wallets.filter((item) => item.id !== id);
+      setWallets(nextWallets);
+      if (walletId === id) setWalletId(nextWallets[0]?.id ?? "");
+      if (toWalletId === id) setToWalletId(nextWallets.find((item) => item.id !== walletId)?.id ?? nextWallets[0]?.id ?? "");
+      setError("");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Wallet gagal dihapus.");
+    }
+  }
   function changeKind(next: TransactionKind) { setKind(next); if (next !== "transfer") { setCategory(categoryOptions[next][0] ?? "Lainnya"); setOtherCategory(""); } }
 
   return (
@@ -236,7 +264,7 @@ export default function CaeshApp() {
           <section className="overview-wallet-panel" aria-label="Wallet">
             <div className="overview-wallet-heading"><div><span className="section-kicker">TEMPAT PENYIMPANAN UANG</span><strong>Wallet kamu</strong></div><button type="button" aria-label="Tambah wallet" onClick={() => setShowWalletForm(true)}>＋</button></div>
             <div className="overview-wallet-list">
-              {walletBalances.map((wallet) => <article className="overview-wallet-item" key={wallet.id}><div className="overview-wallet-item-top"><span className="wallet-symbol">▣</span><span className="wallet-caption">WALLET</span></div><strong className="wallet-name">{wallet.name}</strong><div className="wallet-balance">{ready ? rupiah(wallet.balance) : "Memuat..."}</div><div className="wallet-start">Saldo awal {rupiah(wallet.initialBalance)}</div></article>)}
+              {walletBalances.map((wallet) => <article className="overview-wallet-item" key={wallet.id}><div className="overview-wallet-item-top"><span className="wallet-symbol">▣</span><button type="button" className="wallet-delete-button" aria-label={`Hapus wallet ${wallet.name}`} title="Hapus wallet" onClick={() => handleWalletDelete(wallet.id)}>×</button></div><strong className="wallet-name">{wallet.name}</strong><div className="wallet-balance">{ready ? rupiah(wallet.balance) : "Memuat..."}</div><div className="wallet-start">Saldo awal {rupiah(wallet.initialBalance)}</div></article>)}
               {wallets.length === 0 && ready && <div className="wallet-empty">Belum ada wallet. Tambahkan wallet pertamamu.</div>}
             </div>
           </section>
