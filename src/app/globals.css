@@ -405,7 +405,8 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
   background:var(--surface-soft);
   scroll-snap-align:start;
 }
-.overview-wallet-item-top{display:flex;align-items:center;justify-content:flex-end;margin-bottom:8px}
+.overview-wallet-item-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}
+.overview-wallet-item-top .wallet-name{margin:0;text-align:left}
 .wallet-delete-button{width:26px;height:26px;display:grid;place-items:center;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--muted);font-size:18px;line-height:1;cursor:pointer}
 .wallet-delete-button:hover{border-color:#d9aaa3;color:#b75c4d;background:var(--surface-soft)}
 .wallet-delete-button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
