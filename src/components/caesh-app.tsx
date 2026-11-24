@@ -43,6 +43,8 @@ export default function CaeshApp() {
   const [error, setError] = useState("");
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [activeNav, setActiveNav] = useState<"overview" | "wallets" | "transactions" | "transfer" | "insights">("overview");
+  const [transactionSearch, setTransactionSearch] = useState("");
+  const [transactionFilter, setTransactionFilter] = useState<"all" | TransactionKind>("all");
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem("caesh-theme");
@@ -93,6 +95,10 @@ export default function CaeshApp() {
   }), [periodTransactions]);
   const expenseCount = periodTransactions.filter((item) => item.kind === "expense").length;
   const recent = transactions.slice(0, 6);
+  const visibleTransactions = transactions.filter((item) => { const query = transactionSearch.trim().toLocaleLowerCase(); const matchesSearch = !query || [item.note, item.category, walletName(item.walletId), item.toWalletId ? walletName(item.toWalletId) : ""].join(" ").toLocaleLowerCase().includes(query); return matchesSearch && (transactionFilter === "all" || item.kind === transactionFilter); });
+  const transferTransactions = transactions.filter((item) => item.kind === "transfer");
+  const expenseByCategory = periodTransactions.filter((item) => item.kind === "expense").reduce<Record<string, number>>((result, item) => { result[item.category] = (result[item.category] ?? 0) + item.amount; return result; }, {});
+  const largestExpense = Math.max(1, ...Object.values(expenseByCategory));
   const walletName = (id: string) => wallets.find((wallet) => wallet.id === id)?.name ?? "Wallet tidak ditemukan";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -167,11 +173,11 @@ export default function CaeshApp() {
         <a className="brand" href="#" aria-label="Caesh beranda"><span className="brand-mark">c</span><span>caesh<span className="brand-period">.</span></span></a>
         <div className="side-label">WORKSPACE</div>
         <nav className="side-nav" aria-label="Navigasi utama">
-          <a className={activeNav === "overview" ? "nav-link active" : "nav-link"} href="#overview" aria-current={activeNav === "overview" ? "page" : undefined} onClick={() => setActiveNav("overview")}><span className="nav-icon">▦</span> Ringkasan</a>
-          <a className={activeNav === "wallets" ? "nav-link active" : "nav-link"} href="#wallets" aria-current={activeNav === "wallets" ? "page" : undefined} onClick={() => setActiveNav("wallets")}><span className="nav-icon">▣</span> Wallet</a>
-          <a className={activeNav === "transactions" ? "nav-link active" : "nav-link"} href="#transactions" aria-current={activeNav === "transactions" ? "page" : undefined} onClick={() => setActiveNav("transactions")}><span className="nav-icon">↕</span> Transaksi</a>
-          <a className={activeNav === "transfer" ? "nav-link active" : "nav-link"} href="#transactions" aria-current={activeNav === "transfer" ? "page" : undefined} onClick={() => { setActiveNav("transfer"); setShowForm(true); }}><span className="nav-icon">⇄</span> Transfer</a>
-          <a className={activeNav === "insights" ? "nav-link active" : "nav-link"} href="#insights" aria-current={activeNav === "insights" ? "page" : undefined} onClick={() => setActiveNav("insights")}><span className="nav-icon">⌁</span> Analisis</a>
+          <button type="button" className={activeNav === "overview" ? "nav-link active" : "nav-link"} aria-current={activeNav === "overview" ? "page" : undefined} onClick={() => setActiveNav("overview")}><span className="nav-icon">▦</span> Ringkasan</button>
+          <button type="button" className={activeNav === "wallets" ? "nav-link active" : "nav-link"} aria-current={activeNav === "wallets" ? "page" : undefined} onClick={() => setActiveNav("wallets")}><span className="nav-icon">▣</span> Wallet</button>
+          <button type="button" className={activeNav === "transactions" ? "nav-link active" : "nav-link"} aria-current={activeNav === "transactions" ? "page" : undefined} onClick={() => setActiveNav("transactions")}><span className="nav-icon">↕</span> Transaksi</button>
+          <button type="button" className={activeNav === "transfer" ? "nav-link active" : "nav-link"} aria-current={activeNav === "transfer" ? "page" : undefined} onClick={() => { setActiveNav("transfer"); setKind("transfer"); setShowForm(true); }}><span className="nav-icon">⇄</span> Transfer</button>
+          <button type="button" className={activeNav === "insights" ? "nav-link active" : "nav-link"} aria-current={activeNav === "insights" ? "page" : undefined} onClick={() => setActiveNav("insights")}><span className="nav-icon">⌁</span> Analisis</button>
         </nav>
         <div className="sidebar-bottom">
           <div className="privacy-card"><span className="privacy-icon">◈</span><strong>Data milikmu.</strong><p>Disimpan di browser ini, bukan di server Caesh.</p><span className="privacy-status"><i /> Penyimpanan lokal aktif</span></div>
@@ -180,11 +186,12 @@ export default function CaeshApp() {
       </aside>
 
       <section className="main-panel" id="overview">
-        <header className="topbar"><div className="breadcrumb">Workspace <span>/</span> Ringkasan</div><div className="topbar-right"><span className="local-indicator"><i /> Data tersimpan lokal</span><span className="top-date">{todayLabel}</span><button className="theme-toggle" onClick={() => setTheme((current) => current === "light" ? "dark" : "light")} aria-label={theme === "light" ? "Aktifkan tema gelap" : "Aktifkan tema terang"} title={theme === "light" ? "Tema gelap" : "Tema terang"}><span aria-hidden="true">{theme === "light" ? "☾" : "☀"}</span><span>{theme === "light" ? "Gelap" : "Terang"}</span></button></div></header>
+        <header className="topbar"><div className="breadcrumb">Workspace <span>/</span> {({ overview: "Ringkasan", wallets: "Wallet", transactions: "Transaksi", transfer: "Transfer", insights: "Analisis" })[activeNav]}</div><div className="topbar-right"><span className="local-indicator"><i /> Data tersimpan lokal</span><span className="top-date">{todayLabel}</span><button className="theme-toggle" onClick={() => setTheme((current) => current === "light" ? "dark" : "light")} aria-label={theme === "light" ? "Aktifkan tema gelap" : "Aktifkan tema terang"} title={theme === "light" ? "Tema gelap" : "Tema terang"}><span aria-hidden="true">{theme === "light" ? "☾" : "☀"}</span><span>{theme === "light" ? "Gelap" : "Terang"}</span></button></div></header>
         <div className="content">
-          <div className="welcome-row"><div><div className="eyebrow">PERSONAL FINANCE OVERVIEW</div><h1>Uangmu, lebih <em>terarah.</em></h1><p className="welcome-copy">Pantau arus uang dan bangun kebiasaan finansial yang lebih baik.</p></div><button className="primary-button" onClick={() => setShowForm(true)}><span>＋</span> Tambah transaksi</button></div>
+          <div className="welcome-row"><div><div className="eyebrow">{({ overview: "PERSONAL FINANCE OVERVIEW", wallets: "MONEY STORAGE", transactions: "TRANSACTION HISTORY", transfer: "MOVE YOUR MONEY", insights: "FINANCIAL INSIGHTS" })[activeNav]}</div><h1>{({ overview: <>Uangmu, lebih <em>terarah.</em></>, wallets: <>Kelola <em>wallet.</em></>, transactions: <>Semua <em>transaksi.</em></>, transfer: <>Pindahkan <em>uang.</em></>, insights: <>Kenali pola <em>keuangan.</em></> })[activeNav]}</h1><p className="welcome-copy">{({ overview: "Pantau arus uang dan bangun kebiasaan finansial yang lebih baik.", wallets: "Atur tempat penyimpanan uang dan pantau saldo setiap wallet.", transactions: "Cari, saring, dan tinjau seluruh catatan keuanganmu.", transfer: "Pindahkan saldo antar-wallet tanpa mengubah total uangmu.", insights: "Lihat ke mana uangmu pergi dan bagaimana kebiasaan belanjamu." })[activeNav]}</p></div>{activeNav !== "transfer" && <button className="primary-button" onClick={() => { setKind("expense"); setShowForm(true); }}><span>＋</span> Tambah transaksi</button>}</div>
           {error && <div className="error-banner" role="alert">{error}<button onClick={() => setError("")}>Tutup</button></div>}
 
+          {activeNav === "overview" && <>
           <div className="period-row"><span className="section-kicker">RINGKASAN KEUANGAN</span><div className="period-tabs" aria-label="Periode ringkasan"><button className={period === "month" ? "selected" : ""} onClick={() => setPeriod("month")}>Bulan ini</button><button className={period === "year" ? "selected" : ""} onClick={() => setPeriod("year")}>Tahun ini</button><button className={period === "all" ? "selected" : ""} onClick={() => setPeriod("all")}>Semua</button></div></div>
           <section className="stats-grid" aria-label="Ringkasan saldo">
             <article className="stat-card balance-card"><div className="stat-top"><span>Total saldo semua wallet</span><span className="stat-symbol">↗</span></div><div className="stat-value">{ready ? rupiah(totalBalance) : "Memuat..."}</div><div className="stat-foot"><span className="balance-dot" /> Gabungan saldo seluruh wallet</div><div className="balance-decoration">CAESH</div></article>
@@ -192,7 +199,9 @@ export default function CaeshApp() {
             <article className="stat-card"><div className="stat-top"><span>Total pengeluaran</span><span className="stat-icon expense-icon">↗</span></div><div className="stat-value">{ready ? rupiah(totals.expense) : "Memuat..."}</div><div className="stat-foot">Uang yang digunakan pada periode ini</div></article>
           </section>
 
-          <section className="wallet-section" id="wallets">
+          </>}
+
+          {activeNav === "wallets" && <section className="wallet-section page-section" id="wallets">
             <div className="wallet-section-heading"><div><div className="section-kicker">TEMPAT PENYIMPANAN UANG</div><h2>Wallet kamu</h2></div><button className="outline-button" onClick={() => setShowWalletForm(true)}>＋ Tambah wallet</button></div>
             <div className="wallet-grid">
               {walletBalances.map((wallet) => <article className="wallet-card" key={wallet.id}><div className="wallet-card-top"><span className="wallet-symbol">▣</span><span className="wallet-caption">WALLET</span></div><strong className="wallet-name">{wallet.name}</strong><div className="wallet-balance">{ready ? rupiah(wallet.balance) : "Memuat..."}</div><div className="wallet-start">Saldo awal {rupiah(wallet.initialBalance)}</div></article>)}
@@ -201,13 +210,33 @@ export default function CaeshApp() {
             </div>
           </section>
 
-          <section className="lower-grid" id="transactions">
+          </section>}
+
+          {activeNav === "overview" && <section className="lower-grid" id="transactions">
             <article className="panel-card transactions-card"><div className="panel-heading"><div><div className="section-kicker">CATATAN TERBARU</div><h2>Aktivitas transaksi</h2></div><button className="text-button" onClick={() => setShowForm(true)}>＋ Catat baru</button></div>
               {!ready ? <div className="empty-state">Memuat data lokal...</div> : recent.length === 0 ? <div className="empty-state"><div className="empty-art">↗</div><strong>Belum ada transaksi</strong><p>Mulai catat pemasukan atau pengeluaran pertamamu.</p><button className="outline-button" onClick={() => setShowForm(true)}>Tambah transaksi pertama</button></div> :
               <div className="transaction-list">{recent.map((item) => <div className="transaction-row" key={item.id}><div className={`transaction-icon ${item.kind}`}>{item.kind === "income" ? "↙" : item.kind === "expense" ? "↗" : "⇄"}</div><div className="transaction-info"><strong>{item.note || item.category}</strong><span>{item.kind === "transfer" ? `${walletName(item.walletId)} → ${walletName(item.toWalletId ?? "")}` : `${item.category} · ${walletName(item.walletId)}`} · {new Date(item.date + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</span></div><div className={`transaction-amount ${item.kind}`}>{item.kind === "income" ? "+" : item.kind === "expense" ? "−" : "⇄"}{rupiah(item.amount)}</div><button className="delete-button" aria-label="Hapus transaksi" onClick={() => handleDelete(item.id)}>×</button></div>)}</div>}
             </article>
             <article className="panel-card insight-card" id="insights"><div className="section-kicker">KEBIASAAN FINANSIAL</div><h2>Ringkasan aktivitas</h2><p className="insight-description">Gambaran sederhana dari transaksi pada periode yang dipilih.</p><div className="insight-metric"><span>Jumlah transaksi</span><strong>{periodTransactions.length}</strong></div><div className="insight-metric"><span>Rata-rata pengeluaran</span><strong>{rupiah(expenseCount ? totals.expense / expenseCount : 0)}</strong></div><div className="insight-note"><span>✳</span><p>Catat transaksi secara rutin agar ringkasan keuanganmu semakin akurat.</p></div></article>
-          </section>
+          </section>}
+
+          {activeNav === "transactions" && <section className="panel-card page-section" id="transactions">
+            <div className="panel-heading"><div><div className="section-kicker">RIWAYAT LENGKAP</div><h2>Semua transaksi</h2></div><span className="result-count">{visibleTransactions.length} catatan</span></div>
+            <div className="transaction-tools"><input aria-label="Cari transaksi" type="search" placeholder="Cari catatan, kategori, atau wallet..." value={transactionSearch} onChange={(event) => setTransactionSearch(event.target.value)} /><select aria-label="Filter jenis transaksi" value={transactionFilter} onChange={(event) => setTransactionFilter(event.target.value as "all" | TransactionKind)}><option value="all">Semua jenis</option><option value="income">Pemasukan</option><option value="expense">Pengeluaran</option><option value="transfer">Transfer</option></select></div>
+            {!ready ? <div className="empty-state">Memuat data lokal...</div> : visibleTransactions.length === 0 ? <div className="empty-state"><strong>Tidak ada transaksi ditemukan</strong><p>Coba ubah kata pencarian atau filter yang dipilih.</p></div> : <div className="transaction-list">{visibleTransactions.map((item) => <div className="transaction-row" key={item.id}><div className={`transaction-icon ${item.kind}`}>{item.kind === "income" ? "↙" : item.kind === "expense" ? "↗" : "⇄"}</div><div className="transaction-info"><strong>{item.note || item.category}</strong><span>{item.kind === "transfer" ? `${walletName(item.walletId)} → ${walletName(item.toWalletId ?? "")}` : `${item.category} · ${walletName(item.walletId)}`} · {new Date(item.date + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</span></div><div className={`transaction-amount ${item.kind}`}>{item.kind === "income" ? "+" : item.kind === "expense" ? "−" : "⇄"}{rupiah(item.amount)}</div><button className="delete-button" aria-label="Hapus transaksi" onClick={() => handleDelete(item.id)}>×</button></div>)}</div>}
+          </section>}
+
+          {activeNav === "transfer" && <section className="page-section transfer-page">
+            <div className="transfer-intro panel-card"><div><div className="section-kicker">TRANSFER ANTAR-WALLET</div><h2>Atur perpindahan saldo</h2><p className="insight-description">Transfer hanya memindahkan uang antar-wallet. Total saldo gabungan tidak berubah dan tidak dihitung sebagai pemasukan atau pengeluaran.</p></div><button className="primary-button" onClick={() => { setKind("transfer"); setShowForm(true); }}>＋ Buat transfer</button></div>
+            <div className="transfer-wallet-grid">{walletBalances.map((wallet) => <article className="wallet-card" key={wallet.id}><span className="wallet-caption">SALDO TERSEDIA</span><strong className="wallet-name">{wallet.name}</strong><div className="wallet-balance">{rupiah(wallet.balance)}</div></article>)}</div>
+            <article className="panel-card"><div className="panel-heading"><div><div className="section-kicker">RIWAYAT TRANSFER</div><h2>Transfer terbaru</h2></div><span className="result-count">{transferTransactions.length} transfer</span></div>{transferTransactions.length === 0 ? <div className="empty-state"><strong>Belum ada transfer</strong><p>Transfer antar-wallet yang kamu buat akan muncul di sini.</p></div> : <div className="transaction-list">{transferTransactions.map((item) => <div className="transaction-row" key={item.id}><div className="transaction-icon transfer">⇄</div><div className="transaction-info"><strong>{item.note || "Transfer antar-wallet"}</strong><span>{walletName(item.walletId)} → {walletName(item.toWalletId ?? "")} · {new Date(item.date + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</span></div><div className="transaction-amount transfer">{rupiah(item.amount)}</div><button className="delete-button" aria-label="Hapus transfer" onClick={() => handleDelete(item.id)}>×</button></div>)}</div>}</article>
+          </section>}
+
+          {activeNav === "insights" && <section className="page-section analysis-page">
+            <div className="stats-grid analysis-stats"><article className="stat-card"><div className="stat-top"><span>Jumlah transaksi</span></div><div className="stat-value">{periodTransactions.length}</div><div className="stat-foot">Pada periode yang dipilih</div></article><article className="stat-card"><div className="stat-top"><span>Rata-rata pengeluaran</span></div><div className="stat-value">{rupiah(expenseCount ? totals.expense / expenseCount : 0)}</div><div className="stat-foot">Per transaksi pengeluaran</div></article><article className="stat-card"><div className="stat-top"><span>Arus bersih</span></div><div className="stat-value">{rupiah(totals.income - totals.expense)}</div><div className="stat-foot">Pemasukan dikurangi pengeluaran</div></article></div>
+            <div className="period-row"><span className="section-kicker">PERIODE ANALISIS</span><div className="period-tabs"><button className={period === "month" ? "selected" : ""} onClick={() => setPeriod("month")}>Bulan ini</button><button className={period === "year" ? "selected" : ""} onClick={() => setPeriod("year")}>Tahun ini</button><button className={period === "all" ? "selected" : ""} onClick={() => setPeriod("all")}>Semua</button></div></div>
+            <article className="panel-card category-analysis"><div className="section-kicker">PENGELUARAN PER KATEGORI</div><h2>Ke mana uangmu pergi?</h2>{Object.keys(expenseByCategory).length === 0 ? <div className="empty-state"><strong>Belum ada data pengeluaran</strong><p>Data kategori akan muncul setelah kamu mencatat pengeluaran.</p></div> : Object.entries(expenseByCategory).sort((a,b) => b[1]-a[1]).map(([name,value]) => <div className="category-bar-row" key={name}><div className="category-bar-label"><strong>{name}</strong><span>{rupiah(value)}</span></div><div className="category-bar-track"><span style={{ width: `${Math.max(3, value / largestExpense * 100)}%` }} /></div></div>)}</article>
+          </section>}
           <footer className="footer-note"><span>CAESH © 2026</span><span>Dirancang untuk mengelola uang dengan lebih sadar.</span><span className="footer-lock">◈ DATA LOKAL</span></footer>
         </div>
       </section>
