@@ -1052,3 +1052,27 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
     padding-left: clamp(104px, 9vw, 140px) !important;
   }
 }
+
+
+/* SVG navigation icons must remain visible in the mobile bottom dock too. */
+@media (max-width: 620px) {
+  .side-nav .nav-icon {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    font-size: 0;
+    flex: 0 0 20px;
+  }
+
+  .side-nav .nav-icon svg {
+    display: block;
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
