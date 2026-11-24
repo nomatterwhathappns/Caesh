@@ -191,3 +191,7 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
 .kind-switch .transfer-choice{color:#7585bd}
 :root[data-theme="dark"] .transaction-icon.transfer{background:#30364e;color:#bdc8ff}
 :root[data-theme="dark"] .transaction-amount.transfer{color:#bdc8ff}
+
+.currency-input-wrap{position:relative;display:flex;align-items:center}
+.currency-input-wrap>span{position:absolute;left:13px;z-index:1;color:var(--text-secondary);font-size:13px;font-weight:700;pointer-events:none}
+.currency-input-wrap input{width:100%;padding-left:39px!important;font-variant-numeric:tabular-nums}
