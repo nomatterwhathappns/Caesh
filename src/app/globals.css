@@ -499,3 +499,34 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
   .transactions-card .panel-heading>.text-button,
   .transactions-card .empty-state>.outline-button{display:none}
 }
+
+/* Wallet photo upload and crop editor */
+.visually-hidden-file{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.wallet-card-actions{display:flex;align-items:center;gap:6px}
+.wallet-photo-button{height:26px;padding:0 8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--muted);font-size:10px;cursor:pointer}
+.wallet-photo-button:hover{border-color:var(--accent);color:var(--ink)}
+.overview-wallet-item.has-photo{position:relative;isolation:isolate;overflow:hidden;border-color:#ffffff30;background:#263329}
+.wallet-card-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;pointer-events:none}
+.overview-wallet-item.has-photo::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,#101a1680 0%,#101a1630 42%,#101a16b8 100%);pointer-events:none}
+.overview-wallet-item.has-photo .wallet-name,.overview-wallet-item.has-photo .wallet-balance,.overview-wallet-item.has-photo .wallet-start{color:#fff!important;text-shadow:0 1px 5px #0009}
+.overview-wallet-item.has-photo .wallet-photo-button,.overview-wallet-item.has-photo .wallet-delete-button{background:#17251c99;border-color:#ffffff70;color:#fff;backdrop-filter:blur(8px)}
+.wallet-photo-picker-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:18px 0 10px}
+.wallet-photo-picker-row>div{display:grid;gap:4px}
+.wallet-photo-picker-row strong{font-size:11px}
+.wallet-photo-picker-row span{font-size:10px;color:var(--text-secondary)}
+.wallet-photo-picker-row .outline-button{white-space:nowrap}
+.wallet-photo-mini{display:flex;align-items:center;gap:12px;margin:8px 0 15px;flex-wrap:wrap}
+.wallet-photo-mini img{width:54px;height:54px;object-fit:cover;border-radius:9px}
+.photo-editor-backdrop{z-index:20}
+.photo-editor-card{width:min(100%,430px)}
+.photo-crop-preview{width:min(100%,300px);aspect-ratio:1/1;margin:0 auto 14px;border-radius:13px;overflow:hidden;background:#202a23;position:relative}
+.photo-crop-preview img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-empty-preview{width:min(100%,300px);aspect-ratio:1/1;margin:0 auto 14px;border:1px dashed var(--line);border-radius:13px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--text-secondary);text-align:center}
+.photo-empty-preview>span{font-size:30px}
+.photo-empty-preview strong{font-size:12px;color:var(--ink)}
+.photo-empty-preview p{font-size:10px;margin:0}
+.photo-choose-button{display:block;width:100%;margin:0 0 17px}
+.photo-adjustments{display:grid;gap:13px}
+.photo-adjustments label{display:grid;gap:7px;font-size:11px;font-weight:600;color:var(--ink)}
+.photo-adjustments .photo-range{width:100%;padding:0!important;border:0!important;accent-color:var(--accent);background:transparent!important;box-shadow:none!important}
+@media(max-width:620px){.photo-editor-card{max-height:calc(100dvh - 24px);overflow:auto}.photo-crop-preview,.photo-empty-preview{width:min(100%,260px)}.wallet-photo-picker-row{align-items:flex-start}}
