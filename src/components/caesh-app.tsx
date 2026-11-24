@@ -64,7 +64,7 @@ export default function CaeshApp() {
   const [period, setPeriod] = useState("month");
   const [error, setError] = useState("");
   const [theme, setTheme] = useState<"light" | "dark">("light");
-  const [activeNav, setActiveNav] = useState<"overview" | "wallets" | "transactions" | "transfer" | "insights" | "wishlist">("overview");
+  const [activeNav, setActiveNav] = useState<"overview" | "wallets" | "transactions" | "insights" | "wishlist">("overview");
   const [transactionSearch, setTransactionSearch] = useState("");
   const [transactionFilter, setTransactionFilter] = useState<"all" | TransactionKind>("all");
 
@@ -372,7 +372,6 @@ export default function CaeshApp() {
           <button type="button" className={activeNav === "overview" ? "nav-link active" : "nav-link"} aria-current={activeNav === "overview" ? "page" : undefined} onClick={() => setActiveNav("overview")}><span className="nav-icon">▦</span> Ringkasan</button>
           <button type="button" className={activeNav === "transactions" ? "nav-link active" : "nav-link"} aria-current={activeNav === "transactions" ? "page" : undefined} onClick={() => setActiveNav("transactions")}><span className="nav-icon">↕</span> Transaksi</button>
           <button type="button" className="nav-link nav-add-transaction" onClick={() => { setKind("expense"); setShowForm(true); }} aria-label="Tambah transaksi"><span className="nav-icon">＋</span><span className="nav-add-label">Tambah</span></button>
-          <button type="button" className={activeNav === "transfer" ? "nav-link active" : "nav-link"} aria-current={activeNav === "transfer" ? "page" : undefined} onClick={() => { setActiveNav("transfer"); setKind("transfer"); }}><span className="nav-icon">⇄</span> Transfer</button>
           <button type="button" className={activeNav === "insights" ? "nav-link active" : "nav-link"} aria-current={activeNav === "insights" ? "page" : undefined} onClick={() => setActiveNav("insights")}><span className="nav-icon">⌁</span> Analisis</button>
           <button type="button" className={activeNav === "wishlist" ? "nav-link active" : "nav-link"} aria-current={activeNav === "wishlist" ? "page" : undefined} onClick={() => setActiveNav("wishlist")}><span className="nav-icon">♡</span> Wishlist</button>
         </nav>
@@ -413,15 +412,9 @@ export default function CaeshApp() {
           </section>}
 
           {activeNav === "transactions" && <section className="panel-card page-section" id="transactions">
-            <div className="panel-heading"><div><div className="section-kicker">RIWAYAT LENGKAP</div><h2>Semua transaksi</h2></div><span className="result-count">{visibleTransactions.length} catatan</span></div>
+            <div className="panel-heading"><div><div className="section-kicker">RIWAYAT LENGKAP</div><h2>Semua transaksi</h2></div><div className="transaction-heading-actions"><button className="outline-button" type="button" onClick={() => { setKind("transfer"); setShowForm(true); }}>⇄ Buat transfer</button><span className="result-count">{visibleTransactions.length} catatan</span></div></div>
             <div className="transaction-tools"><input aria-label="Cari transaksi" type="search" placeholder="Cari catatan, kategori, atau wallet..." value={transactionSearch} onChange={(event) => setTransactionSearch(event.target.value)} /><select aria-label="Filter jenis transaksi" value={transactionFilter} onChange={(event) => setTransactionFilter(event.target.value as "all" | TransactionKind)}><option value="all">Semua jenis</option><option value="income">Pemasukan</option><option value="expense">Pengeluaran</option><option value="transfer">Transfer</option></select></div>
             {!ready ? <div className="empty-state">Memuat data lokal...</div> : visibleTransactions.length === 0 ? <div className="empty-state"><strong>Tidak ada transaksi ditemukan</strong><p>Coba ubah kata pencarian atau filter yang dipilih.</p></div> : <div className="transaction-list">{visibleTransactions.map((item) => <div className="transaction-row" key={item.id}><div className={`transaction-icon ${item.kind}`}>{item.kind === "income" ? "↙" : item.kind === "expense" ? "↗" : "⇄"}</div><div className="transaction-info"><strong>{item.note || item.category}</strong><span>{item.kind === "transfer" ? `${walletName(item.walletId)} → ${walletName(item.toWalletId ?? "")}` : `${item.category} · ${walletName(item.walletId)}`} · {new Date(item.date + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</span></div><div className={`transaction-amount ${item.kind}`}>{item.kind === "income" ? "+" : item.kind === "expense" ? "−" : "⇄"}{rupiah(item.amount)}</div><button className="delete-button" aria-label="Hapus transaksi" onClick={() => handleDelete(item.id)}>×</button></div>)}</div>}
-          </section>}
-
-          {activeNav === "transfer" && <section className="page-section transfer-page">
-            <div className="transfer-intro panel-card"><div><div className="section-kicker">TRANSFER ANTAR-WALLET</div><h2>Atur perpindahan saldo</h2></div><button className="primary-button" onClick={() => { setKind("transfer"); setShowForm(true); }}>＋ Buat transfer</button></div>
-            <div className="transfer-wallet-grid">{walletBalances.map((wallet) => <article className="wallet-card" key={wallet.id}><span className="wallet-caption">SALDO TERSEDIA</span><strong className="wallet-name">{wallet.name}</strong><div className="wallet-balance">{rupiah(wallet.balance)}</div></article>)}</div>
-            <article className="panel-card"><div className="panel-heading"><div><div className="section-kicker">RIWAYAT TRANSFER</div><h2>Transfer terbaru</h2></div><span className="result-count">{transferTransactions.length} transfer</span></div>{transferTransactions.length === 0 ? <div className="empty-state"><strong>Belum ada transfer</strong><p>Transfer antar-wallet yang kamu buat akan muncul di sini.</p></div> : <div className="transaction-list">{transferTransactions.map((item) => <div className="transaction-row" key={item.id}><div className="transaction-icon transfer">⇄</div><div className="transaction-info"><strong>{item.note || "Transfer antar-wallet"}</strong><span>{walletName(item.walletId)} → {walletName(item.toWalletId ?? "")} · {new Date(item.date + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</span></div><div className="transaction-amount transfer">{rupiah(item.amount)}</div><button className="delete-button" aria-label="Hapus transfer" onClick={() => handleDelete(item.id)}>×</button></div>)}</div>}</article>
           </section>}
 
           {activeNav === "wishlist" && <section className="page-section wishlist-page">
