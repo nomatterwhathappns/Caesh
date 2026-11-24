@@ -16,7 +16,6 @@
     "@capacitor/filesystem": "^8.1.5",
     "@capacitor/app": "^8.1.2",
     "@capacitor/file-transfer": "^2.0.6",
-    "@m430/capacitor-app-install": "^0.0.2",
     "next": "16.4.6",
     "react": "19.3.1",
     "react-dom": "19.3.1"
