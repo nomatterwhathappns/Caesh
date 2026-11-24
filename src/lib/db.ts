@@ -1,4 +1,4 @@
-"export type TransactionKind = "income" | "expense";
+export type TransactionKind = "income" | "expense";
 
 export type Wallet = {
   id: string;
