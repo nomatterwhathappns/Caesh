@@ -1039,3 +1039,16 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
 @media (min-width: 621px) and (max-width: 900px) {
   .sidebar { left: 14px; }
 }
+
+
+/* Reserve a permanent gutter for the floating desktop navigation so it never covers page content. */
+@media (min-width: 621px) {
+  .content,
+  .overview-content {
+    padding-left: clamp(104px, 9vw, 140px) !important;
+  }
+
+  .topbar {
+    padding-left: clamp(104px, 9vw, 140px) !important;
+  }
+}
