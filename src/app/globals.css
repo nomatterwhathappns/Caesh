@@ -1167,3 +1167,50 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
     scrollbar-width: thin;
   }
 }
+
+
+/* Consistent slim scrollbars across the app, with breathing room beside scrollable content. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--muted) 42%, transparent) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--muted) 42%, transparent);
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--muted) 65%, transparent);
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+
+/* Keep the scrollbar visually separated from rows and text in scrollable lists. */
+.transaction-list,
+.side-nav,
+.wallet-grid,
+.wishlist-grid {
+  scrollbar-gutter: stable;
+}
+
+.transaction-list {
+  padding-right: 8px;
+}
+
+@media (max-width: 620px) {
+  .transaction-list {
+    padding-right: 6px;
+  }
+}
