@@ -117,4 +117,4 @@ jobs:
           name: Caesh Android Preview
           prerelease: true
           make_latest: false
-          files: android/app/build/outputs/apk/release/app-release.apk
+          files: android/app/build/outputs/apk/release/Caesh.apk
