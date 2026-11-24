@@ -46,6 +46,9 @@ jobs:
       - name: Configure Android APK installer
         run: node scripts/configure-android-updater.mjs
 
+      - name: Configure Android app version
+        run: node scripts/configure-android-version.mjs
+
       - name: Check signing secrets
         id: signing_check
         env:
