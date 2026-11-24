@@ -565,55 +565,6 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
 .overview-wallet-item{position:relative}
 
 
-/* Mobile dock with a centered quick-add action and five workspace destinations. */
-@media(max-width:620px){
-  .side-nav{
-    display:grid;
-    grid-template-columns:repeat(7,minmax(0,1fr));
-    align-items:center;
-    gap:1px;
-  }
-  .side-nav > .nav-link:nth-child(1){grid-column:1;grid-row:1}
-  .side-nav > .nav-link:nth-child(2){grid-column:2;grid-row:1}
-  .side-nav > .nav-add-transaction{grid-column:4;grid-row:1}
-  .side-nav > .nav-link:nth-child(4){grid-column:5;grid-row:1}
-  .side-nav > .nav-link:nth-child(5){grid-column:6;grid-row:1}
-  .side-nav > .nav-link:nth-child(6){grid-column:7;grid-row:1}
-  .side-nav .nav-link{
-    min-width:0;
-    height:54px;
-    min-height:54px;
-    padding:5px 0;
-    gap:4px;
-    font-size:8px;
-    letter-spacing:-.1px;
-  }
-  .side-nav .nav-link .nav-icon{font-size:17px}
-  .side-nav .nav-add-transaction{
-    height:60px;
-    min-height:60px;
-    transform:translateY(-7px);
-    border:1px solid var(--line);
-    border-radius:14px;
-    background:var(--surface);
-    box-shadow:0 4px 12px rgba(20,30,20,.16);
-    gap:3px;
-    font-size:8px;
-  }
-  .side-nav .nav-add-transaction .nav-icon{
-    width:29px;
-    height:29px;
-    display:grid;
-    place-items:center;
-    border-radius:50%;
-    background:#78966e;
-    color:#fff;
-    font-size:21px;
-    line-height:1;
-  }
-  .side-nav .nav-add-transaction .nav-add-label{font-size:8px;line-height:1}
-}
-
 /* Five-item mobile dock: two destinations on each side of the centered add action. */
 @media(max-width:620px){
   .side-nav{
