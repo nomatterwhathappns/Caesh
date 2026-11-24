@@ -120,7 +120,7 @@ export default function CaeshApp() {
     let cancelled = false;
     async function checkForUpdate() {
       try {
-        const [appInfo, response] = await Promise.all([App.getInfo(), fetch(UPDATE_MANIFEST_URL, { cache: "no-store" })]);
+        const [appInfo, response] = await Promise.all([App.getInfo(), fetch(`${UPDATE_MANIFEST_URL}?t=${Date.now()}`, { cache: "no-store", headers: { "Cache-Control": "no-cache" } })]);
         if (!response.ok) return;
         const manifest = await response.json() as Partial<CaeshUpdate>;
         if (cancelled || typeof manifest.version !== "string" || typeof manifest.apkUrl !== "string" || !/^https:\/\//i.test(manifest.apkUrl)) return;
