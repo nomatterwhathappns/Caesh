@@ -409,7 +409,7 @@ function isWishlistItem(value: unknown): value is WishlistItem {
     && (value.status === "pending" || value.status === "purchased")
     && Number.isFinite(value.createdAt)
     && (value.purchasedAt === undefined || Number.isFinite(value.purchasedAt))
-    && (value.purchaseAmount === undefined || (Number.isSafeInteger(value.purchaseAmount) && value.purchaseAmount >= 0))
+    && (value.purchaseAmount === undefined || (typeof value.purchaseAmount === "number" && Number.isSafeInteger(value.purchaseAmount) && value.purchaseAmount >= 0))
     && (value.walletId === undefined || typeof value.walletId === "string")
     && (value.transactionId === undefined || typeof value.transactionId === "string");
 }
