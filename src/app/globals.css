@@ -432,3 +432,5 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
   .overview-top-grid .stats-grid{grid-template-columns:1fr;gap:10px}
   .overview-wallet-panel{max-height:260px}
 }
+
+@media(min-width:621px){.side-nav .wallet-nav-item{display:none}}
