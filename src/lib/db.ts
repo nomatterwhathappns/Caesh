@@ -51,6 +51,7 @@ function openDatabase(): Promise<IDBDatabase> {
 
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
+    let settled = false;
     request.onupgradeneeded = (event) => {
       const db = request.result;
       const tx = request.transaction;
@@ -90,14 +91,23 @@ function openDatabase(): Promise<IDBDatabase> {
     };
     request.onsuccess = () => {
       const db = request.result;
+      // A blocked request can still complete after the caller has been notified.
+      if (settled) { db.close(); return; }
+      settled = true;
       // Close stale connections before another tab/app version attempts a schema upgrade.
       db.onversionchange = () => db.close();
       resolve(db);
     };
     request.onblocked = () => {
+      if (settled) return;
+      settled = true;
       reject(new Error("Pembaruan struktur database tertahan. Tutup tab Caesh lain, lalu coba lagi."));
     };
-    request.onerror = () => reject(request.error ?? new Error("Gagal membuka database lokal."));
+    request.onerror = () => {
+      if (settled) return;
+      settled = true;
+      reject(request.error ?? new Error("Gagal membuka database lokal. Data lama tidak dihapus."));
+    };
   });
 }
 
@@ -304,4 +314,155 @@ export async function purchaseWishlist(item: WishlistItem, transaction: Transact
       reject(tx.error ?? new Error("Pembelian wishlist gagal disimpan."));
     };
   });
+}
+
+
+export type CaeshBackup = {
+  format: "caesh-backup";
+  formatVersion: 1;
+  databaseVersion: number;
+  exportedAt: string;
+  transactions: Transaction[];
+  wallets: Wallet[];
+  wishlist: WishlistItem[];
+  preferences: {
+    theme?: string | null;
+    categories?: string | null;
+  };
+};
+
+function readAll<T>(store: IDBObjectStore): Promise<T[]> {
+  return new Promise((resolve, reject) => {
+    const request = store.getAll();
+    request.onsuccess = () => resolve(request.result as T[]);
+    request.onerror = () => reject(request.error ?? new Error("Data lokal gagal dibaca."));
+  });
+}
+
+export async function createBackup(): Promise<CaeshBackup> {
+  const db = await openDatabase();
+  try {
+    const tx = db.transaction([TRANSACTION_STORE, WALLET_STORE, WISHLIST_STORE], "readonly");
+    const [transactions, wallets, wishlist] = await Promise.all([
+      readAll<Transaction>(tx.objectStore(TRANSACTION_STORE)),
+      readAll<Wallet>(tx.objectStore(WALLET_STORE)),
+      readAll<WishlistItem>(tx.objectStore(WISHLIST_STORE)),
+    ]);
+    await new Promise<void>((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onabort = () => reject(tx.error ?? new Error("Backup gagal dibaca."));
+      tx.onerror = () => reject(tx.error ?? new Error("Backup gagal dibaca."));
+    });
+    return {
+      format: "caesh-backup",
+      formatVersion: 1,
+      databaseVersion: DB_VERSION,
+      exportedAt: new Date().toISOString(),
+      transactions,
+      wallets,
+      wishlist,
+      preferences: {
+        theme: typeof localStorage !== "undefined" ? localStorage.getItem("caesh-theme") : null,
+        categories: typeof localStorage !== "undefined" ? localStorage.getItem("caesh-categories") : null,
+      },
+    };
+  } finally {
+    db.close();
+  }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isWallet(value: unknown): value is Wallet {
+  if (!isRecord(value)) return false;
+  return typeof value.id === "string" && value.id.length > 0
+    && typeof value.name === "string"
+    && Number.isSafeInteger(value.initialBalance) && Number(value.initialBalance) >= 0
+    && Number.isFinite(value.createdAt)
+    && (value.photo === undefined || typeof value.photo === "string")
+    && (value.photoX === undefined || (typeof value.photoX === "number" && Number.isFinite(value.photoX)))
+    && (value.photoY === undefined || (typeof value.photoY === "number" && Number.isFinite(value.photoY)))
+    && (value.photoZoom === undefined || (typeof value.photoZoom === "number" && Number.isFinite(value.photoZoom)));
+}
+
+function isTransaction(value: unknown): value is Transaction {
+  if (!isRecord(value)) return false;
+  return typeof value.id === "string" && value.id.length > 0
+    && (value.kind === "income" || value.kind === "expense" || value.kind === "transfer")
+    && Number.isSafeInteger(value.amount) && Number(value.amount) >= 0
+    && typeof value.category === "string"
+    && typeof value.note === "string"
+    && typeof value.date === "string"
+    && typeof value.walletId === "string"
+    && Number.isFinite(value.createdAt)
+    && (value.walletName === undefined || typeof value.walletName === "string")
+    && (value.toWalletId === undefined || typeof value.toWalletId === "string")
+    && (value.toWalletName === undefined || typeof value.toWalletName === "string");
+}
+
+function isWishlistItem(value: unknown): value is WishlistItem {
+  if (!isRecord(value)) return false;
+  return typeof value.id === "string" && value.id.length > 0
+    && typeof value.name === "string"
+    && (value.status === "pending" || value.status === "purchased")
+    && Number.isFinite(value.createdAt)
+    && (value.purchasedAt === undefined || Number.isFinite(value.purchasedAt))
+    && (value.purchaseAmount === undefined || (Number.isSafeInteger(value.purchaseAmount) && value.purchaseAmount >= 0))
+    && (value.walletId === undefined || typeof value.walletId === "string")
+    && (value.transactionId === undefined || typeof value.transactionId === "string");
+}
+
+function validateBackup(value: unknown): CaeshBackup {
+  if (!isRecord(value) || value.format !== "caesh-backup" || value.formatVersion !== 1
+    || !Array.isArray(value.transactions) || !Array.isArray(value.wallets) || !Array.isArray(value.wishlist)
+    || !value.transactions.every(isTransaction) || !value.wallets.every(isWallet) || !value.wishlist.every(isWishlistItem)
+    || !isRecord(value.preferences)) {
+    throw new Error("File backup tidak valid atau formatnya tidak didukung. Data yang sekarang tetap aman.");
+  }
+  const walletIds = new Set(value.wallets.map((wallet) => (wallet as Wallet).id));
+  const transactionIds = new Set(value.transactions.map((item) => (item as Transaction).id));
+  const wishlistIds = new Set(value.wishlist.map((item) => (item as WishlistItem).id));
+  if (walletIds.size !== value.wallets.length || transactionIds.size !== value.transactions.length
+    || wishlistIds.size !== value.wishlist.length) {
+    throw new Error("Backup memiliki ID data ganda. Data yang sekarang tetap aman.");
+  }
+  return value as unknown as CaeshBackup;
+}
+
+export async function restoreBackup(input: unknown): Promise<CaeshBackup> {
+  const backup = validateBackup(input);
+  if (backup.wallets.length === 0) {
+    throw new Error("Backup tidak memiliki wallet. Pemulihan dibatalkan agar Caesh tidak kehilangan wallet utama.");
+  }
+  const db = await openDatabase();
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction([TRANSACTION_STORE, WALLET_STORE, WISHLIST_STORE], "readwrite");
+      const transactionStore = tx.objectStore(TRANSACTION_STORE);
+      const walletStore = tx.objectStore(WALLET_STORE);
+      const wishlistStore = tx.objectStore(WISHLIST_STORE);
+      transactionStore.clear();
+      walletStore.clear();
+      wishlistStore.clear();
+      backup.transactions.forEach((item) => transactionStore.put(item));
+      backup.wallets.forEach((item) => walletStore.put(item));
+      backup.wishlist.forEach((item) => wishlistStore.put(item));
+      tx.oncomplete = () => resolve();
+      tx.onabort = () => reject(tx.error ?? new Error("Pemulihan gagal. Data sebelumnya tetap dipertahankan."));
+      tx.onerror = () => reject(tx.error ?? new Error("Pemulihan gagal. Data sebelumnya tetap dipertahankan."));
+    });
+    if (typeof localStorage !== "undefined") {
+      if (backup.preferences.theme !== undefined && backup.preferences.theme !== null) {
+        localStorage.setItem("caesh-theme", backup.preferences.theme);
+      }
+      if (backup.preferences.categories !== undefined && backup.preferences.categories !== null) {
+        localStorage.setItem("caesh-categories", backup.preferences.categories);
+      }
+    }
+    return backup;
+  } finally {
+    db.close();
+  }
 }
