@@ -1,8 +1,8 @@
 # Caesh
 
-**Caesh** adalah aplikasi pengelola keuangan pribadi berbasis web untuk penggunaan pribadi. Aplikasi menggunakan Next.js dan menyimpan transaksi di browser melalui IndexedDB.
+**Caesh** adalah aplikasi pengelola keuangan pribadi dengan arah pengembangan local-first. Web app Next.js saat ini digunakan sebagai preview dan tempat pengembangan. Target akhirnya adalah aplikasi desktop dan Android yang menyimpan data masing-masing pengguna di perangkatnya.
 
-## Menjalankan secara lokal
+## Menjalankan versi web secara lokal
 
 Persyaratan: Node.js 20.9 atau lebih baru.
 
@@ -20,7 +20,7 @@ npm run build
 npm run start
 ```
 
-## Deploy ke Vercel
+## Deploy preview ke Vercel
 
 1. Import repository GitHub `nomatterwhathappns/Caesh` ke Vercel.
 2. Framework Preset: Next.js.
@@ -29,28 +29,36 @@ npm run start
 5. Output Directory: biarkan default.
 6. Deploy.
 
-Tidak ada environment variable wajib untuk versi awal ini.
+Vercel digunakan untuk hosting preview web, bukan sebagai tempat penyimpanan data keuangan pengguna.
 
 ## Privasi dan penyimpanan
 
-- Data transaksi disimpan di IndexedDB browser pada perangkat dan profil browser yang digunakan.
-- Tidak ada backend, API keuangan, akun pengguna, database cloud, atau sinkronisasi antarperangkat pada versi awal.
-- Vercel meng-host kode aplikasi; transaksi tidak dikirim ke Vercel oleh fitur pencatatan versi awal.
-- Data tidak terenkripsi oleh aplikasi. Menghapus data situs/browser dapat menghapus transaksi.
-- Gunakan browser dan perangkat yang sama untuk mengakses data yang sama.
-- Deployment Protection mengatur akses ke situs, bukan mengenkripsi data lokal.
-- Jangan jadikan aplikasi ini satu-satunya catatan keuangan sebelum backup/restore dan pengujian keamanan tersedia.
+- Data keuangan disimpan secara lokal pada perangkat pengguna.
+- Tidak ada backend keuangan, akun pengguna, database cloud, atau sinkronisasi antarperangkat yang direncanakan.
+- Data antar pengguna dan antar perangkat tidak otomatis bercampur atau tersinkron.
+- Penyimpanan lokal aplikasi saat ini menggunakan IndexedDB di browser.
+- Data lokal belum dienkripsi oleh aplikasi. Menghapus data situs/browser dapat menghapus data.
+- Backup/restore belum tersedia. Jangan jadikan aplikasi ini satu-satunya salinan catatan keuangan penting sebelum fitur backup tersedia.
 
-## Fitur versi awal
+## Kebijakan perlindungan data
 
-- Dashboard ringkasan saldo gabungan seluruh wallet.
-- Membuat beberapa wallet dengan nama dan saldo awal masing-masing.
-- Saldo wallet dihitung dari saldo awal ditambah pemasukan dan dikurangi pengeluaran.
-- Setiap transaksi pemasukan/pengeluaran wajib dikaitkan ke wallet tertentu.
-- Riwayat transaksi menampilkan wallet asal transaksi.
-- Kategori dasar, tanggal transaksi, hapus transaksi, dan filter periode.
-- Migrasi database lokal versi 1 ke versi 2: transaksi lama dipertahankan dan dimasukkan ke Wallet Utama dengan saldo awal Rp0.
+Menjaga data pengguna agar tidak hilang atau rusak saat aplikasi diperbarui adalah persyaratan utama pengembangan Caesh.
 
-## Belum tersedia
+- Pembaruan normal tidak boleh menghapus atau membuat ulang database pengguna.
+- Perubahan struktur database harus memakai versi dan migrasi bertahap.
+- Migrasi harus mempertahankan transaksi, wallet, wishlist, dan foto wallet yang sudah ada.
+- Jika migrasi gagal, proses harus dibatalkan; aplikasi tidak boleh diam-diam mengganti data dengan database kosong.
+- Perubahan yang berpotensi menghapus atau mengubah data secara destruktif harus didahului backup/restore dan pengujian pemulihan.
+- Setiap versi aplikasi harus diuji agar data tetap tersedia setelah update.
 
-Edit transaksi, edit/hapus wallet, kategori kustom, anggaran, target tabungan, ekspor/impor backup, app lock, grafik analisis, dan dukungan offline penuh (PWA/service worker) masih dalam roadmap.
+Kebijakan ini sudah didokumentasikan. Pengujian migrasi otomatis dan backup/restore masih perlu dibuat sebelum rilis publik.
+
+## Fitur saat ini
+
+- Ringkasan saldo dan arus uang.
+- Beberapa wallet dengan saldo awal dan foto.
+- Transaksi pemasukan, pengeluaran, dan transfer.
+- Riwayat dan pencarian transaksi.
+- Analisis pengeluaran.
+- Wishlist dengan pencatatan pembelian.
+- Penyimpanan lokal melalui IndexedDB.
