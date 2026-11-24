@@ -1,6 +1,8 @@
 name: Build Android APK
 
 on:
+  push:
+    branches: [caesh]
   pull_request:
     branches: [main]
   workflow_dispatch:
