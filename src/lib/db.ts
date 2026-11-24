@@ -1,4 +1,4 @@
-export type TransactionKind = "income" | "expense";
+export type TransactionKind = "income" | "expense" | "transfer";
 
 export type Wallet = {
   id: string;
@@ -15,6 +15,7 @@ export type Transaction = {
   note: string;
   date: string;
   walletId: string;
+  toWalletId?: string;
   createdAt: number;
 };
 
