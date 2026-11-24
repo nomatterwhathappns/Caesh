@@ -941,3 +941,101 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
     gap: 9px;
   }
 }
+
+
+/* Desktop workspace: compact icon-only dock floating at the vertical center-left. */
+@media (min-width: 621px) {
+  .sidebar {
+    position: fixed;
+    z-index: 30;
+    left: 22px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 60px;
+    height: auto;
+    max-height: calc(100vh - 40px);
+    overflow: visible;
+    align-self: auto;
+    flex: 0 0 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: var(--surface);
+    box-shadow: 0 12px 34px rgba(25, 40, 25, .10);
+  }
+
+  .sidebar > .side-label,
+  .sidebar > .sidebar-bottom { display: none; }
+
+  .sidebar > .side-nav.desktop-icon-dock {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    width: 100%;
+    overflow: visible;
+    padding: 0;
+  }
+
+  .desktop-icon-dock .nav-link {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
+    min-height: 42px;
+    padding: 0;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0;
+    line-height: 0;
+    cursor: pointer;
+    transition: color .2s ease, background .2s ease, transform .2s ease;
+  }
+
+  .desktop-icon-dock .nav-link:hover {
+    background: var(--surface-soft);
+    color: var(--ink);
+    transform: translateY(-1px);
+  }
+
+  .desktop-icon-dock .nav-link.active {
+    background: var(--nav-active);
+    color: var(--nav-active-text);
+    box-shadow: none;
+  }
+
+  .desktop-icon-dock .nav-link.active::before { display: none; }
+
+  .desktop-icon-dock .nav-icon {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    font-size: 0;
+  }
+
+  .desktop-icon-dock .nav-icon svg {
+    display: block;
+    width: 21px;
+    height: 21px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .main-panel { width: 100%; min-width: 0; }
+}
+
+@media (min-width: 621px) and (max-width: 900px) {
+  .sidebar { left: 14px; }
+}
