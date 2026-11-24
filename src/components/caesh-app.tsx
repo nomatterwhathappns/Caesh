@@ -3,6 +3,7 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Capacitor } from "@capacitor/core";
 import { App } from "@capacitor/app";
+import { Directory, Filesystem } from "@capacitor/filesystem";
 import { FileTransfer } from "@capacitor/file-transfer";
 import { AppInstallPlugin } from "../lib/app-install-plugin";
 import {
@@ -170,6 +171,7 @@ export default function CaeshApp() {
         return;
       }
 
+      if (!apkPath) throw new Error("File APK pembaruan tidak ditemukan.");
       const result = await AppInstallPlugin.installApk({ filePath: apkPath });
       if (!result.completed) throw new Error(result.message || "Installer Android tidak dapat dibuka.");
     } catch (reason) {
