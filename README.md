@@ -53,4 +53,4 @@ Tidak ada environment variable wajib untuk versi awal ini.
 
 ## Belum tersedia
 
-Transfer antar-wallet, edit transaksi, edit/hapus wallet, kategori kustom, anggaran, target tabungan, ekspor/impor backup, app lock, grafik analisis, dan dukungan offline penuh (PWA/service worker) masih dalam roadmap.
+Edit transaksi, edit/hapus wallet, kategori kustom, anggaran, target tabungan, ekspor/impor backup, app lock, grafik analisis, dan dukungan offline penuh (PWA/service worker) masih dalam roadmap.
