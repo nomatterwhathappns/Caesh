@@ -49,6 +49,9 @@ jobs:
       - name: Configure Android app version
         run: node scripts/configure-android-version.mjs
 
+      - name: Configure Android launcher icon
+        run: node scripts/configure-android-icon.mjs
+
       - name: Check signing secrets
         id: signing_check
         env:
