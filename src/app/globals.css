@@ -184,3 +184,10 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
 .theme-toggle:hover{border-color:#8eaa84}
 .theme-toggle span:first-child{font-size:15px;line-height:1}
 @media(max-width:620px){.topbar-right{gap:9px}.theme-toggle{padding:7px 9px}.theme-toggle span:last-child{display:none}}
+
+.transaction-icon.transfer{background:#edf0fb;color:#6678b8}
+.transaction-amount.transfer{color:#7585bd}
+.kind-switch{grid-template-columns:repeat(3,minmax(0,1fr))}
+.kind-switch .transfer-choice{color:#7585bd}
+:root[data-theme="dark"] .transaction-icon.transfer{background:#30364e;color:#bdc8ff}
+:root[data-theme="dark"] .transaction-amount.transfer{color:#bdc8ff}
