@@ -502,8 +502,7 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
 
 /* Wallet photo upload and crop editor */
 .visually-hidden-file{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
-.wallet-card-actions{display:flex;align-items:center;gap:6px}
-.wallet-photo-button{height:26px;padding:0 8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--muted);font-size:10px;cursor:pointer}
+.wallet-photo-button{position:absolute;right:12px;bottom:12px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;padding:0;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--muted);cursor:pointer;z-index:2;transition:background .15s ease,border-color .15s ease,color .15s ease}
 .wallet-photo-button:hover{border-color:var(--accent);color:var(--ink)}
 .overview-wallet-item.has-photo{position:relative;isolation:isolate;overflow:hidden;border-color:#ffffff30;background:#263329}
 .wallet-card-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;pointer-events:none}
