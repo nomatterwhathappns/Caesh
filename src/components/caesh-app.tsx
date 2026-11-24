@@ -26,7 +26,7 @@ const rupiah = (value: number) => new Intl.NumberFormat("id-ID", {
   style: "currency", currency: "IDR", maximumFractionDigits: 0,
 }).format(value);
 type CaeshUpdate = { version: string; apkUrl: string; notes?: string };
-const UPDATE_MANIFEST_URL = "https://raw.githubusercontent.com/nomatterwhathappns/Caesh/android-apk-preview/update.json";
+const UPDATE_MANIFEST_URL = "https://caesh-git-android-apk-preview-eysa-s-projects.vercel.app/update.json";
 function compareVersions(left: string, right: string) {
   const a = left.split(".").map((part) => Number.parseInt(part, 10) || 0);
   const b = right.split(".").map((part) => Number.parseInt(part, 10) || 0);
