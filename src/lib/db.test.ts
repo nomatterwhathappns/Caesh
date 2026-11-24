@@ -1,5 +1,14 @@
 import "fake-indexeddb/auto";
 Object.defineProperty(globalThis, "window", { value: globalThis, configurable: true });
+const testStorage = new Map<string, string>();
+Object.defineProperty(globalThis, "localStorage", {
+  configurable: true,
+  value: {
+    getItem: (key: string) => testStorage.get(key) ?? null,
+    setItem: (key: string, value: string) => { testStorage.set(key, String(value)); },
+    removeItem: (key: string) => { testStorage.delete(key); },
+  },
+});
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createBackup, getTransactions, getWallets, getWishlist, restoreBackup, Transaction, Wallet, WishlistItem } from "./db";
