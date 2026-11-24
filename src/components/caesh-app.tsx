@@ -367,17 +367,13 @@ export default function CaeshApp() {
     <main className="app-shell" data-theme={theme}>
       <aside className="sidebar">
         
-        <div className="side-label">WORKSPACE</div>
-        <nav className="side-nav" aria-label="Navigasi utama">
-          <button type="button" className={activeNav === "overview" ? "nav-link active" : "nav-link"} aria-current={activeNav === "overview" ? "page" : undefined} onClick={() => setActiveNav("overview")}><span className="nav-icon">▦</span> Ringkasan</button>
-          <button type="button" className={activeNav === "transactions" ? "nav-link active" : "nav-link"} aria-current={activeNav === "transactions" ? "page" : undefined} onClick={() => setActiveNav("transactions")}><span className="nav-icon">↕</span> Transaksi</button>
-          <button type="button" className={activeNav === "insights" ? "nav-link active" : "nav-link"} aria-current={activeNav === "insights" ? "page" : undefined} onClick={() => setActiveNav("insights")}><span className="nav-icon">⌁</span> Analisis</button>
-          <button type="button" className="nav-link" onClick={() => { setKind("expense"); setShowForm(true); }} aria-label="Tambah transaksi"><span className="nav-icon">＋</span> Tambah</button>
-          <button type="button" className={activeNav === "wishlist" ? "nav-link active" : "nav-link"} aria-current={activeNav === "wishlist" ? "page" : undefined} onClick={() => setActiveNav("wishlist")}><span className="nav-icon">♡</span> Wishlist</button>
+        <nav className="side-nav desktop-icon-dock" aria-label="Navigasi utama">
+          <button type="button" className={activeNav === "overview" ? "nav-link active" : "nav-link"} aria-current={activeNav === "overview" ? "page" : undefined} onClick={() => setActiveNav("overview")} aria-label="Ringkasan" title="Ringkasan"><span className="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="5" rx="1.5"/><rect x="13" y="10" width="8" height="11" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/></svg></span></button>
+          <button type="button" className={activeNav === "transactions" ? "nav-link active" : "nav-link"} aria-current={activeNav === "transactions" ? "page" : undefined} onClick={() => setActiveNav("transactions")} aria-label="Transaksi" title="Transaksi"><span className="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M15 3v5h5M9 13h6M9 17h6"/></svg></span></button>
+          <button type="button" className={activeNav === "insights" ? "nav-link active" : "nav-link"} aria-current={activeNav === "insights" ? "page" : undefined} onClick={() => setActiveNav("insights")} aria-label="Analisis" title="Analisis"><span className="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 6-7"/><path d="M16 6h4v4"/></svg></span></button>
+          <button type="button" className="nav-link" onClick={() => { setKind("expense"); setShowForm(true); }} aria-label="Tambah transaksi" title="Tambah transaksi"><span className="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span></button>
+          <button type="button" className={activeNav === "wishlist" ? "nav-link active" : "nav-link"} aria-current={activeNav === "wishlist" ? "page" : undefined} onClick={() => setActiveNav("wishlist")} aria-label="Wishlist" title="Wishlist"><span className="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20.8 8.8c0 5.2-8.8 11-8.8 11s-8.8-5.8-8.8-11A4.8 4.8 0 0 1 12 6.1a4.8 4.8 0 0 1 8.8 2.7Z"/></svg></span></button>
         </nav>
-        <div className="sidebar-bottom">
-          <div className="profile-row"><div className="avatar">Y</div><div><strong>Personal space</strong><span>Mode pribadi</span></div><span className="profile-more">•••</span></div>
-        </div>
       </aside>
 
       <section className="main-panel" id="overview">
