@@ -601,3 +601,229 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
   .wishlist-item{min-width:0}
   .wishlist-item-main{min-width:0}
 }
+
+
+/* Desktop visual polish: softer depth, quieter surfaces, and fluid interactions. */
+@media (min-width: 621px) {
+  :root {
+    --desktop-shadow-soft: 0 8px 24px rgba(31, 48, 32, .045);
+    --desktop-shadow-hover: 0 14px 32px rgba(31, 48, 32, .085);
+    --desktop-ease: cubic-bezier(.2, .75, .25, 1);
+  }
+
+  body {
+    background:
+      radial-gradient(ellipse at 82% 0%, rgba(169, 201, 160, .10), transparent 34%),
+      var(--paper);
+  }
+
+  .sidebar {
+    background: color-mix(in srgb, var(--surface) 96%, var(--paper));
+    transition: background .25s ease, border-color .25s ease;
+  }
+
+  .brand-mark {
+    box-shadow: 0 4px 10px rgba(36, 58, 44, .12);
+    transition: transform .28s var(--desktop-ease), box-shadow .28s ease;
+  }
+
+  .brand:hover .brand-mark {
+    transform: rotate(-5deg) translateY(-1px);
+    box-shadow: 0 7px 15px rgba(36, 58, 44, .17);
+  }
+
+  .nav-link {
+    position: relative;
+    transition:
+      color .2s ease,
+      background .22s ease,
+      transform .22s var(--desktop-ease);
+  }
+
+  .nav-link:hover {
+    background: var(--surface-soft);
+    color: var(--ink);
+    transform: translateX(2px);
+  }
+
+  .nav-link.active {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--nav-active-text) 7%, transparent);
+  }
+
+  .nav-link.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 11px;
+    bottom: 11px;
+    width: 3px;
+    border-radius: 0 4px 4px 0;
+    background: #8eae84;
+  }
+
+  .topbar {
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    transition: background .25s ease, border-color .25s ease;
+  }
+
+  .content {
+    animation: caesh-content-in .42s var(--desktop-ease) both;
+  }
+
+  .stat-card,
+  .panel-card,
+  .overview-wallet-panel,
+  .overview-wallet-item,
+  .privacy-card {
+    box-shadow: var(--desktop-shadow-soft);
+    transition:
+      box-shadow .28s var(--desktop-ease),
+      border-color .25s ease,
+      background-color .25s ease,
+      transform .28s var(--desktop-ease);
+  }
+
+  .stat-card:not(.balance-card):hover,
+  .panel-card:hover,
+  .overview-wallet-item:hover {
+    box-shadow: var(--desktop-shadow-hover);
+    border-color: color-mix(in srgb, var(--accent, #8eae84) 24%, var(--line));
+  }
+
+  .overview-wallet-item:hover {
+    transform: translateY(-2px);
+  }
+
+  .balance-card {
+    background:
+      radial-gradient(circle at 92% 10%, rgba(185, 216, 177, .13), transparent 34%),
+      var(--deep);
+    box-shadow: 0 10px 28px rgba(36, 58, 44, .14);
+    transition: box-shadow .28s ease, transform .28s var(--desktop-ease);
+  }
+
+  .balance-card:hover {
+    box-shadow: 0 15px 34px rgba(36, 58, 44, .19);
+    transform: translateY(-2px);
+  }
+
+  .primary-button,
+  .outline-button,
+  .cancel-button,
+  .text-button,
+  .theme-toggle,
+  .wallet-photo-button,
+  .wallet-delete-button,
+  .delete-button,
+  .period-tabs button,
+  .kind-switch button,
+  .overview-wallet-heading > button {
+    transition:
+      color .2s ease,
+      background-color .2s ease,
+      border-color .2s ease,
+      box-shadow .22s ease,
+      transform .22s var(--desktop-ease);
+  }
+
+  .primary-button:hover,
+  .outline-button:hover,
+  .cancel-button:hover,
+  .theme-toggle:hover,
+  .wallet-photo-button:hover,
+  .wallet-delete-button:hover,
+  .overview-wallet-heading > button:hover {
+    transform: translateY(-1px);
+  }
+
+  .period-tabs button.selected,
+  .kind-switch button.active {
+    box-shadow: 0 2px 7px rgba(25, 40, 25, .08);
+  }
+
+  .transaction-row {
+    transition: background-color .2s ease, padding .2s ease;
+  }
+
+  .transaction-row:hover {
+    background: color-mix(in srgb, var(--surface-soft) 72%, transparent);
+  }
+
+  .transaction-row .delete-button {
+    opacity: .48;
+    transition: opacity .2s ease, color .2s ease, transform .2s ease;
+  }
+
+  .transaction-row:hover .delete-button {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+
+  .category-bar-track span {
+    transition: width .55s var(--desktop-ease);
+  }
+
+  .modal-backdrop {
+    animation: caesh-fade-in .2s ease both;
+    -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(5px);
+  }
+
+  .modal-card {
+    animation: caesh-modal-in .28s var(--desktop-ease) both;
+  }
+
+  .modal-close:hover {
+    transform: rotate(90deg);
+  }
+
+  .modal-card input,
+  .modal-card select,
+  .transaction-tools input,
+  .transaction-tools select {
+    transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
+  }
+
+  .nav-link:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible {
+    outline: 2px solid color-mix(in srgb, #8eae84 75%, transparent);
+    outline-offset: 3px;
+  }
+
+  .nav-link:focus-visible {
+    outline-offset: 1px;
+  }
+
+  .wallet-photo-button:hover,
+  .wallet-delete-button:hover {
+    transform: translateY(-1px) scale(1.04);
+  }
+}
+
+@keyframes caesh-content-in {
+  from { opacity: 0; transform: translateY(7px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes caesh-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes caesh-modal-in {
+  from { opacity: 0; transform: translateY(9px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
