@@ -1,4 +1,5 @@
 import "fake-indexeddb/auto";
+Object.defineProperty(globalThis, "window", { value: globalThis, configurable: true });
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createBackup, getTransactions, getWallets, getWishlist, restoreBackup, Transaction, Wallet, WishlistItem } from "./db";
