@@ -869,3 +869,58 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
 @media (max-width: 620px) {
   .topbar .topbar-brand { display: none; }
 }
+
+
+/* Mobile header: show the brand in the topbar and keep theme control on the right. */
+@media (max-width: 620px) {
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 58px;
+    height: 58px;
+    padding: 0 18px;
+  }
+
+  .topbar .topbar-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex: 0 0 auto;
+    height: 32px;
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+    line-height: 1.2;
+    letter-spacing: -1.2px;
+    white-space: nowrap;
+  }
+
+  .topbar .topbar-brand .brand-mark {
+    width: 27px;
+    height: 27px;
+    flex: 0 0 27px;
+    border-radius: 9px;
+    font-size: 19px;
+  }
+
+  .topbar .topbar-brand > span:last-child {
+    display: inline-block;
+    line-height: 1.2;
+    padding: 1px 0;
+  }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0;
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+
+  .topbar-right .theme-toggle {
+    margin-left: auto;
+  }
+}
