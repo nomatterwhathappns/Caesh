@@ -208,8 +208,6 @@ export default function CaeshApp() {
               {wallets.length === 0 && ready && <div className="wallet-empty">Belum ada wallet. Tambahkan wallet pertamamu.</div>}
               <button className="wallet-add-card" onClick={() => setShowWalletForm(true)}><span>＋</span><strong>Buat wallet baru</strong><small>Pisahkan uang berdasarkan tempatnya</small></button>
             </div>
-          </section>
-
           </section>}
 
           {activeNav === "overview" && <section className="lower-grid" id="transactions">
