@@ -340,7 +340,7 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
     line-height:1;
   }
   .main-panel{width:100%;min-width:0}
-  .content{padding-bottom:96px}
+  .content{padding-bottom:132px}
   .app-shell::after{
     content:"";
     position:fixed;
@@ -348,8 +348,15 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
     left:0;
     right:0;
     bottom:0;
-    height:88px;
+    height:124px;
     pointer-events:none;
-    background:linear-gradient(to bottom,transparent 0%,color-mix(in srgb,var(--paper) 68%,transparent) 38%,var(--paper) 100%);
+    background:linear-gradient(
+      to bottom,
+      transparent 0%,
+      color-mix(in srgb,var(--paper) 24%,transparent) 18%,
+      color-mix(in srgb,var(--paper) 72%,transparent) 48%,
+      color-mix(in srgb,var(--paper) 94%,transparent) 76%,
+      var(--paper) 100%
+    );
   }
 }
