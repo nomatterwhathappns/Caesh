@@ -613,3 +613,15 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
   }
   .side-nav .nav-add-transaction .nav-add-label{font-size:8px;line-height:1}
 }
+
+/* Five-item mobile dock: two destinations on each side of the centered add action. */
+@media(max-width:620px){
+  .side-nav{
+    grid-template-columns:repeat(5,minmax(0,1fr));
+  }
+  .side-nav > .nav-link:nth-child(1){grid-column:1;grid-row:1}
+  .side-nav > .nav-link:nth-child(2){grid-column:2;grid-row:1}
+  .side-nav > .nav-add-transaction{grid-column:3;grid-row:1}
+  .side-nav > .nav-link:nth-child(4){grid-column:4;grid-row:1}
+  .side-nav > .nav-link:nth-child(5){grid-column:5;grid-row:1}
+}
