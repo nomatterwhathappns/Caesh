@@ -17,8 +17,8 @@
 ## Milestone 2: Data safety — release requirement
 - [x] Establish a no-data-loss migration policy
 - [ ] Add automated tests for upgrades from every supported IndexedDB version
-- [ ] Test migrations with populated transactions, wallets, wishlist entries, and wallet photos
-- [ ] Export/import backup with schema versioning and validation
+- [x] Add automated regression coverage for populated transactions, wallets, wishlist entries, and wallet photos
+- [x] Export/import backup with schema versioning and validation
 - [ ] Verify backup restoration before any destructive schema transformation
 - [ ] Handle storage failures without silently initializing an empty replacement database
 - [ ] Verify data survives normal application updates on each target platform
@@ -37,4 +37,4 @@
 - [ ] Privacy and security review
 - [ ] Production release checklist
 
-A feature is complete only after implementation and testing. IndexedDB is local storage, not encrypted storage or a backup. Data-preservation policy is documented, but automated migration tests and backup/restore are not yet implemented.
+A feature is complete only after implementation and testing. IndexedDB is local storage, not encrypted storage or a backup. Data-preservation policy, local JSON backup/restore, and automated IndexedDB migration/backup regression tests are implemented. Browser/device-level update testing and release verification remain required.
