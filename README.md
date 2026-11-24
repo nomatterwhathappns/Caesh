@@ -43,12 +43,14 @@ Tidak ada environment variable wajib untuk versi awal ini.
 
 ## Fitur versi awal
 
-- Dashboard ringkasan pemasukan, pengeluaran, dan arus bersih.
-- Catat pemasukan dan pengeluaran.
-- Kategori dasar dan tanggal transaksi.
-- Daftar transaksi terbaru dan hapus transaksi.
-- Filter ringkasan bulan ini, tahun ini, dan semua transaksi.
+- Dashboard ringkasan saldo gabungan seluruh wallet.
+- Membuat beberapa wallet dengan nama dan saldo awal masing-masing.
+- Saldo wallet dihitung dari saldo awal ditambah pemasukan dan dikurangi pengeluaran.
+- Setiap transaksi pemasukan/pengeluaran wajib dikaitkan ke wallet tertentu.
+- Riwayat transaksi menampilkan wallet asal transaksi.
+- Kategori dasar, tanggal transaksi, hapus transaksi, dan filter periode.
+- Migrasi database lokal versi 1 ke versi 2: transaksi lama dipertahankan dan dimasukkan ke Wallet Utama dengan saldo awal Rp0.
 
 ## Belum tersedia
 
-Akun/dompet, transfer, edit transaksi, kategori kustom, anggaran, target tabungan, ekspor/impor backup, app lock, grafik analisis, dan dukungan offline penuh (PWA/service worker) masih dalam roadmap.
+Transfer antar-wallet, edit transaksi, edit/hapus wallet, kategori kustom, anggaran, target tabungan, ekspor/impor backup, app lock, grafik analisis, dan dukungan offline penuh (PWA/service worker) masih dalam roadmap.
