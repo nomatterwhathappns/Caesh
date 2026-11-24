@@ -402,3 +402,33 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
     box-shadow:0 10px 30px rgba(20,30,20,.2);
   }
 }
+
+
+/* Desktop overview: summary at left, one-card-height wallet rail at right. */
+.overview-top-grid{display:grid;grid-template-columns:minmax(0,1fr) 224px;gap:15px;align-items:stretch;margin-bottom:24px}
+.overview-top-grid .stats-grid{min-width:0;margin-bottom:0;align-content:start}
+.overview-wallet-panel{min-width:0;max-height:310px;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:13px}
+.overview-wallet-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.overview-wallet-heading>div{display:grid;gap:4px}
+.overview-wallet-heading strong{font:700 13px Manrope,sans-serif}
+.overview-wallet-heading>button{width:27px;height:27px;border:1px solid var(--line);border-radius:8px;background:var(--surface-soft);color:var(--ink);font-size:17px;cursor:pointer}
+.overview-wallet-list{min-height:0;overflow-y:auto;display:grid;align-content:start;gap:9px;padding-right:3px;scrollbar-width:thin}
+.overview-wallet-item{min-width:0;padding:12px;border:1px solid var(--line);border-radius:11px;background:var(--surface-soft)}
+.overview-wallet-item .wallet-card-top,.overview-wallet-item-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.overview-wallet-item .wallet-name{overflow-wrap:anywhere}
+.overview-wallet-item .wallet-balance{font-size:17px}
+.overview-wallet-item .wallet-start{margin-top:6px}
+.overview-wallet-panel .wallet-empty{padding:12px 2px}
+@media(min-width:621px){
+  .overview-top-grid .stats-grid{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr) minmax(0,1fr)}
+}
+@media(max-width:900px) and (min-width:621px){
+  .overview-top-grid{grid-template-columns:minmax(0,1fr) 205px;gap:10px}
+  .overview-top-grid .stats-grid{grid-template-columns:1fr}
+  .overview-wallet-panel{max-height:100%;min-height:310px}
+}
+@media(max-width:620px){
+  .overview-top-grid{grid-template-columns:1fr;gap:13px}
+  .overview-top-grid .stats-grid{grid-template-columns:1fr;gap:10px}
+  .overview-wallet-panel{max-height:260px}
+}
