@@ -40,6 +40,8 @@ const DB_NAME = "caesh-local";
 const TRANSACTION_STORE = "transactions";
 const WALLET_STORE = "wallets";
 const WISHLIST_STORE = "wishlist";
+// Increase this version only when adding a deliberate, backward-preserving migration.
+// Never delete/recreate existing stores during an ordinary app update.
 const DB_VERSION = 3;
 
 function openDatabase(): Promise<IDBDatabase> {
@@ -86,7 +88,15 @@ function openDatabase(): Promise<IDBDatabase> {
         }
       }
     };
-    request.onsuccess = () => resolve(request.result);
+    request.onsuccess = () => {
+      const db = request.result;
+      // Close stale connections before another tab/app version attempts a schema upgrade.
+      db.onversionchange = () => db.close();
+      resolve(db);
+    };
+    request.onblocked = () => {
+      reject(new Error("Pembaruan struktur database tertahan. Tutup tab Caesh lain, lalu coba lagi."));
+    };
     request.onerror = () => reject(request.error ?? new Error("Gagal membuka database lokal."));
   });
 }
