@@ -15,7 +15,9 @@ export type Transaction = {
   note: string;
   date: string;
   walletId: string;
+  walletName?: string;
   toWalletId?: string;
+  toWalletName?: string;
   createdAt: number;
 };
 
@@ -93,6 +95,87 @@ export async function saveWallet(wallet: Wallet): Promise<void> {
     request.onerror = () => {
       db.close();
       reject(request.error ?? new Error("Gagal menyimpan wallet."));
+    };
+  });
+}
+
+export async function removeWallet(id: string): Promise<void> {
+  const db = await openDatabase();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction([WALLET_STORE, TRANSACTION_STORE], "readwrite");
+    const walletStore = tx.objectStore(WALLET_STORE);
+    const transactionStore = tx.objectStore(TRANSACTION_STORE);
+    let failure: Error | null = null;
+    const walletsRequest = walletStore.getAll();
+    const transactionsRequest = transactionStore.getAll();
+
+    walletsRequest.onsuccess = () => {
+      const wallets = walletsRequest.result as Wallet[];
+      if (wallets.length <= 1) {
+        failure = new Error("Caesh harus memiliki minimal satu wallet.");
+        tx.abort();
+        return;
+      }
+      const wallet = wallets.find((item) => item.id === id);
+      if (!wallet) {
+        failure = new Error("Wallet tidak ditemukan.");
+        tx.abort();
+        return;
+      }
+      if (transactionsRequest.readyState !== "done") return;
+      const transactions = transactionsRequest.result as Transaction[];
+      transactions.forEach((item) => {
+        let changed = false;
+        if (item.walletId === id) {
+          item.walletName = wallet.name;
+          changed = true;
+        }
+        if (item.toWalletId === id) {
+          item.toWalletName = wallet.name;
+          changed = true;
+        }
+        if (changed) transactionStore.put(item);
+      });
+      walletStore.delete(id);
+    };
+
+    transactionsRequest.onsuccess = () => {
+      if (walletsRequest.readyState !== "done") return;
+      const wallets = walletsRequest.result as Wallet[];
+      if (wallets.length <= 1) {
+        failure = new Error("Caesh harus memiliki minimal satu wallet.");
+        tx.abort();
+        return;
+      }
+      const wallet = wallets.find((item) => item.id === id);
+      if (!wallet) {
+        failure = new Error("Wallet tidak ditemukan.");
+        tx.abort();
+        return;
+      }
+      const transactions = transactionsRequest.result as Transaction[];
+      transactions.forEach((item) => {
+        let changed = false;
+        if (item.walletId === id) {
+          item.walletName = wallet.name;
+          changed = true;
+        }
+        if (item.toWalletId === id) {
+          item.toWalletName = wallet.name;
+          changed = true;
+        }
+        if (changed) transactionStore.put(item);
+      });
+      walletStore.delete(id);
+    };
+
+    tx.oncomplete = () => { db.close(); resolve(); };
+    tx.onabort = () => {
+      db.close();
+      reject(failure ?? tx.error ?? new Error("Wallet gagal dihapus."));
+    };
+    tx.onerror = () => {
+      failure = failure ?? tx.error ?? new Error("Wallet gagal dihapus.");
     };
   });
 }
