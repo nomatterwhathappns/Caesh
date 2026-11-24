@@ -829,21 +829,40 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
 }
 
 
-/* Desktop brand placement in the topbar */
+/* Desktop brand placement in the topbar: keep the full mark vertically inside the header. */
 @media (min-width: 621px) {
   .sidebar > .brand { display: none; }
+  .topbar {
+    min-height: 72px;
+    height: auto;
+    box-sizing: border-box;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    overflow: visible;
+  }
   .topbar .topbar-brand {
     display: inline-flex;
     align-items: center;
+    align-self: center;
     gap: 10px;
+    height: 36px;
     margin: 0;
+    padding: 0;
     flex: 0 0 auto;
     font-size: 23px;
-    line-height: 1;
+    line-height: 1.2;
+    letter-spacing: -1.5px;
+    overflow: visible;
+  }
+  .topbar .topbar-brand > span:last-child {
+    display: inline-block;
+    line-height: 1.2;
+    padding: 2px 0;
   }
   .topbar .topbar-brand .brand-mark {
     width: 30px;
     height: 30px;
+    flex: 0 0 30px;
     border-radius: 10px;
   }
 }
