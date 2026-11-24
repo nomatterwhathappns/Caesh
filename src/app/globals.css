@@ -363,3 +363,53 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
 
 
 
+
+
+/* Wallet cards sit below the summary and form a horizontal, scrollable strip. */
+.overview-wallet-panel{
+  width:100%;
+  min-width:0;
+  margin:0 0 24px;
+  padding:16px;
+  border:1px solid var(--line);
+  border-radius:15px;
+  background:var(--surface);
+}
+.overview-wallet-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px}
+.overview-wallet-heading>div{display:grid;gap:5px}
+.overview-wallet-heading strong{font:700 15px Manrope,sans-serif;color:var(--ink)}
+.overview-wallet-heading>button{width:32px;height:32px;border:1px solid var(--line);border-radius:9px;background:var(--surface-soft);color:var(--ink);font-size:19px;cursor:pointer}
+.overview-wallet-list{
+  display:flex;
+  gap:12px;
+  width:100%;
+  overflow-x:auto;
+  overflow-y:hidden;
+  padding:1px 1px 8px;
+  scroll-snap-type:x proximity;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;
+}
+.overview-wallet-item{
+  flex:0 0 220px;
+  min-width:0;
+  min-height:142px;
+  padding:15px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--surface-soft);
+  scroll-snap-align:start;
+}
+.overview-wallet-item-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.overview-wallet-item .wallet-name{font-size:13px;overflow-wrap:anywhere}
+.overview-wallet-item .wallet-balance{font-size:20px;line-height:1.35;overflow-wrap:anywhere}
+.overview-wallet-item .wallet-start{margin-top:8px}
+.overview-wallet-panel .wallet-empty{flex:0 0 220px;display:flex;align-items:center;min-height:142px;padding:14px;border:1px dashed var(--line);border-radius:12px}
+@media(max-width:620px){
+  .overview-wallet-panel{padding:13px;margin-bottom:20px;border-radius:13px}
+  .overview-wallet-heading{margin-bottom:10px}
+  .overview-wallet-heading strong{font-size:14px}
+  .overview-wallet-list{gap:9px}
+  .overview-wallet-item{flex-basis:min(76vw,230px);min-height:136px;padding:13px}
+  .overview-wallet-item .wallet-balance{font-size:18px}
+}
