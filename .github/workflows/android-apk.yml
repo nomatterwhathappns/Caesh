@@ -1,8 +1,6 @@
 name: Build Android APK
 
 on:
-  push:
-    branches: [android-apk-preview]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -31,8 +29,11 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
-      - name: Test and export web app
-        run: npm run build
+      - name: Test data safety
+        run: npm test
+
+      - name: Export web app for Android
+        run: npm run android:build
 
       - name: Generate Android project
         run: npx cap add android
