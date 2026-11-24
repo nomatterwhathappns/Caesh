@@ -4,6 +4,7 @@ import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "re
 import {
   getTransactions, getWallets, removeTransaction, removeWallet, saveTransaction, saveWallet,
   Transaction, TransactionKind, Wallet, WishlistItem, getWishlist, saveWishlist, removeWishlist, purchaseWishlist,
+  createBackup, restoreBackup,
 } from "@/lib/db";
 
 const categories = {
@@ -58,6 +59,7 @@ export default function CaeshApp() {
   const [photoY, setPhotoY] = useState(50);
   const [photoZoom, setPhotoZoom] = useState(1.15);
   const photoPickerRef = useRef<HTMLInputElement>(null);
+  const backupPickerRef = useRef<HTMLInputElement>(null);
   const [todayLabel, setTodayLabel] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [showWalletForm, setShowWalletForm] = useState(false);
@@ -361,6 +363,64 @@ export default function CaeshApp() {
     }
   }
 
+  async function handleBackupExport() {
+    try {
+      const backup = await createBackup();
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `caesh-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      window.alert("Backup Caesh berhasil dibuat. Simpan file ini di tempat yang aman.");
+      setError("");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Backup gagal dibuat. Data lokal tidak diubah.");
+    }
+  }
+
+  async function handleBackupImport(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    if (file.size > 100 * 1024 * 1024) {
+      setError("Ukuran file backup maksimal 100 MB. Data lokal tidak diubah.");
+      return;
+    }
+    try {
+      const parsed: unknown = JSON.parse(await file.text());
+      const confirmed = window.confirm(
+        "Pulihkan backup ini? Seluruh transaksi, wallet, dan wishlist yang sekarang ada di perangkat ini akan diganti dengan isi backup. Ekspor backup kondisi sekarang terlebih dahulu jika masih dibutuhkan. Tindakan ini tidak bisa dibatalkan."
+      );
+      if (!confirmed) return;
+      const backup = await restoreBackup(parsed);
+      setTransactions(backup.transactions);
+      setWallets(backup.wallets);
+      setWishlist(backup.wishlist);
+      setWalletId(backup.wallets[0]?.id ?? "");
+      setToWalletId(backup.wallets[1]?.id ?? "");
+      if (backup.preferences.theme === "light" || backup.preferences.theme === "dark") {
+        setTheme(backup.preferences.theme);
+      }
+      if (backup.preferences.categories) {
+        try {
+          const saved = JSON.parse(backup.preferences.categories) as Partial<CategoryOptions>;
+          setCategoryOptions({
+            income: Array.isArray(saved.income) ? saved.income.filter((item): item is string => typeof item === "string" && item.trim().length > 0 && item !== "Lainnya") : categories.income.filter((item) => item !== "Lainnya"),
+            expense: Array.isArray(saved.expense) ? saved.expense.filter((item): item is string => typeof item === "string" && item.trim().length > 0 && item !== "Lainnya") : categories.expense.filter((item) => item !== "Lainnya"),
+          });
+        } catch { /* Invalid optional preferences do not affect restored financial records. */ }
+      }
+      setError("");
+      window.alert("Backup berhasil dipulihkan. Data Caesh sudah diperbarui dari file backup.");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Backup gagal dipulihkan. Data lokal sebelumnya tetap aman.");
+    }
+  }
+
   function changeKind(next: TransactionKind) { setKind(next); if (next !== "transfer") { setCategory(categoryOptions[next][0] ?? "Lainnya"); setOtherCategory(""); } }
 
   return (
@@ -376,8 +436,9 @@ export default function CaeshApp() {
         </nav>
       </aside>
 
+      <input ref={backupPickerRef} className="visually-hidden-file" type="file" accept="application/json,.json" onChange={handleBackupImport} />
       <section className="main-panel" id="overview">
-        <header className="topbar"><a className="brand topbar-brand" href="#" aria-label="Caesh beranda"><span className="brand-mark">c</span><span>caesh<span className="brand-period">.</span></span></a><div className="topbar-right"><span className="top-date">{todayLabel}</span><button className="theme-toggle" onClick={() => setTheme((current) => current === "light" ? "dark" : "light")} aria-label={theme === "light" ? "Aktifkan tema gelap" : "Aktifkan tema terang"} title={theme === "light" ? "Tema gelap" : "Tema terang"}><span aria-hidden="true">{theme === "light" ? "☾" : "☀"}</span><span>{theme === "light" ? "Gelap" : "Terang"}</span></button></div></header>
+        <header className="topbar"><a className="brand topbar-brand" href="#" aria-label="Caesh beranda"><span className="brand-mark">c</span><span>caesh<span className="brand-period">.</span></span></a><div className="topbar-right"><span className="top-date">{todayLabel}</span><button type="button" className="theme-toggle backup-action" onClick={handleBackupExport} title="Ekspor backup" aria-label="Ekspor backup"><span aria-hidden="true">↓</span><span>Backup</span></button><button type="button" className="theme-toggle backup-action" onClick={() => backupPickerRef.current?.click()} title="Pulihkan backup" aria-label="Pulihkan backup"><span aria-hidden="true">↑</span><span>Pulihkan</span></button><button className="theme-toggle" onClick={() => setTheme((current) => current === "light" ? "dark" : "light")} aria-label={theme === "light" ? "Aktifkan tema gelap" : "Aktifkan tema terang"} title={theme === "light" ? "Tema gelap" : "Tema terang"}><span aria-hidden="true">{theme === "light" ? "☾" : "☀"}</span><span>{theme === "light" ? "Gelap" : "Terang"}</span></button></div></header>
         <div className={activeNav === "overview" ? "content overview-content" : "content"}>
           <div className="welcome-row"><div><div className="eyebrow">{({ overview: "PERSONAL FINANCE OVERVIEW", wallets: "MONEY STORAGE", transactions: "TRANSACTION HISTORY", insights: "FINANCIAL INSIGHTS", wishlist: "YOUR WISHLIST" })[activeNav]}</div><h1>{({ overview: <>Uangmu, lebih <em>terarah.</em></>, wallets: <>Kelola <em>wallet.</em></>, transactions: <>Semua <em>transaksi.</em></>, insights: <>Kenali pola <em>keuangan.</em></>, wishlist: <>Daftar <em>keinginan.</em></> })[activeNav]}</h1></div>{activeNav !== "wishlist" && <button className="primary-button" onClick={() => { setKind("expense"); setShowForm(true); }}><span>＋</span> Tambah transaksi</button>}</div>
           {error && <div className="error-banner" role="alert">{error}<button onClick={() => setError("")}>Tutup</button></div>}
