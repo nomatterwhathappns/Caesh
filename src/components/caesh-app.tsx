@@ -3,7 +3,8 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Capacitor } from "@capacitor/core";
 import { App } from "@capacitor/app";
-import { Browser } from "@capacitor/browser";
+import { FileTransfer } from "@capacitor/file-transfer";
+import { AppInstallPlugin } from "@m430/capacitor-app-install";
 import { Directory, Filesystem } from "@capacitor/filesystem";
 import {
   getTransactions, getWallets, removeTransaction, removeWallet, saveTransaction, saveWallet,
@@ -124,6 +125,9 @@ export default function CaeshApp() {
   const [transactionFilter, setTransactionFilter] = useState<"all" | TransactionKind>("all");
   const [availableUpdate, setAvailableUpdate] = useState<CaeshUpdate | null>(null);
   const [updateLoading, setUpdateLoading] = useState(false);
+  const [updateDownloadProgress, setUpdateDownloadProgress] = useState<number | null>(null);
+  const [downloadedUpdatePath, setDownloadedUpdatePath] = useState<string | null>(null);
+  const [updateError, setUpdateError] = useState("");
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem("caesh-theme");
@@ -160,19 +164,60 @@ export default function CaeshApp() {
         if (!response.ok) return;
         const manifest = await response.json() as Partial<CaeshUpdate>;
         if (cancelled || typeof manifest.version !== "string" || typeof manifest.apkUrl !== "string" || !/^https:\/\//i.test(manifest.apkUrl)) return;
-        if (compareVersions(manifest.version, appInfo.version) > 0) setAvailableUpdate({ version: manifest.version, apkUrl: manifest.apkUrl, notes: typeof manifest.notes === "string" ? manifest.notes : undefined });
+        if (compareVersions(manifest.version, appInfo.version) > 0) {
+          setAvailableUpdate({ version: manifest.version, apkUrl: manifest.apkUrl, notes: typeof manifest.notes === "string" ? manifest.notes : undefined });
+        } else {
+          setAvailableUpdate(null);
+        }
       } catch { /* Offline: do not interrupt normal app usage. */ }
     }
     void checkForUpdate();
-    return () => { cancelled = true; };
+    const stateListener = App.addListener("appStateChange", ({ isActive }) => {
+      if (isActive) void checkForUpdate();
+    });
+    return () => {
+      cancelled = true;
+      void stateListener.then((listener) => listener.remove());
+    };
   }, []);
 
-  async function openUpdateDownload() {
+  async function downloadAndInstallUpdate() {
     if (!availableUpdate) return;
     setUpdateLoading(true);
-    try { await Browser.open({ url: availableUpdate.apkUrl }); }
-    catch { window.open(availableUpdate.apkUrl, "_blank", "noopener,noreferrer"); }
-    finally { setUpdateLoading(false); }
+    setUpdateError("");
+    try {
+      let apkPath = downloadedUpdatePath;
+      if (!apkPath) {
+        setUpdateDownloadProgress(0);
+        const target = await Filesystem.getUri({ directory: Directory.Cache, path: "caesh-update.apk" });
+        const progressListener = await FileTransfer.addListener("progress", (event) => {
+          if (event.type !== "download" || !event.lengthComputable || event.contentLength <= 0) return;
+          setUpdateDownloadProgress(Math.min(100, Math.round((event.bytes / event.contentLength) * 100)));
+        });
+        try {
+          await FileTransfer.downloadFile({ url: availableUpdate.apkUrl, path: target.uri, progress: true });
+        } finally {
+          await progressListener.remove();
+        }
+        apkPath = target.uri.startsWith("file://") ? decodeURIComponent(target.uri.slice(7)) : target.uri;
+        setDownloadedUpdatePath(apkPath);
+        setUpdateDownloadProgress(100);
+      }
+
+      const permission = await AppInstallPlugin.canInstallUnknownApps();
+      if (!permission.granted) {
+        await AppInstallPlugin.openInstallUnknownAppsSettings();
+        setUpdateError("Aktifkan izin instalasi untuk CAESH, lalu kembali ke sini dan tekan Pasang update.");
+        return;
+      }
+
+      const result = await AppInstallPlugin.installApk({ filePath: apkPath });
+      if (!result.completed) throw new Error(result.message || "Installer Android tidak dapat dibuka.");
+    } catch (reason) {
+      setUpdateError(reason instanceof Error ? reason.message : "Pembaruan gagal diunduh atau dipasang. Coba lagi.");
+    } finally {
+      setUpdateLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -596,7 +641,7 @@ export default function CaeshApp() {
         {pendingPhoto && <div className="photo-adjustments"><label>Geser horizontal <input className="photo-range" type="range" min="0" max="100" value={photoX} onChange={(event) => setPhotoX(Number(event.target.value))} /></label><label>Geser vertikal <input className="photo-range" type="range" min="0" max="100" value={photoY} onChange={(event) => setPhotoY(Number(event.target.value))} /></label><label>Zoom <input className="photo-range" type="range" min="1" max="2.5" step="0.05" value={photoZoom} onChange={(event) => setPhotoZoom(Number(event.target.value))} /></label></div>}
         <div className="modal-actions">{pendingPhoto && <button type="button" className="cancel-button" onClick={() => setPendingPhoto("")}>Hapus foto</button>}<button type="button" className="cancel-button" onClick={() => setShowPhotoEditor(false)}>Batal</button><button type="button" className="primary-button" onClick={handlePhotoSave}>Simpan foto</button></div>
       </section></div>}
-      {availableUpdate && <div className="modal-backdrop update-backdrop" role="presentation"><section className="modal-card update-modal" role="dialog" aria-modal="true" aria-labelledby="update-modal-title"><div className="update-mark" aria-hidden="true">↻</div><div className="section-kicker">PEMBARUAN CAESH</div><h2 id="update-modal-title">Update CAESH tersedia</h2><p>Versi baru <strong>{availableUpdate.version}</strong> sudah tersedia. Lu bisa update sekarang atau nanti.</p>{availableUpdate.notes && <div className="update-notes">{availableUpdate.notes}</div>}<div className="modal-actions update-actions"><button type="button" className="cancel-button" onClick={() => setAvailableUpdate(null)}>Nanti saja</button><button type="button" className="primary-button" onClick={openUpdateDownload} disabled={updateLoading}>{updateLoading ? "Membuka..." : "Update"}</button></div><small>Data CAESH tetap tersimpan selama pembaruan dipasang sebagai update, bukan instalasi baru.</small></section></div>}
+      {availableUpdate && <div className="modal-backdrop update-backdrop" role="presentation"><section className="modal-card update-modal" role="dialog" aria-modal="true" aria-labelledby="update-modal-title"><div className="update-mark" aria-hidden="true">↻</div><div className="section-kicker">PEMBARUAN CAESH</div><h2 id="update-modal-title">Update CAESH tersedia</h2><p>Versi baru <strong>{availableUpdate.version}</strong> sudah tersedia. Lu bisa update sekarang atau nanti.</p>{availableUpdate.notes && <div className="update-notes">{availableUpdate.notes}</div>}{updateDownloadProgress !== null && <div className="update-progress"><div className="update-progress-label"><span>{downloadedUpdatePath ? "APK berhasil diunduh" : "Mengunduh pembaruan..."}</span><strong>{updateDownloadProgress}%</strong></div><div className="update-progress-track"><span style={{ width: `${updateDownloadProgress}%` }} /></div></div>}{updateError && <div className="update-error">{updateError}</div>}<div className="modal-actions update-actions"><button type="button" className="cancel-button" onClick={() => setAvailableUpdate(null)} disabled={updateLoading}>Nanti saja</button><button type="button" className="primary-button" onClick={downloadAndInstallUpdate} disabled={updateLoading}>{updateLoading ? "Memproses..." : downloadedUpdatePath ? "Pasang update" : "Download & update"}</button></div><small>Data CAESH tetap tersimpan selama pembaruan dipasang sebagai update dengan tanda tangan yang sama.</small></section></div>}
 
       {showWalletForm && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowWalletForm(false); }}><section className="modal-card" role="dialog" aria-modal="true" aria-labelledby="wallet-modal-title"><div className="modal-heading"><div><div className="section-kicker">WALLET BARU</div><h2 id="wallet-modal-title">Tambah wallet</h2></div><button className="modal-close" onClick={() => setShowWalletForm(false)} aria-label="Tutup">×</button></div>
         <form onSubmit={handleWalletSubmit}><label className="field-label" htmlFor="wallet-name">Nama wallet</label><input id="wallet-name" type="text" maxLength={32} placeholder="Contoh: BCA, Cash, DANA" value={newWalletName} onChange={(event) => setNewWalletName(event.target.value)} required />
