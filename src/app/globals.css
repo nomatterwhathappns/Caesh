@@ -924,3 +924,20 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
     margin-left: auto;
   }
 }
+
+
+/* Compact desktop workspace sidebar: keep navigation readable without wasting width. */
+@media (min-width: 621px) {
+  .sidebar {
+    width: 190px;
+    flex: 0 0 190px;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .side-nav .nav-link {
+    padding-left: 10px;
+    padding-right: 10px;
+    gap: 9px;
+  }
+}
