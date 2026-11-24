@@ -276,3 +276,80 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
   .sidebar-bottom{display:none}
   .main-panel{width:100%;min-width:0}
 }
+
+
+/* Responsive workspace navigation: desktop sidebar, compact floating mobile dock. */
+@media(min-width:621px){
+  .sidebar{
+    flex:0 0 244px;
+    border-right:1px solid var(--line);
+    box-shadow:1px 0 0 rgba(20,35,20,.015);
+  }
+}
+@media(max-width:620px){
+  .app-shell{display:block;min-height:100vh}
+  .sidebar{
+    position:fixed;
+    z-index:30;
+    left:12px;
+    right:12px;
+    bottom:10px;
+    width:auto;
+    height:auto;
+    max-height:none;
+    display:block;
+    overflow:visible;
+    padding:8px;
+    border:1px solid color-mix(in srgb,var(--line) 78%,transparent);
+    border-radius:19px;
+    background:color-mix(in srgb,var(--surface) 88%,transparent);
+    -webkit-backdrop-filter:blur(16px);
+    backdrop-filter:blur(16px);
+    box-shadow:0 8px 28px rgba(20,30,20,.16);
+  }
+  .sidebar>.brand,
+  .sidebar>.side-label,
+  .sidebar>.sidebar-bottom{display:none}
+  .side-nav{
+    display:grid;
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    gap:2px;
+    width:100%;
+    overflow:visible;
+    padding:0;
+  }
+  .side-nav .nav-link{
+    min-width:0;
+    width:100%;
+    height:54px;
+    min-height:54px;
+    padding:5px 1px;
+    border-radius:12px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    gap:4px;
+    white-space:nowrap;
+    font-size:9px;
+    line-height:1.1;
+  }
+  .side-nav .nav-icon{
+    width:auto;
+    font-size:17px;
+    line-height:1;
+  }
+  .main-panel{width:100%;min-width:0}
+  .content{padding-bottom:96px}
+  .app-shell::after{
+    content:"";
+    position:fixed;
+    z-index:20;
+    left:0;
+    right:0;
+    bottom:0;
+    height:88px;
+    pointer-events:none;
+    background:linear-gradient(to bottom,transparent 0%,color-mix(in srgb,var(--paper) 68%,transparent) 38%,var(--paper) 100%);
+  }
+}
