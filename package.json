@@ -18,7 +18,9 @@
     "react-dom": "19.3.1",
     "@capacitor/filesystem": "^7.1.4",
     "@capacitor/app": "^7.1.0",
-    "@capacitor/browser": "^7.0.2"
+    "@capacitor/browser": "^7.0.2",
+    "@capacitor/file-transfer": "^7.0.0",
+    "@m430/capacitor-app-install": "^0.0.2"
   },
   "devDependencies": {
     "@capacitor/cli": "^7.4.3",
