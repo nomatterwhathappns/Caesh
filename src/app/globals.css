@@ -460,3 +460,14 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
   .overview-content{padding-top:25px}
   .overview-content .welcome-row{margin-bottom:24px}
 }
+
+
+/* Use the space freed from the overview chrome to widen the workspace. */
+@media(min-width:621px){
+  .content{width:100%;max-width:none;padding-left:clamp(24px,3.2vw,54px);padding-right:clamp(24px,3.2vw,54px)}
+  .topbar{padding-left:clamp(24px,3.2vw,54px);padding-right:clamp(24px,3.2vw,54px)}
+  .topbar-spacer{flex:1}
+}
+@media(min-width:1100px){
+  .overview-content{padding-left:clamp(28px,3.2vw,58px);padding-right:clamp(28px,3.2vw,58px)}
+}
