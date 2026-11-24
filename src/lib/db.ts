@@ -1,4 +1,15 @@
 export type TransactionKind = "income" | "expense" | "transfer";
+export type WishlistStatus = "pending" | "purchased";
+export type WishlistItem = {
+  id: string;
+  name: string;
+  status: WishlistStatus;
+  createdAt: number;
+  purchasedAt?: number;
+  purchaseAmount?: number;
+  walletId?: string;
+  transactionId?: string;
+};
 
 export type Wallet = {
   id: string;
@@ -28,7 +39,8 @@ export type Transaction = {
 const DB_NAME = "caesh-local";
 const TRANSACTION_STORE = "transactions";
 const WALLET_STORE = "wallets";
-const DB_VERSION = 2;
+const WISHLIST_STORE = "wishlist";
+const DB_VERSION = 3;
 
 function openDatabase(): Promise<IDBDatabase> {
   if (typeof window === "undefined" || !("indexedDB" in window)) {
@@ -43,6 +55,9 @@ function openDatabase(): Promise<IDBDatabase> {
       if (!db.objectStoreNames.contains(TRANSACTION_STORE)) {
         const store = db.createObjectStore(TRANSACTION_STORE, { keyPath: "id" });
         store.createIndex("date", "date", { unique: false });
+      }
+      if (!db.objectStoreNames.contains(WISHLIST_STORE)) {
+        db.createObjectStore(WISHLIST_STORE, { keyPath: "id" });
       }
       if (!db.objectStoreNames.contains(WALLET_STORE)) {
         const wallets = db.createObjectStore(WALLET_STORE, { keyPath: "id" });
@@ -219,6 +234,64 @@ export async function removeTransaction(id: string): Promise<void> {
     request.onerror = () => {
       db.close();
       reject(request.error ?? new Error("Gagal menghapus transaksi."));
+    };
+  });
+}
+
+
+export async function getWishlist(): Promise<WishlistItem[]> {
+  const db = await openDatabase();
+  return new Promise((resolve, reject) => {
+    const request = db.transaction(WISHLIST_STORE, "readonly").objectStore(WISHLIST_STORE).getAll();
+    request.onsuccess = () => {
+      db.close();
+      resolve((request.result as WishlistItem[]).sort((a, b) => b.createdAt - a.createdAt));
+    };
+    request.onerror = () => {
+      db.close();
+      reject(request.error ?? new Error("Gagal membaca wishlist."));
+    };
+  });
+}
+
+export async function saveWishlist(item: WishlistItem): Promise<void> {
+  const db = await openDatabase();
+  return new Promise((resolve, reject) => {
+    const request = db.transaction(WISHLIST_STORE, "readwrite").objectStore(WISHLIST_STORE).put(item);
+    request.onsuccess = () => { db.close(); resolve(); };
+    request.onerror = () => {
+      db.close();
+      reject(request.error ?? new Error("Wishlist gagal disimpan."));
+    };
+  });
+}
+
+export async function removeWishlist(id: string): Promise<void> {
+  const db = await openDatabase();
+  return new Promise((resolve, reject) => {
+    const request = db.transaction(WISHLIST_STORE, "readwrite").objectStore(WISHLIST_STORE).delete(id);
+    request.onsuccess = () => { db.close(); resolve(); };
+    request.onerror = () => {
+      db.close();
+      reject(request.error ?? new Error("Wishlist gagal dihapus."));
+    };
+  });
+}
+
+export async function purchaseWishlist(item: WishlistItem, transaction: Transaction): Promise<void> {
+  const db = await openDatabase();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction([WISHLIST_STORE, TRANSACTION_STORE], "readwrite");
+    tx.objectStore(WISHLIST_STORE).put(item);
+    tx.objectStore(TRANSACTION_STORE).put(transaction);
+    tx.oncomplete = () => { db.close(); resolve(); };
+    tx.onabort = () => {
+      db.close();
+      reject(tx.error ?? new Error("Pembelian wishlist gagal disimpan."));
+    };
+    tx.onerror = () => {
+      db.close();
+      reject(tx.error ?? new Error("Pembelian wishlist gagal disimpan."));
     };
   });
 }
