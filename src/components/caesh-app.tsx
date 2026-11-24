@@ -3,7 +3,7 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import {
   getTransactions, getWallets, removeTransaction, removeWallet, saveTransaction, saveWallet,
-  Transaction, TransactionKind, Wallet,
+  Transaction, TransactionKind, Wallet, WishlistItem, getWishlist, saveWishlist, removeWishlist, purchaseWishlist,
 } from "@/lib/db";
 
 const categories = {
@@ -28,6 +28,13 @@ const today = () => {
 export default function CaeshApp() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [wallets, setWallets] = useState<Wallet[]>([]);
+  const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
+  const [showWishlistForm, setShowWishlistForm] = useState(false);
+  const [newWishlistName, setNewWishlistName] = useState("");
+  const [purchaseTarget, setPurchaseTarget] = useState<WishlistItem | null>(null);
+  const [purchaseAmount, setPurchaseAmount] = useState("");
+  const [purchaseWalletId, setPurchaseWalletId] = useState("");
+  const [wishlistTab, setWishlistTab] = useState<"pending" | "purchased">("pending");
   const [ready, setReady] = useState(false);
   const [kind, setKind] = useState<TransactionKind>("expense");
   const [amount, setAmount] = useState("");
@@ -57,7 +64,7 @@ export default function CaeshApp() {
   const [period, setPeriod] = useState("month");
   const [error, setError] = useState("");
   const [theme, setTheme] = useState<"light" | "dark">("light");
-  const [activeNav, setActiveNav] = useState<"overview" | "wallets" | "transactions" | "transfer" | "insights">("overview");
+  const [activeNav, setActiveNav] = useState<"overview" | "wallets" | "transactions" | "transfer" | "insights" | "wishlist">("overview");
   const [transactionSearch, setTransactionSearch] = useState("");
   const [transactionFilter, setTransactionFilter] = useState<"all" | TransactionKind>("all");
 
@@ -300,6 +307,60 @@ export default function CaeshApp() {
       setError(reason instanceof Error ? reason.message : "Wallet gagal dihapus.");
     }
   }
+  async function handleWishlistCreate(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const name = newWishlistName.trim();
+    if (!name) return;
+    const item: WishlistItem = { id: crypto.randomUUID(), name, status: "pending", createdAt: Date.now() };
+    try {
+      await saveWishlist(item);
+      setWishlist((current) => [item, ...current]);
+      setNewWishlistName("");
+      setShowWishlistForm(false);
+      setError("");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Wishlist gagal disimpan.");
+    }
+  }
+
+  async function handleWishlistDelete(item: WishlistItem) {
+    if (!window.confirm(`Hapus "${item.name}" dari wishlist?`)) return;
+    try {
+      await removeWishlist(item.id);
+      setWishlist((current) => current.filter((entry) => entry.id !== item.id));
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Wishlist gagal dihapus.");
+    }
+  }
+
+  async function handleWishlistPurchase(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!purchaseTarget) return;
+    const value = parseRupiahInput(purchaseAmount);
+    const selectedWallet = walletBalances.find((wallet) => wallet.id === purchaseWalletId);
+    if (!Number.isSafeInteger(value) || value <= 0) { setError("Masukkan harga pembelian yang valid."); return; }
+    if (!selectedWallet) { setError("Pilih wallet untuk pembelian."); return; }
+    if (selectedWallet.balance < value) { setError("Saldo wallet tidak mencukupi untuk pembelian ini."); return; }
+    const transaction: Transaction = {
+      id: crypto.randomUUID(), kind: "expense", amount: value, category: "Wishlist",
+      note: `Pembelian wishlist: ${purchaseTarget.name}`, date: today(), walletId: selectedWallet.id,
+      createdAt: Date.now(),
+    };
+    const updatedItem: WishlistItem = {
+      ...purchaseTarget, status: "purchased", purchasedAt: Date.now(),
+      purchaseAmount: value, walletId: selectedWallet.id, transactionId: transaction.id,
+    };
+    try {
+      await purchaseWishlist(updatedItem, transaction);
+      setTransactions((current) => [transaction, ...current].sort((a, b) => b.date.localeCompare(a.date) || b.createdAt - a.createdAt));
+      setWishlist((current) => current.map((entry) => entry.id === updatedItem.id ? updatedItem : entry));
+      setPurchaseTarget(null); setPurchaseAmount(""); setError("");
+      setWishlistTab("purchased");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Pembelian wishlist gagal disimpan.");
+    }
+  }
+
   function changeKind(next: TransactionKind) { setKind(next); if (next !== "transfer") { setCategory(categoryOptions[next][0] ?? "Lainnya"); setOtherCategory(""); } }
 
   return (
@@ -312,7 +373,7 @@ export default function CaeshApp() {
           <button type="button" className={activeNav === "transactions" ? "nav-link active" : "nav-link"} aria-current={activeNav === "transactions" ? "page" : undefined} onClick={() => setActiveNav("transactions")}><span className="nav-icon">↕</span> Transaksi</button>
           <button type="button" className="nav-link nav-add-transaction" onClick={() => { setKind("expense"); setShowForm(true); }} aria-label="Tambah transaksi"><span className="nav-icon">＋</span><span className="nav-add-label">Tambah</span></button>
           <button type="button" className={activeNav === "transfer" ? "nav-link active" : "nav-link"} aria-current={activeNav === "transfer" ? "page" : undefined} onClick={() => { setActiveNav("transfer"); setKind("transfer"); }}><span className="nav-icon">⇄</span> Transfer</button>
-          <button type="button" className={activeNav === "insights" ? "nav-link active" : "nav-link"} aria-current={activeNav === "insights" ? "page" : undefined} onClick={() => setActiveNav("insights")}><span className="nav-icon">⌁</span> Analisis</button>
+          <button type="button" className={activeNav === "insights" ? "nav-link active" : "nav-link"} aria-current={activeNav === "insights" ? "page" : undefined} onClick={() => setActiveNav("insights")}><span className="nav-icon">⌁</span> Analisis</button>\n          <button type="button" className={activeNav === "wishlist" ? "nav-link active" : "nav-link"} aria-current={activeNav === "wishlist" ? "page" : undefined} onClick={() => setActiveNav("wishlist")}><span className="nav-icon">♡</span> Wishlist</button>
         </nav>
         <div className="sidebar-bottom">
           <div className="profile-row"><div className="avatar">Y</div><div><strong>Personal space</strong><span>Mode pribadi</span></div><span className="profile-more">•••</span></div>
@@ -322,7 +383,7 @@ export default function CaeshApp() {
       <section className="main-panel" id="overview">
         <header className="topbar"><div className="topbar-spacer" aria-hidden="true" /><div className="topbar-right"><span className="top-date">{todayLabel}</span><button className="theme-toggle" onClick={() => setTheme((current) => current === "light" ? "dark" : "light")} aria-label={theme === "light" ? "Aktifkan tema gelap" : "Aktifkan tema terang"} title={theme === "light" ? "Tema gelap" : "Tema terang"}><span aria-hidden="true">{theme === "light" ? "☾" : "☀"}</span><span>{theme === "light" ? "Gelap" : "Terang"}</span></button></div></header>
         <div className={activeNav === "overview" ? "content overview-content" : "content"}>
-          <div className="welcome-row"><div><div className="eyebrow">{({ overview: "PERSONAL FINANCE OVERVIEW", wallets: "MONEY STORAGE", transactions: "TRANSACTION HISTORY", transfer: "MOVE YOUR MONEY", insights: "FINANCIAL INSIGHTS" })[activeNav]}</div><h1>{({ overview: <>Uangmu, lebih <em>terarah.</em></>, wallets: <>Kelola <em>wallet.</em></>, transactions: <>Semua <em>transaksi.</em></>, transfer: <>Pindahkan <em>uang.</em></>, insights: <>Kenali pola <em>keuangan.</em></> })[activeNav]}</h1></div>{activeNav !== "transfer" && <button className="primary-button" onClick={() => { setKind("expense"); setShowForm(true); }}><span>＋</span> Tambah transaksi</button>}</div>
+          <div className="welcome-row"><div><div className="eyebrow">{({ overview: "PERSONAL FINANCE OVERVIEW", wallets: "MONEY STORAGE", transactions: "TRANSACTION HISTORY", transfer: "MOVE YOUR MONEY", insights: "FINANCIAL INSIGHTS", wishlist: "YOUR WISHLIST" })[activeNav]}</div><h1>{({ overview: <>Uangmu, lebih <em>terarah.</em></>, wallets: <>Kelola <em>wallet.</em></>, transactions: <>Semua <em>transaksi.</em></>, transfer: <>Pindahkan <em>uang.</em></>, insights: <>Kenali pola <em>keuangan.</em></>, wishlist: <>Daftar <em>keinginan.</em></> })[activeNav]}</h1></div>{activeNav !== "transfer" && activeNav !== "wishlist" && <button className="primary-button" onClick={() => { setKind("expense"); setShowForm(true); }}><span>＋</span> Tambah transaksi</button>}</div>
           {error && <div className="error-banner" role="alert">{error}<button onClick={() => setError("")}>Tutup</button></div>}
 
           {activeNav === "overview" && <>
@@ -362,6 +423,24 @@ export default function CaeshApp() {
             <article className="panel-card"><div className="panel-heading"><div><div className="section-kicker">RIWAYAT TRANSFER</div><h2>Transfer terbaru</h2></div><span className="result-count">{transferTransactions.length} transfer</span></div>{transferTransactions.length === 0 ? <div className="empty-state"><strong>Belum ada transfer</strong><p>Transfer antar-wallet yang kamu buat akan muncul di sini.</p></div> : <div className="transaction-list">{transferTransactions.map((item) => <div className="transaction-row" key={item.id}><div className="transaction-icon transfer">⇄</div><div className="transaction-info"><strong>{item.note || "Transfer antar-wallet"}</strong><span>{walletName(item.walletId)} → {walletName(item.toWalletId ?? "")} · {new Date(item.date + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</span></div><div className="transaction-amount transfer">{rupiah(item.amount)}</div><button className="delete-button" aria-label="Hapus transfer" onClick={() => handleDelete(item.id)}>×</button></div>)}</div>}</article>
           </section>}
 
+          {activeNav === "wishlist" && <section className="page-section wishlist-page">
+            <div className="wishlist-toolbar panel-card">
+              <div><div className="section-kicker">DAFTAR KEINGINAN</div><h2>Wishlist kamu</h2></div>
+              <button className="primary-button" onClick={() => setShowWishlistForm(true)}>＋ Tambah wishlist</button>
+            </div>
+            <div className="kind-switch wishlist-tabs">
+              <button type="button" className={wishlistTab === "pending" ? "active" : ""} onClick={() => setWishlistTab("pending")}>Belum dibeli ({wishlist.filter((item) => item.status === "pending").length})</button>
+              <button type="button" className={wishlistTab === "purchased" ? "active" : ""} onClick={() => setWishlistTab("purchased")}>Sudah dibeli ({wishlist.filter((item) => item.status === "purchased").length})</button>
+            </div>
+            {wishlist.filter((item) => item.status === wishlistTab).length === 0
+              ? <article className="panel-card empty-state"><div className="empty-art">♡</div><strong>{wishlistTab === "pending" ? "Belum ada wishlist" : "Belum ada barang yang dibeli"}</strong><p>{wishlistTab === "pending" ? "Tambahkan barang yang ingin kamu beli nanti." : "Barang yang sudah dibeli dari wishlist akan muncul di sini."}</p>{wishlistTab === "pending" && <button className="outline-button" onClick={() => setShowWishlistForm(true)}>Tambah wishlist pertama</button>}</article>
+              : <div className="wishlist-grid">{wishlist.filter((item) => item.status === wishlistTab).map((item) => <article className="panel-card wishlist-item" key={item.id}>
+                  <div className="wishlist-item-icon">♡</div><div className="wishlist-item-main"><strong>{item.name}</strong><span>{item.status === "purchased" ? `Dibeli · ${new Date(item.purchasedAt ?? item.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}` : `Ditambahkan · ${new Date(item.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}`}</span></div>
+                  {item.status === "purchased" ? <div className="wishlist-purchase-detail"><strong>{rupiah(item.purchaseAmount ?? 0)}</strong><span>{walletName(item.walletId ?? "")}</span></div> : <button className="primary-button" onClick={() => { setPurchaseTarget(item); setPurchaseWalletId(wallets[0]?.id ?? ""); setPurchaseAmount(""); }}>Beli</button>}
+                  <button type="button" className="delete-button" aria-label={`Hapus ${item.name} dari wishlist`} onClick={() => handleWishlistDelete(item)}>×</button>
+                </article>)}</div>}
+          </section>}
+
           {activeNav === "insights" && <section className="page-section analysis-page">
             <div className="stats-grid analysis-stats"><article className="stat-card"><div className="stat-top"><span>Jumlah transaksi</span></div><div className="stat-value">{periodTransactions.length}</div><div className="stat-foot">Pada periode yang dipilih</div></article><article className="stat-card"><div className="stat-top"><span>Rata-rata pengeluaran</span></div><div className="stat-value">{rupiah(expenseCount ? totals.expense / expenseCount : 0)}</div><div className="stat-foot">Per transaksi pengeluaran</div></article><article className="stat-card"><div className="stat-top"><span>Arus bersih</span></div><div className="stat-value">{rupiah(totals.income - totals.expense)}</div><div className="stat-foot">Pemasukan dikurangi pengeluaran</div></article></div>
             <div className="period-row"><span className="section-kicker">PERIODE ANALISIS</span><div className="period-tabs"><button className={period === "month" ? "selected" : ""} onClick={() => setPeriod("month")}>Bulan ini</button><button className={period === "year" ? "selected" : ""} onClick={() => setPeriod("year")}>Tahun ini</button><button className={period === "all" ? "selected" : ""} onClick={() => setPeriod("all")}>Semua</button></div></div>
@@ -379,6 +458,10 @@ export default function CaeshApp() {
           <label className="field-label" htmlFor="note">Catatan <span>(opsional)</span></label><input id="note" type="text" maxLength={80} placeholder="Contoh: makan siang" value={note} onChange={(event) => setNote(event.target.value)} />
           <div className="modal-actions"><button type="button" className="cancel-button" onClick={() => setShowForm(false)}>Batal</button><button type="submit" className="primary-button">Simpan transaksi</button></div>
         </form></section></div>}
+
+      {showWishlistForm && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowWishlistForm(false); }}><section className="modal-card" role="dialog" aria-modal="true" aria-labelledby="wishlist-modal-title"><div className="modal-heading"><div><div className="section-kicker">WISHLIST BARU</div><h2 id="wishlist-modal-title">Tambah wishlist</h2></div><button className="modal-close" onClick={() => setShowWishlistForm(false)} aria-label="Tutup">×</button></div><form onSubmit={handleWishlistCreate}><label className="field-label" htmlFor="wishlist-name">Nama wishlist</label><input id="wishlist-name" type="text" maxLength={80} placeholder="Contoh: Headphone baru" value={newWishlistName} onChange={(event) => setNewWishlistName(event.target.value)} required /><div className="modal-actions"><button type="button" className="cancel-button" onClick={() => setShowWishlistForm(false)}>Batal</button><button type="submit" className="primary-button">Simpan wishlist</button></div></form></section></div>}
+
+      {purchaseTarget && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setPurchaseTarget(null); }}><section className="modal-card" role="dialog" aria-modal="true" aria-labelledby="wishlist-purchase-title"><div className="modal-heading"><div><div className="section-kicker">KONFIRMASI PEMBELIAN</div><h2 id="wishlist-purchase-title">{purchaseTarget.name}</h2></div><button className="modal-close" onClick={() => setPurchaseTarget(null)} aria-label="Tutup">×</button></div><form onSubmit={handleWishlistPurchase}><label className="field-label" htmlFor="wishlist-price">Harga pembelian (Rp)</label><div className="currency-input-wrap"><span>Rp</span><input id="wishlist-price" className="amount-input" inputMode="numeric" type="text" placeholder="0" value={purchaseAmount} onChange={(event) => setPurchaseAmount(formatRupiahInput(event.target.value))} required /></div><label className="field-label" htmlFor="wishlist-wallet">Bayar menggunakan wallet</label><select id="wishlist-wallet" value={purchaseWalletId} onChange={(event) => setPurchaseWalletId(event.target.value)} required>{walletBalances.map((wallet) => <option key={wallet.id} value={wallet.id}>{wallet.name} — {rupiah(wallet.balance)}</option>)}</select><p className="wallet-form-hint">Saldo wallet akan dipotong dan transaksi pengeluaran akan tercatat otomatis.</p><div className="modal-actions"><button type="button" className="cancel-button" onClick={() => setPurchaseTarget(null)}>Batal</button><button type="submit" className="primary-button">Konfirmasi pembelian</button></div></form></section></div>}
 
       <input ref={photoPickerRef} className="visually-hidden-file" type="file" accept="image/*" onChange={handlePhotoFileChange} />
 
