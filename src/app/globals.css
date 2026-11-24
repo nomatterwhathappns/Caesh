@@ -471,3 +471,36 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
 @media(min-width:1100px){
   .overview-content{padding-left:clamp(28px,3.2vw,58px);padding-right:clamp(28px,3.2vw,58px)}
 }
+
+
+/* Center the quick-add transaction action in the mobile floating dock. */
+.nav-add-transaction{display:none}
+@media(max-width:620px){
+  .side-nav{grid-template-columns:repeat(5,minmax(0,1fr))}
+  .side-nav .nav-add-transaction{
+    display:flex;
+    grid-column:3;
+    grid-row:1;
+    justify-self:center;
+    align-self:center;
+    width:58px;
+    min-width:58px;
+    height:58px;
+    min-height:58px;
+    margin-top:-12px;
+    padding:5px 3px;
+    border:1px solid color-mix(in srgb,var(--line) 72%,transparent);
+    border-radius:17px;
+    background:var(--nav-active);
+    color:var(--nav-active-text);
+    box-shadow:0 5px 15px rgba(30,45,30,.16);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:2px;
+    font-weight:700;
+  }
+  .side-nav .nav-add-transaction .nav-icon{font-size:23px;line-height:1}
+  .side-nav .nav-add-label{font-size:8px;line-height:1}
+}
