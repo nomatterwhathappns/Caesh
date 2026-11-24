@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.0.1",
   "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-android-preview/Caesh.apk",
-  "notes": "Pembaruan CAESH tersedia. Periksa catatan versi sebelum memasang."
+  "notes": "CAESH 1.0.1: Menghapus fitur Backup dan Restore yang belum berfungsi dengan benar."
 }
