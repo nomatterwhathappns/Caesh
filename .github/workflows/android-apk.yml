@@ -80,11 +80,14 @@ jobs:
         working-directory: android
         run: ./gradlew assembleDebug
 
+      - name: Name debug APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/Caesh-debug.apk
+
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
           name: caesh-android-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: android/app/build/outputs/apk/debug/Caesh-debug.apk
           if-no-files-found: error
           retention-days: 14
 
@@ -93,17 +96,21 @@ jobs:
         working-directory: android
         run: ./gradlew assembleRelease
 
+      - name: Name signed release APK
+        if: steps.signing_check.outputs.enabled == 'true'
+        run: cp android/app/build/outputs/apk/release/app-release.apk android/app/build/outputs/apk/release/Caesh.apk
+
       - name: Upload signed release APK
         if: steps.signing_check.outputs.enabled == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: caesh-android-signed-release-apk
-          path: android/app/build/outputs/apk/release/app-release.apk
+          path: android/app/build/outputs/apk/release/Caesh.apk
           if-no-files-found: error
           retention-days: 14
 
       - name: Publish direct APK download
-        if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/android-apk-preview' && steps.signing_check.outputs.enabled == 'true'
+        if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/caesh' && steps.signing_check.outputs.enabled == 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: caesh-android-preview
