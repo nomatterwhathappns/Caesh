@@ -1109,3 +1109,61 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
     white-space: nowrap;
   }
 }
+
+
+/* Transaction history: keep the page fixed to the viewport and scroll only its list. */
+.main-panel:has(.page-section#transactions) {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-panel:has(.page-section#transactions) > .content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 18px;
+}
+
+.main-panel:has(.page-section#transactions) > .content > .welcome-row {
+  flex: 0 0 auto;
+  margin-bottom: 22px;
+}
+
+.main-panel .page-section#transactions {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0;
+}
+
+.main-panel .page-section#transactions > .panel-heading,
+.main-panel .page-section#transactions > .transaction-tools {
+  flex: 0 0 auto;
+}
+
+.main-panel .page-section#transactions > .transaction-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+@media (max-width: 620px) {
+  .main-panel:has(.page-section#transactions) > .content {
+    padding-bottom: 96px;
+  }
+
+  .main-panel .page-section#transactions > .transaction-list {
+    scrollbar-width: thin;
+  }
+}
