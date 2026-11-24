@@ -212,7 +212,7 @@ export default function CaeshApp() {
           <button type="button" className={activeNav === "overview" ? "nav-link active" : "nav-link"} aria-current={activeNav === "overview" ? "page" : undefined} onClick={() => setActiveNav("overview")}><span className="nav-icon">▦</span> Ringkasan</button>
           <button type="button" className={activeNav === "wallets" ? "nav-link active" : "nav-link"} aria-current={activeNav === "wallets" ? "page" : undefined} onClick={() => setActiveNav("wallets")}><span className="nav-icon">▣</span> Wallet</button>
           <button type="button" className={activeNav === "transactions" ? "nav-link active" : "nav-link"} aria-current={activeNav === "transactions" ? "page" : undefined} onClick={() => setActiveNav("transactions")}><span className="nav-icon">↕</span> Transaksi</button>
-          <button type="button" className={activeNav === "transfer" ? "nav-link active" : "nav-link"} aria-current={activeNav === "transfer" ? "page" : undefined} onClick={() => { setActiveNav("transfer"); setKind("transfer"); setShowForm(true); }}><span className="nav-icon">⇄</span> Transfer</button>
+          <button type="button" className={activeNav === "transfer" ? "nav-link active" : "nav-link"} aria-current={activeNav === "transfer" ? "page" : undefined} onClick={() => { setActiveNav("transfer"); setKind("transfer"); }}><span className="nav-icon">⇄</span> Transfer</button>
           <button type="button" className={activeNav === "insights" ? "nav-link active" : "nav-link"} aria-current={activeNav === "insights" ? "page" : undefined} onClick={() => setActiveNav("insights")}><span className="nav-icon">⌁</span> Analisis</button>
         </nav>
         <div className="sidebar-bottom">
