@@ -47,7 +47,6 @@ export default function CaeshApp() {
   const [error, setError] = useState("");
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [activeNav, setActiveNav] = useState<"overview" | "wallets" | "transactions" | "transfer" | "insights">("overview");
-  const [walletPreviewOpen, setWalletPreviewOpen] = useState(false);
   const [transactionSearch, setTransactionSearch] = useState("");
   const [transactionFilter, setTransactionFilter] = useState<"all" | TransactionKind>("all");
 
@@ -211,14 +210,6 @@ export default function CaeshApp() {
         <div className="side-label">WORKSPACE</div>
         <nav className="side-nav" aria-label="Navigasi utama">
           <button type="button" className={activeNav === "overview" ? "nav-link active" : "nav-link"} aria-current={activeNav === "overview" ? "page" : undefined} onClick={() => setActiveNav("overview")}><span className="nav-icon">▦</span> Ringkasan</button>
-          <div className="wallet-nav-item">
-            <button type="button" className="nav-link" aria-expanded={walletPreviewOpen} onClick={() => { if (window.matchMedia("(max-width: 620px)").matches) setWalletPreviewOpen((open) => !open); }}><span className="nav-icon">▣</span> Wallet</button>
-            {walletPreviewOpen && <div className="wallet-preview" role="dialog" aria-label="Daftar wallet">
-              <div className="wallet-preview-heading"><strong>Wallet kamu</strong><span>{wallets.length} wallet</span></div>
-              {walletBalances.length ? walletBalances.map((wallet) => <button type="button" className="wallet-preview-row" key={wallet.id} onClick={() => setWalletPreviewOpen(false)}><span><strong>{wallet.name}</strong><small>Saldo tersedia</small></span><b>{rupiah(wallet.balance)}</b></button>) : <p className="wallet-preview-empty">Belum ada wallet.</p>}
-              <button type="button" className="wallet-preview-manage" onClick={() => { setWalletPreviewOpen(false); setShowWalletForm(true); }}>＋ Tambah wallet <span>→</span></button>
-            </div>}
-          </div>
           <button type="button" className={activeNav === "transactions" ? "nav-link active" : "nav-link"} aria-current={activeNav === "transactions" ? "page" : undefined} onClick={() => setActiveNav("transactions")}><span className="nav-icon">↕</span> Transaksi</button>
           <button type="button" className={activeNav === "transfer" ? "nav-link active" : "nav-link"} aria-current={activeNav === "transfer" ? "page" : undefined} onClick={() => { setActiveNav("transfer"); setKind("transfer"); }}><span className="nav-icon">⇄</span> Transfer</button>
           <button type="button" className={activeNav === "insights" ? "nav-link active" : "nav-link"} aria-current={activeNav === "insights" ? "page" : undefined} onClick={() => setActiveNav("insights")}><span className="nav-icon">⌁</span> Analisis</button>
