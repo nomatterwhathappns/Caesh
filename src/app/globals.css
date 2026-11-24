@@ -559,3 +559,7 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
   .side-nav{grid-template-columns:repeat(6,minmax(0,1fr))}
   .side-nav .nav-add-transaction{grid-column:3;grid-row:1}
 }
+
+
+/* Keep the image-plus control anchored even when a wallet has no photo. */
+.overview-wallet-item{position:relative}
