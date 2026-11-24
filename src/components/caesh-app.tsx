@@ -1,6 +1,8 @@
 "use client";
 
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { Capacitor } from "@capacitor/core";
+import { Directory, Filesystem } from "@capacitor/filesystem";
 import {
   getTransactions, getWallets, removeTransaction, removeWallet, saveTransaction, saveWallet,
   Transaction, TransactionKind, Wallet, WishlistItem, getWishlist, saveWishlist, removeWishlist, purchaseWishlist,
@@ -26,16 +28,42 @@ const today = () => {
   return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 };
 
-function downloadBackupFile(backup: Awaited<ReturnType<typeof createBackup>>, prefix = "caesh-backup") {
-  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+async function downloadBackupFile(backup: Awaited<ReturnType<typeof createBackup>>, prefix = "caesh-backup") {
+  const fileName = `${prefix}-${new Date().toISOString().slice(0, 10)}.json`;
+  const json = JSON.stringify(backup, null, 2);
+
+  if (Capacitor.isNativePlatform()) {
+    // Android: write the backup to the shared Documents/CAESH folder.
+    const bytes = new TextEncoder().encode(json);
+    let binary = "";
+    const chunkSize = 0x8000;
+    for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+      binary += String.fromCharCode(...bytes.subarray(offset, offset + chunkSize));
+    }
+    const base64 = btoa(binary);
+    await Filesystem.writeFile({
+      path: `CAESH/${fileName}`,
+      data: base64,
+      directory: Directory.Documents,
+      recursive: true,
+    });
+    return { fileName, location: "Documents/CAESH" };
+  }
+
+  // Browser: retain the normal download behavior for desktop and mobile web.
+  const blob = new Blob([json], { type: "application/json" });
   const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `${prefix}-${new Date().toISOString().slice(0, 10)}.json`;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
+  try {
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  } finally {
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  return { fileName, location: "folder Download" };
 }
 
 export default function CaeshApp() {
@@ -378,8 +406,8 @@ export default function CaeshApp() {
   async function handleBackupExport() {
     try {
       const backup = await createBackup();
-      downloadBackupFile(backup);
-      window.alert("Backup Caesh berhasil dibuat. Simpan file ini di tempat yang aman.");
+      const saved = await downloadBackupFile(backup);
+      window.alert(`Backup CAESH berhasil disimpan sebagai ${saved.fileName}. Lokasi: ${saved.location}. Salin file ini ke tempat lain yang aman.`);
       setError("");
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Backup gagal dibuat. Data lokal tidak diubah.");
@@ -402,7 +430,7 @@ export default function CaeshApp() {
       if (!confirmed) return;
       // Download a safety copy first; if it cannot be read/exported, do not overwrite local data.
       const currentBackup = await createBackup();
-      downloadBackupFile(currentBackup, "caesh-before-restore");
+      await downloadBackupFile(currentBackup, "caesh-before-restore");
       const backup = await restoreBackup(parsed);
       setTransactions(backup.transactions);
       setWallets(backup.wallets);
