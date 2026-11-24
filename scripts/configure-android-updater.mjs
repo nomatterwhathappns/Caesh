@@ -1,11 +1,15 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 
+const applicationId = "com.caesh.finance";
 const manifestPath = "android/app/src/main/AndroidManifest.xml";
 let manifest = await readFile(manifestPath, "utf8");
 
 if (!manifest.includes('android:name="android.permission.REQUEST_INSTALL_PACKAGES"')) {
-  manifest = manifest.replace("</manifest>", '    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />\n</manifest>');
+  manifest = manifest.replace(
+    "</manifest>",
+    '    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />\n</manifest>',
+  );
 }
 
 if (!manifest.includes('android:name="androidx.core.content.FileProvider"')) {
@@ -20,6 +24,9 @@ if (!manifest.includes('android:name="androidx.core.content.FileProvider"')) {
                 android:resource="@xml/file_paths" />
         </provider>
 `;
+  if (!manifest.includes("</application>")) {
+    throw new Error("AndroidManifest.xml does not contain an application element.");
+  }
   manifest = manifest.replace("</application>", provider + "    </application>");
 }
 
