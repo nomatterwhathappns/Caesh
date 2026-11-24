@@ -211,6 +211,7 @@ export default function CaeshApp() {
         <nav className="side-nav" aria-label="Navigasi utama">
           <button type="button" className={activeNav === "overview" ? "nav-link active" : "nav-link"} aria-current={activeNav === "overview" ? "page" : undefined} onClick={() => setActiveNav("overview")}><span className="nav-icon">▦</span> Ringkasan</button>
           <button type="button" className={activeNav === "transactions" ? "nav-link active" : "nav-link"} aria-current={activeNav === "transactions" ? "page" : undefined} onClick={() => setActiveNav("transactions")}><span className="nav-icon">↕</span> Transaksi</button>
+          <button type="button" className="nav-link nav-add-transaction" onClick={() => { setKind("expense"); setShowForm(true); }} aria-label="Tambah transaksi"><span className="nav-icon">＋</span><span className="nav-add-label">Tambah</span></button>
           <button type="button" className={activeNav === "transfer" ? "nav-link active" : "nav-link"} aria-current={activeNav === "transfer" ? "page" : undefined} onClick={() => { setActiveNav("transfer"); setKind("transfer"); }}><span className="nav-icon">⇄</span> Transfer</button>
           <button type="button" className={activeNav === "insights" ? "nav-link active" : "nav-link"} aria-current={activeNav === "insights" ? "page" : undefined} onClick={() => setActiveNav("insights")}><span className="nav-icon">⌁</span> Analisis</button>
         </nav>
