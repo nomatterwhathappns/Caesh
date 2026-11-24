@@ -40,10 +40,10 @@ Data preservation is a release requirement, not an optional enhancement.
 - Vercel Deployment Protection is an access gate for the preview website, not encryption for local storage.
 - IndexedDB and local preferences are not encrypted by this application.
 - Clearing browser/app site data can remove local records.
-- Backup/restore, application lock, and a full security review are not implemented yet.
+- Backup/restore JSON is implemented for transactions, wallets, wallet photos, wishlist, and preferences, with schema validation and atomic IndexedDB record replacement. Application lock and a full security review are not implemented yet.
 
 ## Current implementation
 
 The database currently uses version 3 and creates stores for transactions, wallets, and wishlist. Existing version 1 transactions are retained and assigned to the default wallet during the version 2 migration. Current schema setup is additive and does not intentionally delete existing stores or records.
 
-A migration safety policy is now documented. Automated migration tests, backup/restore, and packaged-app storage verification remain required before a public release.
+A migration safety policy, JSON backup/restore, and automated IndexedDB regression tests for upgrades from versions 1, 2, and 3 are implemented. Packaged-app storage verification remains required before a public release.
