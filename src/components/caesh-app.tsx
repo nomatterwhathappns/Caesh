@@ -11,10 +11,10 @@ const categories = {
   expense: ["Makanan", "Transportasi", "Belanja", "Tagihan", "Hiburan", "Kesehatan", "Lainnya"],
 };
 const formatRupiahInput = (value: string) => {
-  const digits = value.replace(/\\D/g, "");
+  const digits = value.replace(/\D/g, "");
   return digits ? new Intl.NumberFormat("id-ID", { maximumFractionDigits: 0 }).format(Number(digits)) : "";
 };
-const parseRupiahInput = (value: string) => Number(value.replace(/\\D/g, ""));
+const parseRupiahInput = (value: string) => Number(value.replace(/\D/g, ""));
 const rupiah = (value: number) => new Intl.NumberFormat("id-ID", {
   style: "currency", currency: "IDR", maximumFractionDigits: 0,
 }).format(value);
