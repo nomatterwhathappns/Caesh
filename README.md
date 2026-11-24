@@ -38,7 +38,7 @@ Vercel digunakan untuk hosting preview web, bukan sebagai tempat penyimpanan dat
 - Data antar pengguna dan antar perangkat tidak otomatis bercampur atau tersinkron.
 - Penyimpanan lokal aplikasi saat ini menggunakan IndexedDB di browser.
 - Data lokal belum dienkripsi oleh aplikasi. Menghapus data situs/browser dapat menghapus data.
-- Backup/restore belum tersedia. Jangan jadikan aplikasi ini satu-satunya salinan catatan keuangan penting sebelum fitur backup tersedia.
+- Fitur Backup dan Pulihkan tersedia untuk mengekspor atau memulihkan transaksi, wallet, foto wallet, wishlist, serta preferensi ke file JSON. Simpan file backup di lokasi aman di luar perangkat.
 
 ## Kebijakan perlindungan data
 
@@ -51,7 +51,7 @@ Menjaga data pengguna agar tidak hilang atau rusak saat aplikasi diperbarui adal
 - Perubahan yang berpotensi menghapus atau mengubah data secara destruktif harus didahului backup/restore dan pengujian pemulihan.
 - Setiap versi aplikasi harus diuji agar data tetap tersedia setelah update.
 
-Kebijakan ini sudah didokumentasikan. Pengujian migrasi otomatis dan backup/restore masih perlu dibuat sebelum rilis publik.
+Kebijakan ini sudah didokumentasikan. Caesh memiliki pengujian otomatis untuk migrasi database versi 1, 2, dan 3 serta alur backup/restore. Pengujian perangkat nyata dan verifikasi update pada aplikasi desktop/Android tetap wajib sebelum rilis publik.
 
 ## Fitur saat ini
 
