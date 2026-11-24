@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run test && next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test": "tsx --test src/lib/db.test.ts"
   },
   "dependencies": {
     "next": "16.4.6",
@@ -19,7 +20,9 @@
     "@types/react-dom": "^19.3.0",
     "eslint": "^9.28.0",
     "eslint-config-next": "16.4.6",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "fake-indexeddb": "^6.2.4",
+    "tsx": "^4.20.6"
   },
   "engines": {
     "node": ">=20.9.0"
