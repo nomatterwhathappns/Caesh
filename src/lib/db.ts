@@ -5,6 +5,10 @@ export type Wallet = {
   name: string;
   initialBalance: number;
   createdAt: number;
+  photo?: string;
+  photoX?: number;
+  photoY?: number;
+  photoZoom?: number;
 };
 
 export type Transaction = {
