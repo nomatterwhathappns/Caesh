@@ -89,7 +89,7 @@ await writeFile(`${resDir}/xml/expense_widget_info.xml`, `<?xml version="1.0" en
     android:minHeight="180dp"
     android:targetCellWidth="2"
     android:targetCellHeight="2"
-    android:updatePeriodMillis="0"
+    android:updatePeriodMillis="1800000"
     android:initialLayout="@layout/expense_widget"
     android:resizeMode="none"
     android:widgetCategory="home_screen"
@@ -109,7 +109,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Base64;
 import android.widget.RemoteViews;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.StandardCharsets;\nimport java.text.SimpleDateFormat;\nimport java.util.Calendar;\nimport java.util.Locale;
 
 public class ExpenseWidgetProvider extends AppWidgetProvider {
     static final String PREFS = "caesh_expense_widget";
@@ -138,8 +138,40 @@ public class ExpenseWidgetProvider extends AppWidgetProvider {
         for (int id : ids) updateOne(context, manager, id);
     }
 
+    private static void refreshPeriodIfNeeded(SharedPreferences prefs) {
+        String period = prefs.getString("period", "monthly");
+        if ("custom".equals(period)) return;
+        String currentKey = getCurrentPeriodKey(period);
+        String previousKey = prefs.getString("periodKey", currentKey);
+        if (currentKey.equals(previousKey)) return;
+        String label = "monthly".equals(period) ? "Bulan ini" : "yearly".equals(period) ? "Tahun ini" : "weekly".equals(period) ? "Minggu ini" : "Hari ini";
+        String beforeImage = prefs.getString("beforeImage", "");
+        String baseImage = prefs.getString("baseImage", "");
+        String image = beforeImage.isEmpty() ? baseImage : beforeImage;
+        prefs.edit()
+            .putString("periodKey", currentKey)
+            .putString("amount", "Rp0")
+            .putString("caption", label + " · 0 transaksi")
+            .putString("image", image)
+            .putBoolean("overLimit", false)
+            .apply();
+    }
+
+    private static String getCurrentPeriodKey(String period) {
+        Calendar calendar = Calendar.getInstance();
+        if ("daily".equals(period)) return new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT).format(calendar.getTime());
+        if ("weekly".equals(period)) {
+            int daysSinceMonday = (calendar.get(Calendar.DAY_OF_WEEK) + 5) % 7;
+            calendar.add(Calendar.DAY_OF_MONTH, -daysSinceMonday);
+            return new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT).format(calendar.getTime());
+        }
+        if ("yearly".equals(period)) return new SimpleDateFormat("yyyy", Locale.ROOT).format(calendar.getTime());
+        return new SimpleDateFormat("yyyy-MM", Locale.ROOT).format(calendar.getTime());
+    }
+
     private static void updateOne(Context context, AppWidgetManager manager, int id) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        refreshPeriodIfNeeded(prefs);
         String title = prefs.getString("title", "Pengeluaran Bulanan");
         String amount = prefs.getString("amount", "Rp0");
         String caption = prefs.getString("caption", "Bulan ini");
@@ -204,9 +236,13 @@ public class ExpenseWidgetPlugin extends Plugin {
         String transactionCount = String.valueOf(call.getInt("transactionCount", 0));
         boolean overLimit = call.getBoolean("overLimit", false);
         boolean enabled = call.getBoolean("enabled", true);
-        String baseImage = call.getString("baseImage", "");\n        String beforeImage = call.getString("beforeImage", "");
+        String period = call.getString("period", "monthly");
+        String periodKey = call.getString("periodKey", "");
+        String baseImage = call.getString("baseImage", "");
+        String beforeImage = call.getString("beforeImage", "");
         String afterImage = call.getString("afterImage", "");
-        String image = overLimit && !afterImage.isEmpty() ? afterImage : beforeImage;
+        boolean limitEnabled = call.getBoolean("limitEnabled", false);
+        String image = overLimit && !afterImage.isEmpty() ? afterImage : limitEnabled && !beforeImage.isEmpty() ? beforeImage : baseImage;
         if (!enabled) image = "";
         String caption = periodLabel + " · " + transactionCount + " transaksi";
         if (overLimit) caption = "Batas pengeluaran terlampaui";
@@ -216,6 +252,14 @@ public class ExpenseWidgetPlugin extends Plugin {
             .putString("amount", amount)
             .putString("caption", caption)
             .putString("image", image)
+            .putString("period", period)
+            .putString("periodKey", periodKey)
+            .putString("periodLabel", periodLabel)
+            .putString("baseImage", baseImage)
+            .putString("beforeImage", beforeImage)
+            .putString("afterImage", afterImage)
+            .putBoolean("limitEnabled", limitEnabled)
+            .putBoolean("overLimit", overLimit)
             .apply();
         ExpenseWidgetProvider.updateAll(getContext());
         JSObject result = new JSObject();
