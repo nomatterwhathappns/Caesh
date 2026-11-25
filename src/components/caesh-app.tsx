@@ -842,7 +842,7 @@ export default function CaeshApp() {
     try {
       await removeTransaction(deleteTransactionTarget.id);
       setDeleteTransactionTarget(null);
-      setTransactions((current) => current.filter((item) => item.id !== id));
+      setTransactions((current) => current.filter((item) => item.id !== deleteTransactionTarget.id));
     } catch { setError("Transaksi gagal dihapus."); }
   }
 
