@@ -648,7 +648,7 @@ export default function CaeshApp() {
     const selectedWallet = regularWallets.find((wallet) => wallet.id === purchaseWalletId);
     if (!Number.isSafeInteger(value) || value <= 0) { setError("Masukkan harga pembelian yang valid."); return; }
     if (!selectedWallet) { setError("Pilih wallet untuk pembelian."); return; }
-    if (selectedWallet.balance < value) { setError("Saldo wallet tidak mencukupi untuk pembelian ini."); return; }
+    if ((walletBalances.find((wallet) => wallet.id === selectedWallet.id)?.balance ?? 0) < value) { setError("Saldo wallet tidak mencukupi untuk pembelian ini."); return; }
     const transaction: Transaction = {
       id: crypto.randomUUID(), kind: "expense", amount: value, category: "Wishlist",
       note: `Pembelian wishlist: ${purchaseTarget.name}`, date: today(), walletId: selectedWallet.id,
