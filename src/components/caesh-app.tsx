@@ -290,6 +290,7 @@ export default function CaeshApp() {
   function toggleAllBalanceFilterWallets() {
     setBalanceFilterWalletIds(selectedBalanceWalletIds.length === wallets.length ? [] : wallets.map((wallet) => wallet.id));
   }
+  const regularWallets = wallets.filter((wallet) => wallet.category !== "notes");
   const expenseWidgetWalletIds = expenseWidgetSettings.walletIds === null ? regularWallets.map((wallet) => wallet.id) : expenseWidgetSettings.walletIds.filter((id) => regularWallets.some((wallet) => wallet.id === id));
   const expenseWidgetRange = getExpenseDateRange(expenseWidgetSettings.period, new Date(), expenseWidgetSettings.startDate, expenseWidgetSettings.endDate);
   const expenseWidgetSummary = calculateExpenseSummary(transactions, expenseWidgetWalletIds, expenseWidgetRange);
@@ -316,7 +317,6 @@ export default function CaeshApp() {
     expense: periodTransactions.filter((item) => item.kind === "expense").reduce((sum, item) => sum + item.amount, 0),
   }), [periodTransactions]);
   const expenseCount = periodTransactions.filter((item) => item.kind === "expense").length;
-  const regularWallets = wallets.filter((wallet) => wallet.category !== "notes");
   const walletName = (id: string) => wallets.find((wallet) => wallet.id === id)?.name
     ?? transactions.find((item) => item.walletId === id)?.walletName
     ?? transactions.find((item) => item.toWalletId === id)?.toWalletName
