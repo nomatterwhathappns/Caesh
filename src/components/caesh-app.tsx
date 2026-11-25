@@ -210,7 +210,9 @@ export default function CaeshApp() {
           if (!response.ok) throw new Error(`Update manifest returned HTTP ${response.status}`);
           manifest = await response.json() as Partial<CaeshUpdate>;
         }
-        if (cancelled || typeof manifest.version !== "string" || typeof manifest.apkUrl !== "string" || !/^https:\/\//i.test(manifest.apkUrl) || typeof manifest.sha256 !== "string" || !/^[a-f0-9]{64}$/i.test(manifest.sha256)) return;
+        if (cancelled || typeof manifest.version !== "string" || typeof manifest.apkUrl !== "string" || typeof manifest.sha256 !== "string" || !/^[a-f0-9]{64}$/i.test(manifest.sha256)) return;
+        const expectedApkUrl = `https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v${manifest.version}/Caesh.apk`;
+        if (manifest.apkUrl !== expectedApkUrl) return;
         if (compareVersions(manifest.version, appInfo.version) > 0) {
           setAvailableUpdate({ version: manifest.version, apkUrl: manifest.apkUrl, sha256: manifest.sha256.toLowerCase(), notes: typeof manifest.notes === "string" ? manifest.notes : undefined });
         } else {
@@ -253,17 +255,27 @@ export default function CaeshApp() {
 
       if (!apkPath) throw new Error("File APK pembaruan tidak ditemukan.");
 
-      const verification = await AppInstallPlugin.verifyApkSha256({
-        filePath: apkPath,
-        expectedSha256: availableUpdate.sha256,
-      });
+      let verification: { valid: boolean; actualSha256: string };
+      try {
+        verification = await AppInstallPlugin.verifyApkSha256({
+          filePath: apkPath,
+          expectedSha256: availableUpdate.sha256,
+        });
+      } catch {
+        try {
+          await Filesystem.deleteFile({ directory: Directory.Cache, path: "caesh-update.apk" });
+        } catch { /* The cache file may already have been removed. */ }
+        setDownloadedUpdatePath(null);
+        setUpdateDownloadProgress(null);
+        throw new Error("APK tidak dapat diverifikasi. File dihapus; silakan unduh ulang pembaruan.");
+      }
       if (!verification.valid) {
         try {
           await Filesystem.deleteFile({ directory: Directory.Cache, path: "caesh-update.apk" });
         } catch { /* The cache file may already have been removed. */ }
         setDownloadedUpdatePath(null);
         setUpdateDownloadProgress(null);
-        throw new Error("Verifikasi SHA-256 gagal. APK tidak akan dipasang. Silakan unduh ulang pembaruan.");
+        throw new Error("Verifikasi SHA-256 gagal. APK tidak akan dipasang. File dihapus; silakan unduh ulang pembaruan.");
       }
 
       const permission = await AppInstallPlugin.canInstallUnknownApps();
