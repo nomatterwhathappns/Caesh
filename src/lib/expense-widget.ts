@@ -49,6 +49,19 @@ export function getExpenseDateRange(period: ExpenseWidgetPeriod, referenceDate: 
   return { start: toLocalDateString(start), end: toLocalDateString(end) };
 }
 
+
+export function getExpensePeriodKey(period: ExpenseWidgetPeriod, referenceDate: Date, customStart: string, customEnd: string): string {
+  if (period === "custom") return `${customStart}|${customEnd}`;
+  const date = new Date(referenceDate.getFullYear(), referenceDate.getMonth(), referenceDate.getDate());
+  if (period === "daily") return toLocalDateString(date);
+  if (period === "weekly") {
+    date.setDate(date.getDate() - ((date.getDay() + 6) % 7));
+    return toLocalDateString(date);
+  }
+  if (period === "monthly") return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+  return String(date.getFullYear());
+}
+
 export function calculateExpenseSummary(transactions: Transaction[], selectedWalletIds: string[], range: ExpenseDateRange): { total: number; count: number } {
   if (!range.start || !range.end || range.start > range.end || selectedWalletIds.length === 0) return { total: 0, count: 0 };
   const selected = new Set(selectedWalletIds);
