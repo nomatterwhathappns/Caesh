@@ -14,7 +14,7 @@ for (const entry of await readdir(resRoot, { withFileTypes: true })) {
   if (!entry.isDirectory() || !/^mipmap(?:-.+)?$/.test(entry.name)) continue;
   const dir = `${resRoot}/${entry.name}`;
   for (const file of await readdir(dir)) {
-    if (/^ic_launcher(?:_round)?\\.(png|webp|xml)$/.test(file)) {
+    if (/^ic_launcher(?:_round)?\.(png|webp|xml)$/.test(file)) {
       await rm(`${dir}/${file}`, { force: true });
     }
   }
@@ -41,7 +41,7 @@ await writeFile(`${valuesDir}/caesh_icon.xml`, `<?xml version="1.0" encoding="ut
 
 const manifestPath = "android/app/src/main/AndroidManifest.xml";
 let manifest = await readFile(manifestPath, "utf8");
-const match = manifest.match(/<application\\b[^>]*>/s);
+const match = manifest.match(/<application\b[^>]*>/s);
 if (!match) throw new Error("AndroidManifest.xml application element not found.");
 let appTag = match[0];
 for (const [name, value] of [["android:icon", "@mipmap/ic_launcher"], ["android:roundIcon", "@mipmap/ic_launcher_round"]]) {
