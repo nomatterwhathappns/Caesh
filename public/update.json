@@ -1,5 +1,5 @@
 {
-  "version": "1.4.6",
-  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.4.6/Caesh.apk",
-  "notes": "CAESH 1.4.6: Detail wallet berisi saldo, riwayat pemasukan/pengeluaran/transfer, total pemasukan dan pengeluaran, serta catatan khusus yang tersimpan."
+  "version": "1.5.6",
+  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.5.6/Caesh.apk",
+  "notes": "CAESH 1.5.6: Notes utang per orang, pencatatan utang diberikan/diterima, penambahan utang sebelum lunas, pembayaran sebagian/penuh, dan riwayat utang khusus di halaman Transaksi. Notes otomatis hilang dari wallet saat lunas; riwayat tetap tersimpan."
 }
