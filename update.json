@@ -1,7 +1,7 @@
 {
-  "version": "1.8.9",
-  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.8.9/Caesh.apk",
-  "notes": "Riwayat pembaruan ditampilkan lengkap untuk semua versi yang terlewat.",
+  "version": "1.8.10",
+  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.8.10/Caesh.apk",
+  "notes": "Memperbaiki perilaku pop-up agar halaman latar terkunci, serta menutup menu pengaturan wallet saat klik di luar atau saat daftar wallet digeser.",
   "releases": [
     {
       "version": "1.7.8",
@@ -14,6 +14,10 @@
     {
       "version": "1.8.9",
       "notes": "Menampilkan daftar semua pembaruan yang terlewat sejak versi CAESH yang terpasang, bukan hanya versi terbaru."
+    },
+    {
+      "version": "1.8.10",
+      "notes": "Memperbaiki perilaku pop-up agar halaman latar terkunci, serta menutup menu pengaturan wallet saat klik di luar atau saat daftar wallet digeser."
     }
   ]
 }
