@@ -378,7 +378,7 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
 .overview-wallet-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px}
 .overview-wallet-heading>div{display:grid;gap:5px}
 .overview-wallet-heading strong{font:700 15px Manrope,sans-serif;color:var(--ink)}
-.overview-wallet-heading>button{width:32px;height:32px;border:1px solid var(--line);border-radius:9px;background:var(--surface-soft);color:var(--ink);font-size:19px;cursor:pointer}
+.overview-wallet-heading>button{width:42px;height:42px;flex:0 0 42px;display:grid;place-items:center;padding:0;border:1px solid var(--line);border-radius:11px;background:var(--surface-soft);color:var(--ink);font-size:25px;line-height:1;cursor:pointer}
 .overview-wallet-list{
   display:flex;
   align-items:flex-start;
@@ -405,7 +405,7 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
   background:var(--surface-soft);
   scroll-snap-align:start;
 }
-.overview-wallet-item-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}
+.overview-wallet-item-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
 .overview-wallet-item-top .wallet-name{margin:0;text-align:left}
 .wallet-delete-button{width:26px;height:26px;display:grid;place-items:center;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--muted);font-size:18px;line-height:1;cursor:pointer}
 .wallet-delete-button:hover{border-color:#d9aaa3;color:#b75c4d;background:var(--surface-soft)}
@@ -1315,7 +1315,7 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
 .summary-privacy-toggle{position:absolute;right:16px;top:48px;z-index:2;min-width:76px;width:auto;height:34px;padding:0 9px;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;border:1px solid #ffffff35;border-radius:10px;background:#ffffff12;color:#fff;font:600 11px 'DM Sans',sans-serif;cursor:pointer}
 .summary-privacy-toggle:hover{background:#ffffff22}
 .wallet-add-button{padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:600 11px 'Manrope',sans-serif;cursor:pointer}
-.wallet-settings-trigger{width:30px;height:28px;display:grid;place-items:center;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--muted);font-size:17px;letter-spacing:1px;cursor:pointer}
+.wallet-settings-trigger{width:30px;height:30px;flex:0 0 30px;display:flex;align-items:center;justify-content:center;padding:0;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--muted);font-family:Arial,sans-serif;font-size:15px;line-height:1;letter-spacing:0;cursor:pointer}
 .wallet-settings-trigger:hover{border-color:var(--accent);color:var(--ink)}
 .wallet-settings-menu{position:absolute;z-index:5;top:44px;right:10px;min-width:178px;padding:6px;border:1px solid var(--line);border-radius:12px;background:var(--surface);box-shadow:0 12px 30px #14201524;display:grid;gap:3px}
 .wallet-settings-menu button{width:100%;padding:10px 11px;border:0;border-radius:8px;background:transparent;color:var(--ink);text-align:left;font:500 11px 'DM Sans',sans-serif;cursor:pointer}
