@@ -119,7 +119,7 @@ export default function CaeshApp() {
   const [walletSettingsOpenId, setWalletSettingsOpenId] = useState<string | null>(null);
 
   const hasOpenModal = Boolean(
-    showForm || showWalletForm || showWishlistForm || purchaseTarget || showPhotoEditor ||
+    showForm || showWalletForm || showWishlistForm || purchaseTarget || showPhotoEditor || showExpenseWidgetSettings ||
     debtAction || detailWalletId || availableUpdate
   );
 
@@ -490,7 +490,11 @@ export default function CaeshApp() {
   const expenseWidgetSummary = calculateExpenseSummary(transactions, expenseWidgetWalletIds, expenseWidgetRange);
   const expenseWidgetOverLimit = isExpenseLimitExceeded(expenseWidgetSummary.total, expenseWidgetSettings);
 
-useEffect(() => {
+  const expenseWidgetRangeLabel = expenseWidgetRange.start && expenseWidgetRange.end
+    ? `${new Date(expenseWidgetRange.start + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })} – ${new Date(expenseWidgetRange.end + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}`
+    : "Pilih rentang tanggal";
+
+  useEffect(() => {
     if (!Capacitor.isNativePlatform() || !ready || !expenseWidgetSettingsLoaded) return;
     const overLimit = isExpenseLimitExceeded(expenseWidgetSummary.total, expenseWidgetSettings);
     ExpenseWidgetPlugin.syncExpenseWidget({
@@ -505,9 +509,6 @@ useEffect(() => {
     }).then((status) => setExpenseWidgetInstalled(status.installed))
       .catch((reason: unknown) => console.warn("CAESH widget could not refresh.", reason));
   }, [ready, expenseWidgetSettingsLoaded, expenseWidgetSettings, expenseWidgetSummary.total, expenseWidgetSummary.count, expenseWidgetRangeLabel]);
-  const expenseWidgetRangeLabel = expenseWidgetRange.start && expenseWidgetRange.end
-    ? `${new Date(expenseWidgetRange.start + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })} – ${new Date(expenseWidgetRange.end + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}`
-    : "Pilih rentang tanggal";
   async function handleWidgetImageFileChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     event.target.value = "";
