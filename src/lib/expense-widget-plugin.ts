@@ -7,7 +7,7 @@ export interface ExpenseWidgetBridge {
     periodLabel: string;
     transactionCount: number;
     overLimit: boolean;
-    beforeImage?: string;
+    baseImage?: string;\n    beforeImage?: string;
     afterImage?: string;
     enabled: boolean;
   }): Promise<{ installed: boolean }>;
