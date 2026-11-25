@@ -9,6 +9,7 @@ export type ExpenseWidgetSettings = {
   endDate: string;
   limitEnabled: boolean;
   monthlyLimit: number;
+  baseImage: string;
   beforeImage: string;
   afterImage: string;
 };
@@ -22,6 +23,7 @@ export const DEFAULT_EXPENSE_WIDGET_SETTINGS: ExpenseWidgetSettings = {
   endDate: "",
   limitEnabled: false,
   monthlyLimit: 0,
+  baseImage: "",
   beforeImage: "",
   afterImage: "",
 };
