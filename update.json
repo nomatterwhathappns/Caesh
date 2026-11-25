@@ -2,7 +2,11 @@
   "version": "1.10.10",
   "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.10.10/Caesh.apk",
   "notes": "Menambahkan widget pengeluaran di home screen Android dengan periode fleksibel, pilihan wallet, dan background opsional berdasarkan batas pengeluaran.",
-  "releases": [\n    {\n      "version": "1.10.10",\n      "notes": "Menambahkan widget pengeluaran di home screen Android dengan periode fleksibel, pilihan wallet, dan background opsional berdasarkan batas pengeluaran."\n    },
+  "releases": [
+    {
+      "version": "1.10.10",
+      "notes": "Menambahkan widget pengeluaran di home screen Android dengan periode fleksibel, pilihan wallet, dan background opsional berdasarkan batas pengeluaran."
+    },
     {
       "version": "1.7.8",
       "notes": "Memperbaiki tombol Back Android agar menutup dialog, kembali ke Ringkasan, atau keluar dari aplikasi dari halaman utama."
