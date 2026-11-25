@@ -124,7 +124,7 @@ test("invalid or empty-wallet backups are rejected without changing existing rec
     preferences: { theme: "light", categories: null },
   };
   await restoreBackup(original);
-  await assert.rejects(() => restoreBackup({ ...original, wallets: [] }), /tidak memiliki wallet/);
+  await assert.rejects(() => restoreBackup({ ...original, wallets: [] }), /minimal satu wallet biasa/);
   await assert.rejects(() => restoreBackup({ ...original, wallets: [{ ...wallet, initialBalance: 0, category: "notes" as const, debtDirection: "lent" as const }] }), /minimal satu wallet biasa/);
   await assert.rejects(() => restoreBackup({ format: "wrong" }), /tidak valid/);
   assert.deepEqual(await getTransactions(), original.transactions);
