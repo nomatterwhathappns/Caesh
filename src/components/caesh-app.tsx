@@ -382,21 +382,6 @@ export default function CaeshApp() {
     return () => { active = false; };
   }, []);
 
-  useEffect(() => {
-    if (!Capacitor.isNativePlatform() || !ready || !expenseWidgetSettingsLoaded) return;
-    const overLimit = isExpenseLimitExceeded(expenseWidgetSummary.total, expenseWidgetSettings);
-    ExpenseWidgetPlugin.syncExpenseWidget({
-      title: expenseWidgetSettings.title,
-      amount: rupiah(expenseWidgetSummary.total),
-      periodLabel: expenseWidgetRangeLabel,
-      transactionCount: expenseWidgetSummary.count,
-      overLimit,
-      beforeImage: expenseWidgetSettings.beforeImage,
-      afterImage: expenseWidgetSettings.afterImage,
-      enabled: true,
-    }).then((status) => setExpenseWidgetInstalled(status.installed))
-      .catch((reason: unknown) => console.warn("CAESH widget could not refresh.", reason));
-  }, [ready, expenseWidgetSettingsLoaded, expenseWidgetSettings, expenseWidgetSummary.total, expenseWidgetSummary.count, expenseWidgetRangeLabel]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -504,6 +489,22 @@ export default function CaeshApp() {
   const expenseWidgetRange = getExpenseDateRange(expenseWidgetSettings.period, new Date(), expenseWidgetSettings.startDate, expenseWidgetSettings.endDate);
   const expenseWidgetSummary = calculateExpenseSummary(transactions, expenseWidgetWalletIds, expenseWidgetRange);
   const expenseWidgetOverLimit = isExpenseLimitExceeded(expenseWidgetSummary.total, expenseWidgetSettings);
+
+useEffect(() => {
+    if (!Capacitor.isNativePlatform() || !ready || !expenseWidgetSettingsLoaded) return;
+    const overLimit = isExpenseLimitExceeded(expenseWidgetSummary.total, expenseWidgetSettings);
+    ExpenseWidgetPlugin.syncExpenseWidget({
+      title: expenseWidgetSettings.title,
+      amount: rupiah(expenseWidgetSummary.total),
+      periodLabel: expenseWidgetRangeLabel,
+      transactionCount: expenseWidgetSummary.count,
+      overLimit,
+      beforeImage: expenseWidgetSettings.beforeImage,
+      afterImage: expenseWidgetSettings.afterImage,
+      enabled: true,
+    }).then((status) => setExpenseWidgetInstalled(status.installed))
+      .catch((reason: unknown) => console.warn("CAESH widget could not refresh.", reason));
+  }, [ready, expenseWidgetSettingsLoaded, expenseWidgetSettings, expenseWidgetSummary.total, expenseWidgetSummary.count, expenseWidgetRangeLabel]);
   const expenseWidgetRangeLabel = expenseWidgetRange.start && expenseWidgetRange.end
     ? `${new Date(expenseWidgetRange.start + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })} – ${new Date(expenseWidgetRange.end + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}`
     : "Pilih rentang tanggal";
