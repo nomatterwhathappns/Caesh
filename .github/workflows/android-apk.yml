@@ -127,12 +127,16 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+      - name: Expose CAESH version
+        id: app_version
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
       - name: Publish direct APK download
-        if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/caesh' && steps.signing_check.outputs.enabled == 'true'
+        if: ((github.event_name == 'push' && github.ref == 'refs/heads/caesh') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/caesh')) && steps.signing_check.outputs.enabled == 'true'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: caesh-android-preview
-          name: Caesh Android Preview
+          tag_name: caesh-v${{ steps.app_version.outputs.version }}
+          name: CAESH v${{ steps.app_version.outputs.version }}
           prerelease: true
           make_latest: false
           files: android/app/build/outputs/apk/release/Caesh.apk
