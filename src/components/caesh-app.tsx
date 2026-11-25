@@ -153,8 +153,8 @@ export default function CaeshApp() {
       .then(([savedTransactions, savedWallets]) => {
         setTransactions(savedTransactions);
         setWallets(savedWallets);
-        setWalletId(savedWallets[0]?.id ?? "");
-        setToWalletId(savedWallets[1]?.id ?? "");
+        setWalletId(savedWallets.find((wallet) => wallet.category !== "notes")?.id ?? "");
+        setToWalletId(savedWallets.filter((wallet) => wallet.category !== "notes")[1]?.id ?? "");
       })
       .catch((reason: unknown) => setError(reason instanceof Error ? reason.message : "Database lokal tidak dapat dibuka."))
       .finally(() => setReady(true));
@@ -290,14 +290,14 @@ export default function CaeshApp() {
   function toggleAllBalanceFilterWallets() {
     setBalanceFilterWalletIds(selectedBalanceWalletIds.length === wallets.length ? [] : wallets.map((wallet) => wallet.id));
   }
-  const expenseWidgetWalletIds = expenseWidgetSettings.walletIds ?? wallets.map((wallet) => wallet.id);
+  const expenseWidgetWalletIds = expenseWidgetSettings.walletIds === null ? regularWallets.map((wallet) => wallet.id) : expenseWidgetSettings.walletIds.filter((id) => regularWallets.some((wallet) => wallet.id === id));
   const expenseWidgetRange = getExpenseDateRange(expenseWidgetSettings.period, new Date(), expenseWidgetSettings.startDate, expenseWidgetSettings.endDate);
   const expenseWidgetSummary = calculateExpenseSummary(transactions, expenseWidgetWalletIds, expenseWidgetRange);
   const expenseWidgetRangeLabel = expenseWidgetRange.start && expenseWidgetRange.end
     ? `${new Date(expenseWidgetRange.start + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })} – ${new Date(expenseWidgetRange.end + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}`
     : "Pilih rentang tanggal";
   function toggleExpenseWidgetWallet(walletId: string) {
-    const current = expenseWidgetSettings.walletIds ?? wallets.map((wallet) => wallet.id);
+    const current = expenseWidgetSettings.walletIds === null ? regularWallets.map((wallet) => wallet.id) : expenseWidgetSettings.walletIds.filter((id) => regularWallets.some((wallet) => wallet.id === id));
     const next = current.includes(walletId) ? current.filter((id) => id !== walletId) : [...current, walletId];
     setExpenseWidgetSettings((settings) => ({ ...settings, walletIds: next }));
   }
@@ -592,13 +592,13 @@ export default function CaeshApp() {
   }
 
   async function handleWalletDelete(id: string) {
-    if (wallets.length <= 1) {
-      setError("Caesh harus memiliki minimal satu wallet. Tambahkan wallet lain sebelum menghapus yang ini.");
-      return;
-    }
     const wallet = wallets.find((item) => item.id === id);
     if (!wallet) return;
     if (wallet.category === "notes") { setError("Notes utang hanya akan hilang otomatis setelah lunas."); return; }
+    if (regularWallets.length <= 1) {
+      setError("Caesh harus memiliki minimal satu wallet biasa agar pembayaran dan pencatatan tetap bisa dilakukan.");
+      return;
+    }
     const related = transactions.filter((item) => item.walletId === id || item.toWalletId === id);
     const balance = walletBalances.find((item) => item.id === id)?.balance ?? wallet.initialBalance;
     const message = related.length
@@ -609,8 +609,8 @@ export default function CaeshApp() {
       await removeWallet(id);
       const nextWallets = wallets.filter((item) => item.id !== id);
       setWallets(nextWallets);
-      if (walletId === id) setWalletId(nextWallets[0]?.id ?? "");
-      if (toWalletId === id) setToWalletId(nextWallets.find((item) => item.id !== walletId)?.id ?? nextWallets[0]?.id ?? "");
+      if (walletId === id) setWalletId(nextWallets.find((item) => item.category !== "notes")?.id ?? "");
+      if (toWalletId === id) setToWalletId(nextWallets.find((item) => item.category !== "notes" && item.id !== walletId)?.id ?? nextWallets.find((item) => item.category !== "notes")?.id ?? "");
       setError("");
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Wallet gagal dihapus.");
@@ -714,8 +714,8 @@ export default function CaeshApp() {
               <div className="expense-widget-setting-block"><label className="field-label" htmlFor="expense-widget-period">Periode pengeluaran</label><select id="expense-widget-period" value={expenseWidgetSettings.period} onChange={(event) => setExpenseWidgetSettings((settings) => ({ ...settings, period: event.target.value as ExpenseWidgetPeriod }))}><option value="daily">Harian</option><option value="weekly">Mingguan</option><option value="monthly">Bulanan</option><option value="custom">Rentang tanggal sendiri</option></select></div>
               {expenseWidgetSettings.period === "custom" && <div className="expense-widget-date-grid"><div><label className="field-label" htmlFor="expense-widget-start">Dari tanggal</label><input id="expense-widget-start" type="date" value={expenseWidgetSettings.startDate} max={expenseWidgetSettings.endDate || undefined} onChange={(event) => setExpenseWidgetSettings((settings) => ({ ...settings, startDate: event.target.value }))} /></div><div><label className="field-label" htmlFor="expense-widget-end">Sampai tanggal</label><input id="expense-widget-end" type="date" value={expenseWidgetSettings.endDate} min={expenseWidgetSettings.startDate || undefined} onChange={(event) => setExpenseWidgetSettings((settings) => ({ ...settings, endDate: event.target.value }))} /></div></div>}
               <div className="expense-widget-wallets"><span className="field-label">Hitung dari wallet</span>
-                {wallets.length === 0 ? <p className="expense-widget-empty">Belum ada wallet yang bisa dipilih.</p> : wallets.map((wallet) => <label className="expense-widget-wallet-option" key={wallet.id}><input type="checkbox" checked={expenseWidgetWalletIds.includes(wallet.id)} onChange={() => toggleExpenseWidgetWallet(wallet.id)} /><span>{wallet.name}</span></label>)}
-                <button type="button" className="text-button expense-widget-select-all" onClick={() => setExpenseWidgetSettings((settings) => ({ ...settings, walletIds: settings.walletIds === null || settings.walletIds.length === wallets.length ? [] : wallets.map((wallet) => wallet.id) }))}>{expenseWidgetWalletIds.length === wallets.length ? "Kosongkan pilihan" : "Pilih semua wallet"}</button>
+                {regularWallets.length === 0 ? <p className="expense-widget-empty">Belum ada wallet biasa yang bisa dipilih.</p> : regularWallets.map((wallet) => <label className="expense-widget-wallet-option" key={wallet.id}><input type="checkbox" checked={expenseWidgetWalletIds.includes(wallet.id)} onChange={() => toggleExpenseWidgetWallet(wallet.id)} /><span>{wallet.name}</span></label>)}
+                <button type="button" className="text-button expense-widget-select-all" onClick={() => setExpenseWidgetSettings((settings) => ({ ...settings, walletIds: settings.walletIds === null || settings.walletIds.filter((id) => regularWallets.some((wallet) => wallet.id === id)).length === regularWallets.length ? [] : regularWallets.map((wallet) => wallet.id) }))}>{expenseWidgetWalletIds.length === wallets.length ? "Kosongkan pilihan" : "Pilih semua wallet"}</button>
               </div>
             </div>}
           </section>
@@ -756,7 +756,7 @@ export default function CaeshApp() {
               ? <article className="panel-card empty-state"><div className="empty-art">♡</div><strong>{wishlistTab === "pending" ? "Belum ada wishlist" : "Belum ada barang yang dibeli"}</strong><p>{wishlistTab === "pending" ? "Tambahkan barang yang ingin kamu beli nanti." : "Barang yang sudah dibeli dari wishlist akan muncul di sini."}</p>{wishlistTab === "pending" && <button className="outline-button" onClick={() => setShowWishlistForm(true)}>Tambah wishlist pertama</button>}</article>
               : <div className="wishlist-grid">{wishlist.filter((item) => item.status === wishlistTab).map((item) => <article className="panel-card wishlist-item" key={item.id}>
                   <div className="wishlist-item-main"><strong>{item.name}</strong><span>{item.status === "purchased" ? `Dibeli · ${new Date(item.purchasedAt ?? item.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}` : `Ditambahkan · ${new Date(item.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}`}</span></div>
-                  {item.status === "purchased" ? <div className="wishlist-purchase-detail"><strong>{rupiah(item.purchaseAmount ?? 0)}</strong><span>{walletName(item.walletId ?? "")}</span></div> : <button className="primary-button" onClick={() => { setPurchaseTarget(item); setPurchaseWalletId(wallets[0]?.id ?? ""); setPurchaseAmount(""); }}>Beli</button>}
+                  {item.status === "purchased" ? <div className="wishlist-purchase-detail"><strong>{rupiah(item.purchaseAmount ?? 0)}</strong><span>{walletName(item.walletId ?? "")}</span></div> : <button className="primary-button" onClick={() => { setPurchaseTarget(item); setPurchaseWalletId(regularWallets[0]?.id ?? ""); setPurchaseAmount(""); }}>Beli</button>}
                   <button type="button" className="delete-button" aria-label={`Hapus ${item.name} dari wishlist`} onClick={() => handleWishlistDelete(item)}>×</button>
                 </article>)}</div>}
           </section>}
