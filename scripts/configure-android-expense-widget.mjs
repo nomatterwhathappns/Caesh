@@ -204,7 +204,7 @@ public class ExpenseWidgetPlugin extends Plugin {
         String transactionCount = String.valueOf(call.getInt("transactionCount", 0));
         boolean overLimit = call.getBoolean("overLimit", false);
         boolean enabled = call.getBoolean("enabled", true);
-        String beforeImage = call.getString("beforeImage", "");
+        String baseImage = call.getString("baseImage", "");\n        String beforeImage = call.getString("beforeImage", "");
         String afterImage = call.getString("afterImage", "");
         String image = overLimit && !afterImage.isEmpty() ? afterImage : beforeImage;
         if (!enabled) image = "";
