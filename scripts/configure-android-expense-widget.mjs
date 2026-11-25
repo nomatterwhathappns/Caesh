@@ -68,11 +68,15 @@ const layoutXml = (padding, titleSize, amountSize, captionSize) => `<?xml versio
             android:textStyle="bold"
             android:shadowColor="#99000000"
             android:shadowRadius="3" />
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
         <TextView
             android:id="@+id/expense_widget_amount"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="0dp"
             android:text="Rp0"
             android:textColor="#FFFFFF"
             android:textSize="${amountSize}sp"
