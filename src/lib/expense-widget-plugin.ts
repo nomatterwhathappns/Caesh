@@ -4,10 +4,14 @@ export interface ExpenseWidgetBridge {
   syncExpenseWidget(options: {
     title: string;
     amount: string;
-    periodLabel: string;\n    period: "daily" | "weekly" | "monthly" | "yearly" | "custom";\n    periodKey: string;
+    periodLabel: string;
+    period: "daily" | "weekly" | "monthly" | "yearly" | "custom";
+    periodKey: string;
     transactionCount: number;
-    overLimit: boolean;\n    limitEnabled: boolean;
-    baseImage?: string;\n    beforeImage?: string;
+    overLimit: boolean;
+    limitEnabled: boolean;
+    baseImage?: string;
+    beforeImage?: string;
     afterImage?: string;
     enabled: boolean;
   }): Promise<{ installed: boolean }>;
