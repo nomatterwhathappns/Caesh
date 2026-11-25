@@ -48,11 +48,9 @@ const layoutXml = (padding, titleSize, amountSize, captionSize) => `<?xml versio
         android:clipToOutline="true"
         android:scaleType="centerCrop"
         android:contentDescription="@null" />
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="top"
         android:padding="${padding}dp"
         android:background="@drawable/expense_widget_overlay"
         android:clipToOutline="true">
@@ -60,6 +58,7 @@ const layoutXml = (padding, titleSize, amountSize, captionSize) => `<?xml versio
             android:id="@+id/expense_widget_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
             android:text="Pengeluaran Bulanan"
             android:textColor="#FFFFFF"
             android:textSize="${titleSize}sp"
@@ -68,10 +67,13 @@ const layoutXml = (padding, titleSize, amountSize, captionSize) => `<?xml versio
             android:textStyle="bold"
             android:shadowColor="#99000000"
             android:shadowRadius="3" />
-        <Space
+        <LinearLayout
+            android:id="@+id/expense_widget_bottom_group"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:orientation="vertical"
+            android:gravity="bottom">
         <TextView
             android:id="@+id/expense_widget_amount"
             android:layout_width="match_parent"
@@ -109,7 +111,8 @@ const layoutXml = (padding, titleSize, amountSize, captionSize) => `<?xml versio
             android:ellipsize="end"
             android:shadowColor="#99000000"
             android:shadowRadius="2" />
-    </LinearLayout>
+        </LinearLayout>
+    </RelativeLayout>
 </FrameLayout>
 `;
 await writeFile(`${resDir}/layout/expense_widget_small.xml`, layoutXml(9, 11, 16, 9));
