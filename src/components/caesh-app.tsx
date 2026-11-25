@@ -274,7 +274,7 @@ export default function CaeshApp() {
   }, [summaryNominalsHidden, summaryPrivacyLoaded]);
 
   useEffect(() => {
-    if (!walletPrivacyLoaded) return;
+    if (!walletPrivacyLoaded || !ready) return;
     const activeIds = hiddenWalletNominals.filter((id) => wallets.some((wallet) => wallet.id === id && wallet.category !== "notes"));
     if (activeIds.length !== hiddenWalletNominals.length) setHiddenWalletNominals(activeIds);
     window.localStorage.setItem("caesh-hidden-wallet-nominals", JSON.stringify(activeIds));
