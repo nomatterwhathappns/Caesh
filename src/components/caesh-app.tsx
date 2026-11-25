@@ -92,6 +92,21 @@ export default function CaeshApp() {
   const [expenseWidgetSettings, setExpenseWidgetSettings] = useState<ExpenseWidgetSettings>({ period: "monthly", walletIds: null, startDate: today(), endDate: today() });
   const [expenseWidgetSettingsLoaded, setExpenseWidgetSettingsLoaded] = useState(false);
   const [showExpenseWidgetSettings, setShowExpenseWidgetSettings] = useState(false);
+  const [balanceFilterWalletIds, setBalanceFilterWalletIds] = useState<string[] | null>(null);
+  const [balanceFilterLoaded, setBalanceFilterLoaded] = useState(false);
+  const [showBalanceFilter, setShowBalanceFilter] = useState(false);
+
+  useEffect(() => {
+    try {
+      const rawBalanceFilter = window.localStorage.getItem("caesh-balance-wallet-filter");
+      if (rawBalanceFilter !== null) {
+        const parsed: unknown = JSON.parse(rawBalanceFilter);
+        if (parsed === null) setBalanceFilterWalletIds(null);
+        else if (Array.isArray(parsed) && parsed.every((id) => typeof id === "string")) setBalanceFilterWalletIds(parsed);
+      }
+    } catch { /* Keep the default of including all wallets if saved settings are unreadable. */ }
+    setBalanceFilterLoaded(true);
+  }, []);
 
   useEffect(() => {
     try {
@@ -222,6 +237,11 @@ export default function CaeshApp() {
   }
 
   useEffect(() => {
+    if (!balanceFilterLoaded) return;
+    window.localStorage.setItem("caesh-balance-wallet-filter", JSON.stringify(balanceFilterWalletIds));
+  }, [balanceFilterWalletIds, balanceFilterLoaded]);
+
+  useEffect(() => {
     if (!expenseWidgetSettingsLoaded) return;
     window.localStorage.setItem("caesh-expense-widget", JSON.stringify(expenseWidgetSettings));
   }, [expenseWidgetSettings, expenseWidgetSettingsLoaded]);
@@ -242,7 +262,22 @@ export default function CaeshApp() {
     }, 0);
     return { ...wallet, balance: wallet.initialBalance + movement };
   }), [wallets, transactions]);
-  const totalBalance = walletBalances.reduce((sum, wallet) => sum + wallet.balance, 0);
+  const selectedBalanceWalletIds = balanceFilterWalletIds === null
+    ? wallets.map((wallet) => wallet.id)
+    : balanceFilterWalletIds.filter((id) => wallets.some((wallet) => wallet.id === id));
+  const totalBalance = walletBalances.reduce(
+    (sum, wallet) => sum + (selectedBalanceWalletIds.includes(wallet.id) ? wallet.balance : 0),
+    0,
+  );
+  function toggleBalanceFilterWallet(walletId: string) {
+    setBalanceFilterWalletIds((current) => {
+      const selected = current === null ? wallets.map((wallet) => wallet.id) : current.filter((id) => wallets.some((wallet) => wallet.id === id));
+      return selected.includes(walletId) ? selected.filter((id) => id !== walletId) : [...selected, walletId];
+    });
+  }
+  function toggleAllBalanceFilterWallets() {
+    setBalanceFilterWalletIds(selectedBalanceWalletIds.length === wallets.length ? [] : wallets.map((wallet) => wallet.id));
+  }
   const expenseWidgetWalletIds = expenseWidgetSettings.walletIds ?? wallets.map((wallet) => wallet.id);
   const expenseWidgetRange = getExpenseDateRange(expenseWidgetSettings.period, new Date(), expenseWidgetSettings.startDate, expenseWidgetSettings.endDate);
   const expenseWidgetSummary = calculateExpenseSummary(transactions, expenseWidgetWalletIds, expenseWidgetRange);
@@ -528,7 +563,13 @@ export default function CaeshApp() {
           {activeNav === "overview" && <>
           <div className="period-row"><span className="section-kicker">RINGKASAN KEUANGAN</span><div className="period-tabs" aria-label="Periode ringkasan"><button className={period === "month" ? "selected" : ""} onClick={() => setPeriod("month")}>Bulan ini</button><button className={period === "year" ? "selected" : ""} onClick={() => setPeriod("year")}>Tahun ini</button><button className={period === "all" ? "selected" : ""} onClick={() => setPeriod("all")}>Semua</button></div></div>
           <section className="stats-grid" aria-label="Ringkasan saldo">
-            <article className="stat-card balance-card"><div className="stat-top"><span>Total saldo semua wallet</span><span className="stat-symbol">↗</span></div><div className="stat-value">{ready ? rupiah(totalBalance) : "Memuat..."}</div><div className="stat-foot"><span className="balance-dot" /> Gabungan saldo seluruh wallet</div><div className="balance-decoration">CAESH</div></article>
+            <article className="stat-card balance-card"><div className="stat-top"><span>Total saldo semua wallet</span><span className="stat-symbol">↗</span></div><div className="stat-value">{ready ? rupiah(totalBalance) : "Memuat..."}</div><div className="stat-foot"><span className="balance-dot" /> {selectedBalanceWalletIds.length === wallets.length ? "Gabungan saldo seluruh wallet" : `Menghitung ${selectedBalanceWalletIds.length} dari ${wallets.length} wallet`}</div>
+              <button type="button" className="balance-filter-trigger" aria-expanded={showBalanceFilter} onClick={() => setShowBalanceFilter((visible) => !visible)}>{showBalanceFilter ? "Tutup filter wallet" : "Atur wallet yang dihitung"}</button>
+              {showBalanceFilter && <div className="balance-filter-panel">
+                <div className="balance-filter-heading"><strong>Pilih wallet untuk total saldo</strong><button type="button" className="balance-filter-select-all" onClick={toggleAllBalanceFilterWallets}>{selectedBalanceWalletIds.length === wallets.length ? "Kosongkan" : "Pilih semua"}</button></div>
+                {wallets.length === 0 ? <p className="expense-widget-empty">Belum ada wallet yang bisa dipilih.</p> : wallets.map((wallet) => <label className="balance-filter-option" key={wallet.id}><input type="checkbox" checked={selectedBalanceWalletIds.includes(wallet.id)} onChange={() => toggleBalanceFilterWallet(wallet.id)} /><span>{wallet.name}</span></label>)}
+              </div>}
+              <div className="balance-decoration">CAESH</div></article>
             <article className="stat-card"><div className="stat-top"><span>Total pemasukan</span><span className="stat-icon income-icon">↙</span></div><div className="stat-value">{ready ? rupiah(totals.income) : "Memuat..."}</div><div className="stat-foot">Uang yang masuk pada periode ini</div></article>
             <article className="stat-card"><div className="stat-top"><span>Total pengeluaran</span><span className="stat-icon expense-icon">↗</span></div><div className="stat-value">{ready ? rupiah(totals.expense) : "Memuat..."}</div><div className="stat-foot">Uang yang digunakan pada periode ini</div></article>
           </section>
