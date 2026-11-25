@@ -4,7 +4,7 @@ export interface ExpenseWidgetBridge {
   syncExpenseWidget(options: {
     title: string;
     amount: string;
-    periodLabel: string;
+    periodLabel: string;\n    period: "daily" | "weekly" | "monthly" | "yearly" | "custom";\n    periodKey: string;
     transactionCount: number;
     overLimit: boolean;
     baseImage?: string;\n    beforeImage?: string;
