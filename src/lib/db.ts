@@ -166,6 +166,11 @@ export async function removeWallet(id: string): Promise<void> {
         tx.abort();
         return;
       }
+      if (wallet.category === "notes") {
+        failure = new Error("Notes utang hanya dapat ditutup melalui pembayaran lunas.");
+        tx.abort();
+        return;
+      }
       if (transactionsRequest.readyState !== "done") return;
       const transactions = transactionsRequest.result as Transaction[];
       transactions.forEach((item) => {
@@ -194,6 +199,11 @@ export async function removeWallet(id: string): Promise<void> {
       const wallet = wallets.find((item) => item.id === id);
       if (!wallet) {
         failure = new Error("Wallet tidak ditemukan.");
+        tx.abort();
+        return;
+      }
+      if (wallet.category === "notes") {
+        failure = new Error("Notes utang hanya dapat ditutup melalui pembayaran lunas.");
         tx.abort();
         return;
       }
@@ -254,7 +264,7 @@ function validateDebtTransfer(transaction: Transaction, noteWallet: Wallet, acti
 
 /** Create a Notes wallet and its first cash movement atomically. */
 export async function createDebtNote(wallet: Wallet, transaction: Transaction): Promise<void> {
-  if (wallet.category !== "notes" || !wallet.debtDirection || wallet.initialBalance !== 0) {
+  if (wallet.category !== "notes" || !wallet.debtDirection || wallet.initialBalance !== 0 || !wallet.name.trim()) {
     throw new Error("Data Notes baru tidak valid.");
   }
   const db = await openDatabase();
