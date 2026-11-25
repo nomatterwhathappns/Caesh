@@ -1506,3 +1506,8 @@ body.caesh-modal-open {
 .debt-detail-actions .modal-actions > button {
   flex: 1 1 130px;
 }
+
+/* v1.11.18: debt action dialog must sit above the wallet detail dialog. */
+.debt-action-backdrop {
+  z-index: 20;
+}
