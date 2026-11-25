@@ -597,7 +597,7 @@ export default function CaeshApp() {
   }
   const recent = transactions.filter((item) => !item.hiddenFromHistory).slice(0, 6);
   const visibleTransactions = transactions.filter((item) => !item.hiddenFromHistory).filter((item) => { const query = transactionSearch.trim().toLocaleLowerCase(); const matchesSearch = !query || [item.note, item.category, walletName(item.walletId), item.toWalletId ? walletName(item.toWalletId) : ""].join(" ").toLocaleLowerCase().includes(query); const matchesFilter = transactionFilter === "all" || (transactionFilter === "debt" ? item.category === "Utang" : item.kind === transactionFilter && item.category !== "Utang"); return matchesSearch && matchesFilter; });
-  const transferTransactions = transactions.filter((item) => item.kind === "transfer");
+  const transferTransactions = transactions.filter((item) => !item.hiddenFromHistory && item.kind === "transfer");
   const expenseByCategory = periodTransactions.filter((item) => item.kind === "expense").reduce<Record<string, number>>((result, item) => { result[item.category] = (result[item.category] ?? 0) + item.amount; return result; }, {});
   const largestExpense = Math.max(1, ...Object.values(expenseByCategory));
 
