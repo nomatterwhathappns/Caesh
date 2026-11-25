@@ -9,7 +9,7 @@ import { AppInstallPlugin } from "../lib/app-install-plugin";
 import { calculateExpenseSummary, getExpenseDateRange, getExpensePeriodKey, isExpenseLimitExceeded, normalizeExpenseWidgetSettings, DEFAULT_EXPENSE_WIDGET_SETTINGS, ExpenseWidgetPeriod, ExpenseWidgetSettings } from "@/lib/expense-widget";
 import { ExpenseWidgetPlugin } from "@/lib/expense-widget-plugin";
 import {
-  createDebtNote, recordDebtMovement, getTransactions, getWallets, removeTransaction, removeWallet, saveTransaction, saveWallet,
+  createDebtNote, recordDebtMovement, getTransactions, getWallets, removeTransaction, removeWallet, settleDebtNote, saveTransaction, saveWallet,
   DebtDirection, Transaction, TransactionKind, Wallet, WishlistItem, getWishlist, saveWishlist, removeWishlist, purchaseWishlist,
 } from "@/lib/db";
 
@@ -118,6 +118,7 @@ export default function CaeshApp() {
   const [walletPrivacyLoaded, setWalletPrivacyLoaded] = useState(false);
   const [walletSettingsOpenId, setWalletSettingsOpenId] = useState<string | null>(null);
   const [deleteTransactionTarget, setDeleteTransactionTarget] = useState<Transaction | null>(null);
+  const [deleteDebtWithHistory, setDeleteDebtWithHistory] = useState(false);
 
   const hasOpenModal = Boolean(
     showForm || showWalletForm || showWishlistForm || purchaseTarget || showPhotoEditor || showExpenseWidgetSettings ||
@@ -557,6 +558,7 @@ export default function CaeshApp() {
   const periodTransactions = useMemo(() => {
     const now = new Date();
     return transactions.filter((item) => {
+      if (item.hiddenFromHistory) return false;
       if (period === "all") return true;
       const itemDate = new Date(item.date + "T00:00:00");
       return itemDate.getFullYear() === now.getFullYear() &&
@@ -575,7 +577,7 @@ export default function CaeshApp() {
   const detailWallet = wallets.find((wallet) => wallet.id === detailWalletId) ?? null;
   const detailWalletBalance = detailWallet ? walletBalances.find((wallet) => wallet.id === detailWallet.id)?.balance ?? detailWallet.initialBalance : 0;
   const detailWalletTransactions = detailWallet
-    ? transactions.filter((item) => item.walletId === detailWallet.id || item.toWalletId === detailWallet.id)
+    ? transactions.filter((item) => !item.hiddenFromHistory && (item.walletId === detailWallet.id || item.toWalletId === detailWallet.id))
     : [];
   const detailWalletIncome = detailWalletTransactions.filter((item) => item.kind === "income" && item.walletId === detailWallet?.id).reduce((sum, item) => sum + item.amount, 0);
   const detailWalletExpense = detailWalletTransactions.filter((item) => item.kind === "expense" && item.walletId === detailWallet?.id).reduce((sum, item) => sum + item.amount, 0);
@@ -593,8 +595,8 @@ export default function CaeshApp() {
       setDetailWalletSaving(false);
     }
   }
-  const recent = transactions.slice(0, 6);
-  const visibleTransactions = transactions.filter((item) => { const query = transactionSearch.trim().toLocaleLowerCase(); const matchesSearch = !query || [item.note, item.category, walletName(item.walletId), item.toWalletId ? walletName(item.toWalletId) : ""].join(" ").toLocaleLowerCase().includes(query); const matchesFilter = transactionFilter === "all" || (transactionFilter === "debt" ? item.category === "Utang" : item.kind === transactionFilter && item.category !== "Utang"); return matchesSearch && matchesFilter; });
+  const recent = transactions.filter((item) => !item.hiddenFromHistory).slice(0, 6);
+  const visibleTransactions = transactions.filter((item) => !item.hiddenFromHistory).filter((item) => { const query = transactionSearch.trim().toLocaleLowerCase(); const matchesSearch = !query || [item.note, item.category, walletName(item.walletId), item.toWalletId ? walletName(item.toWalletId) : ""].join(" ").toLocaleLowerCase().includes(query); const matchesFilter = transactionFilter === "all" || (transactionFilter === "debt" ? item.category === "Utang" : item.kind === transactionFilter && item.category !== "Utang"); return matchesSearch && matchesFilter; });
   const transferTransactions = transactions.filter((item) => item.kind === "transfer");
   const expenseByCategory = periodTransactions.filter((item) => item.kind === "expense").reduce<Record<string, number>>((result, item) => { result[item.category] = (result[item.category] ?? 0) + item.amount; return result; }, {});
   const largestExpense = Math.max(1, ...Object.values(expenseByCategory));
@@ -832,18 +834,42 @@ export default function CaeshApp() {
   }
 
   async function handleDelete(id: string) {
-    const target = transactions.find((item) => item.id === id);
-    if (target?.category === "Utang") { setError("Riwayat utang tidak bisa dihapus langsung agar saldo dan status pelunasan tetap akurat."); return; }
+    const target = transactions.find((item) => item.id === id && !item.hiddenFromHistory);
+    setDeleteDebtWithHistory(false);
     setDeleteTransactionTarget(target ?? null);
   }
 
   async function confirmDeleteTransaction() {
     if (!deleteTransactionTarget) return;
     try {
-      await removeTransaction(deleteTransactionTarget.id);
+      await removeTransaction(deleteTransactionTarget.id, deleteTransactionTarget.category === "Utang" && deleteDebtWithHistory);
+      const [savedTransactions, savedWallets] = await Promise.all([getTransactions(), getWallets()]);
+      setTransactions(savedTransactions);
+      setWallets(savedWallets);
       setDeleteTransactionTarget(null);
-      setTransactions((current) => current.filter((item) => item.id !== deleteTransactionTarget.id));
-    } catch { setError("Transaksi gagal dihapus."); }
+      setDeleteDebtWithHistory(false);
+      if (detailWalletId && !savedWallets.some((wallet) => wallet.id === detailWalletId)) {
+        setDetailWalletId(null);
+        setDetailWalletNote("");
+      }
+      setError("");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Transaksi gagal dihapus.");
+    }
+  }
+
+  async function handleSettleDebt(wallet: Wallet) {
+    const remaining = Math.abs(walletBalances.find((item) => item.id === wallet.id)?.balance ?? 0);
+    if (!window.confirm(`Selesaikan utang dengan ${wallet.name} yang masih tersisa ${rupiah(remaining)}? Utang akan dianggap lunas tanpa pembayaran tambahan dan saldo wallet tidak berubah.`)) return;
+    try {
+      await settleDebtNote(wallet.id);
+      setWallets((current) => current.filter((item) => item.id !== wallet.id));
+      setDetailWalletId(null);
+      setDetailWalletNote("");
+      setError("");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Utang gagal diselesaikan.");
+    }
   }
 
   async function handleWalletDelete(id: string) {
@@ -973,7 +999,7 @@ export default function CaeshApp() {
           {activeNav === "overview" && <section className="lower-grid" id="transactions">
             <article className="panel-card transactions-card"><div className="panel-heading"><div><div className="section-kicker">CATATAN TERBARU</div><h2>Aktivitas transaksi</h2></div><button className="text-button" onClick={() => setShowForm(true)}>＋ Catat baru</button></div>
               {!ready ? <div className="empty-state">Memuat data lokal...</div> : recent.length === 0 ? <div className="empty-state"><div className="empty-art">↗</div><strong>Belum ada transaksi</strong><p>Mulai catat pemasukan atau pengeluaran pertamamu.</p><button className="outline-button" onClick={() => setShowForm(true)}>Tambah transaksi pertama</button></div> :
-              <div className="transaction-list">{recent.map((item) => <div className="transaction-row" key={item.id}><div className={`transaction-icon ${item.kind}`}>{item.kind === "income" ? "↙" : item.kind === "expense" ? "↗" : "⇄"}</div><div className="transaction-info"><strong>{item.note || item.category}</strong><span>{item.kind === "transfer" ? `${walletName(item.walletId)} → ${walletName(item.toWalletId ?? "")}` : `${item.category} · ${walletName(item.walletId)}`} · {new Date(item.date + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</span></div><div className={`transaction-amount ${item.kind}`}>{summaryNominalsHidden ? "••••••" : `${item.kind === "income" ? "+" : item.kind === "expense" ? "−" : "⇄"}${rupiah(item.amount)}`}</div>{item.category !== "Utang" && <button className="delete-button" aria-label="Hapus transaksi" onClick={() => handleDelete(item.id)}>×</button>}</div>)}</div>}
+              <div className="transaction-list">{recent.map((item) => <div className="transaction-row" key={item.id}><div className={`transaction-icon ${item.kind}`}>{item.kind === "income" ? "↙" : item.kind === "expense" ? "↗" : "⇄"}</div><div className="transaction-info"><strong>{item.note || item.category}</strong><span>{item.kind === "transfer" ? `${walletName(item.walletId)} → ${walletName(item.toWalletId ?? "")}` : `${item.category} · ${walletName(item.walletId)}`} · {new Date(item.date + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</span></div><div className={`transaction-amount ${item.kind}`}>{summaryNominalsHidden ? "••••••" : `${item.kind === "income" ? "+" : item.kind === "expense" ? "−" : "⇄"}${rupiah(item.amount)}`}</div>{!item.hiddenFromHistory && <button className="delete-button" aria-label="Hapus transaksi" onClick={() => handleDelete(item.id)}>×</button>}</div>)}</div>}
             </article>
             <article className="panel-card insight-card" id="insights"><div className="section-kicker">KEBIASAAN FINANSIAL</div><h2>Ringkasan aktivitas</h2><div className="insight-metric"><span>Jumlah transaksi</span><strong>{periodTransactions.length}</strong></div><div className="insight-metric"><span>Rata-rata pengeluaran</span><strong>{displayNominal(expenseCount ? totals.expense / expenseCount : 0, summaryNominalsHidden)}</strong></div><div className="insight-note"><span>✳</span><p>Catat transaksi secara rutin agar ringkasan keuanganmu semakin akurat.</p></div></article>
           </section>}
@@ -1030,7 +1056,7 @@ export default function CaeshApp() {
         <input ref={widgetImagePickerRef} className="visually-hidden-file" type="file" accept="image/png,image/jpeg,image/webp" onChange={handleWidgetImageFileChange} />
         <div className="modal-actions"><button type="button" className="primary-button" onClick={() => setShowExpenseWidgetSettings(false)}>Selesai</button></div>
       </section></div>}
-      {deleteTransactionTarget && <div className="modal-backdrop delete-confirm-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteTransactionTarget(null); }}><section className="modal-card delete-confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-confirm-title" aria-describedby="delete-confirm-description"><div className="delete-confirm-icon" aria-hidden="true">!</div><div className="section-kicker">KONFIRMASI HAPUS</div><h2 id="delete-confirm-title">Hapus transaksi ini?</h2><p id="delete-confirm-description">Transaksi <strong>{deleteTransactionTarget.note || deleteTransactionTarget.category}</strong> sebesar <strong>{rupiah(deleteTransactionTarget.amount)}</strong> akan dihapus dari riwayat. Tindakan ini tidak bisa dibatalkan.</p><div className="modal-actions"><button type="button" className="cancel-button" onClick={() => setDeleteTransactionTarget(null)}>Batal</button><button type="button" className="delete-confirm-button" onClick={confirmDeleteTransaction}>Ya, hapus</button></div></section></div>}
+      {deleteTransactionTarget && <div className="modal-backdrop delete-confirm-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteTransactionTarget(null); }}><section className="modal-card delete-confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-confirm-title" aria-describedby="delete-confirm-description"><div className="delete-confirm-icon" aria-hidden="true">!</div><div className="section-kicker">KONFIRMASI HAPUS</div><h2 id="delete-confirm-title">Hapus transaksi ini?</h2><p id="delete-confirm-description">Transaksi <strong>{deleteTransactionTarget.note || deleteTransactionTarget.category}</strong> sebesar <strong>{rupiah(deleteTransactionTarget.amount)}</strong> akan dihapus dari riwayat. Tindakan ini tidak bisa dibatalkan.</p>{deleteTransactionTarget.category === "Utang" && <label className="debt-delete-history-option"><input type="checkbox" checked={deleteDebtWithHistory} onChange={(event) => setDeleteDebtWithHistory(event.target.checked)} /><span>Hapus transaksi termasuk seluruh riwayat utang</span></label>}<div className="modal-actions"><button type="button" className="cancel-button" onClick={() => setDeleteTransactionTarget(null)}>Batal</button><button type="button" className="delete-confirm-button" onClick={confirmDeleteTransaction}>Ya, hapus</button></div></section></div>}
 
       {showForm && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowForm(false); }}><section className="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div className="modal-heading"><div><div className="section-kicker">CATATAN BARU</div><h2 id="modal-title">Tambah transaksi</h2></div><button className="modal-close" onClick={() => setShowForm(false)} aria-label="Tutup">×</button></div>
         <form onSubmit={handleSubmit}><div className="kind-switch"><button type="button" className={kind === "expense" ? "active expense-choice" : ""} onClick={() => changeKind("expense")}>Pengeluaran</button><button type="button" className={kind === "income" ? "active income-choice" : ""} onClick={() => changeKind("income")}>Pemasukan</button><button type="button" className={kind === "transfer" ? "active transfer-choice" : ""} onClick={() => changeKind("transfer")}>Transfer</button></div>
@@ -1064,7 +1090,7 @@ export default function CaeshApp() {
 
       {detailWallet && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !detailWalletSaving) setDetailWalletId(null); }}><section className="modal-card wallet-detail-modal" role="dialog" aria-modal="true" aria-labelledby="wallet-detail-title"><div className="modal-heading"><div><div className="section-kicker">INFORMASI WALLET</div><h2 id="wallet-detail-title">{detailWallet.name}</h2></div><button className="modal-close" onClick={() => setDetailWalletId(null)} aria-label="Tutup detail wallet" disabled={detailWalletSaving}>×</button></div>
         <div className="wallet-detail-balance"><span>{detailWallet.category === "notes" ? "Sisa utang" : "Saldo saat ini"}</span><strong>{displayNominal(detailWallet.category === "notes" ? Math.abs(detailWalletBalance) : detailWalletBalance, detailWallet.category !== "notes" && isWalletNominalHidden(detailWallet.id))}</strong></div>
-        {detailWallet.category === "notes" ? <div className="debt-detail-actions"><p>{detailWallet.debtDirection === "lent" ? "Orang ini masih berutang ke lu." : "Lu masih punya utang ke orang ini."}</p><div className="modal-actions"><button type="button" className="outline-button" onClick={() => openDebtAction(detailWallet, "add")}>＋ Tambah utang</button><button type="button" className="primary-button" onClick={() => openDebtAction(detailWallet, "payment")}>Bayar</button></div></div> : <div className="wallet-detail-totals"><div><span>Total pemasukan</span><strong className="income">{displayNominal(detailWalletIncome, isWalletNominalHidden(detailWallet.id))}</strong></div><div><span>Total pengeluaran</span><strong className="expense">{displayNominal(detailWalletExpense, isWalletNominalHidden(detailWallet.id))}</strong></div></div>}
+        {detailWallet.category === "notes" ? <div className="debt-detail-actions"><p>{detailWallet.debtDirection === "lent" ? "Orang ini masih berutang ke lu." : "Lu masih punya utang ke orang ini."}</p><div className="modal-actions"><button type="button" className="outline-button" onClick={() => openDebtAction(detailWallet, "payment")}>Bayar</button><button type="button" className="outline-button" onClick={() => openDebtAction(detailWallet, "add")}>＋ Tambah utang</button><button type="button" className="primary-button" onClick={() => void handleSettleDebt(detailWallet)}>Selesaikan utang</button></div></div> : <div className="wallet-detail-totals"><div><span>Total pemasukan</span><strong className="income">{displayNominal(detailWalletIncome, isWalletNominalHidden(detailWallet.id))}</strong></div><div><span>Total pengeluaran</span><strong className="expense">{displayNominal(detailWalletExpense, isWalletNominalHidden(detailWallet.id))}</strong></div></div>}
         <div className="wallet-detail-history"><div className="panel-heading"><h3>Riwayat wallet</h3><span className="result-count">{detailWalletTransactions.length} transaksi</span></div>
           {detailWalletTransactions.length === 0 ? <div className="empty-state">Belum ada riwayat transaksi untuk wallet ini.</div> : <div className="transaction-list">{detailWalletTransactions.map((item) => { const incomingTransfer = item.kind === "transfer" && item.toWalletId === detailWallet.id; const outgoingTransfer = item.kind === "transfer" && item.walletId === detailWallet.id; const title = item.note || item.category || (item.kind === "transfer" ? "Transfer" : "Transaksi"); const amountPrefix = item.kind === "income" || incomingTransfer ? "+" : item.kind === "expense" || outgoingTransfer ? "−" : ""; const relatedWallet = incomingTransfer ? item.walletName ?? walletName(item.walletId) : outgoingTransfer ? item.toWalletName ?? walletName(item.toWalletId ?? "") : ""; return <div className="transaction-row" key={item.id}><div className={`transaction-icon ${item.kind}`}>{item.kind === "income" ? "↙" : item.kind === "expense" ? "↗" : "⇄"}</div><div className="transaction-info"><strong>{title}</strong><span>{item.kind === "transfer" ? `${incomingTransfer ? "Dari" : "Ke"} ${relatedWallet}` : item.category} · {new Date(item.date + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</span></div><div className={`transaction-amount ${item.kind}`}>{isWalletNominalHidden(detailWallet.id) ? "••••••" : `${amountPrefix}${rupiah(item.amount)}`}</div></div>; })}</div>}
         </div>
