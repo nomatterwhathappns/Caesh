@@ -1,5 +1,5 @@
 {
-  "version": "1.5.6",
-  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.5.6/Caesh.apk",
-  "notes": "CAESH 1.5.6: Notes utang per orang, pencatatan utang diberikan/diterima, penambahan utang sebelum lunas, pembayaran sebagian/penuh, dan riwayat utang khusus di halaman Transaksi. Notes otomatis hilang dari wallet saat lunas; riwayat tetap tersimpan."
+  "version": "1.5.7",
+  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.5.7/Caesh.apk",
+  "notes": "CAESH 1.5.7: perbaikan bug TypeScript pada validasi saldo saat pembelian wishlist. Tidak ada fitur baru."
 }
