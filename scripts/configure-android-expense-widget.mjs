@@ -91,7 +91,7 @@ await writeFile(`${resDir}/xml/expense_widget_info.xml`, `<?xml version="1.0" en
     android:targetCellHeight="2"
     android:updatePeriodMillis="0"
     android:initialLayout="@layout/expense_widget"
-    android:resizeMode="horizontal|vertical"
+    android:resizeMode="none"
     android:widgetCategory="home_screen"
     android:description="@string/app_name" />
 `);
@@ -155,7 +155,7 @@ public class ExpenseWidgetProvider extends AppWidgetProvider {
             launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             PendingIntent pending = PendingIntent.getActivity(context, 0, launch,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-            views.setOnClickPendingIntent(R.id.expense_widget_title, pending);
+            views.setOnClickPendingIntent(R.id.expense_widget_root, pending);\n            views.setOnClickPendingIntent(R.id.expense_widget_title, pending);
             views.setOnClickPendingIntent(R.id.expense_widget_amount, pending);
             views.setOnClickPendingIntent(R.id.expense_widget_caption, pending);
         }
