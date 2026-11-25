@@ -1,5 +1,5 @@
 {
-  "version": "1.1.6",
-  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.1.6/Caesh.apk",
-  "notes": "CAESH 1.1.6: Menambahkan widget pengeluaran dengan pilihan wallet dan periode yang dapat diatur."
+  "version": "1.6.7",
+  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.6.7/Caesh.apk",
+  "notes": "CAESH 1.6.7: perbaikan label tombol Hide Nominal. Saat nominal tersembunyi tombol menampilkan Tampilkan; saat nominal terlihat tombol menampilkan Hide. Preferensi hide/show tetap tersimpan."
 }
