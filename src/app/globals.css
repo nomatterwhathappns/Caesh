@@ -1248,7 +1248,7 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
 .expense-widget-date-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .expense-widget-wallets{grid-column:1/-1;display:flex;align-items:center;gap:9px 16px;flex-wrap:wrap}
 .expense-widget-wallets>.field-label{width:100%;margin:2px 0 0}
-.expense-widget-wallet-option{display:inline-flex;align-items:center;gap:7px;font-size:11px;color:var(--text);cursor:pointer}
+.expense-widget-wallet-option{display:inline-flex;align-items:center;gap:7px;font-size:11px;color:var(--ink);cursor:pointer}
 .expense-widget-wallet-option input{accent-color:#718b68;width:15px;height:15px}
 .expense-widget-select-all{padding:4px 0}
 .expense-widget-empty{font-size:11px;color:#92998f;margin:0}
