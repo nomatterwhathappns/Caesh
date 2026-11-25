@@ -27,7 +27,7 @@ const rupiah = (value: number) => new Intl.NumberFormat("id-ID", {
   style: "currency", currency: "IDR", maximumFractionDigits: 0,
 }).format(value);
 type CaeshReleaseNote = { version: string; notes: string };
-type CaeshUpdate = { version: string; apkUrl: string; sha256: string; notes?: string; releases?: CaeshReleaseNote[] };
+type CaeshUpdate = { version: string; apkUrl: string; sha256: string; notes?: string; releases: CaeshReleaseNote[] };
 const UPDATE_MANIFEST_URL = "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-update/update.json";
 function compareVersions(left: string, right: string) {
   const a = left.split(".").map((part) => Number.parseInt(part, 10) || 0);
@@ -212,9 +212,10 @@ export default function CaeshApp() {
           manifest = await response.json() as Partial<CaeshUpdate>;
         }
         if (cancelled || typeof manifest.version !== "string" || typeof manifest.apkUrl !== "string" || typeof manifest.sha256 !== "string" || !/^[a-f0-9]{64}$/i.test(manifest.sha256)) return;
-        const expectedApkUrl = `https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v${manifest.version}/Caesh.apk`;
+        const latestVersion = manifest.version;
+        const expectedApkUrl = `https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v${latestVersion}/Caesh.apk`;
         if (manifest.apkUrl !== expectedApkUrl) return;
-        if (compareVersions(manifest.version, appInfo.version) > 0) {
+        if (compareVersions(latestVersion, appInfo.version) > 0) {
           const releaseHistory = Array.isArray(manifest.releases)
             ? manifest.releases.filter((release): release is CaeshReleaseNote =>
                 !!release &&
@@ -223,14 +224,14 @@ export default function CaeshApp() {
                 typeof release.notes === "string" &&
                 release.notes.trim().length > 0 &&
                 compareVersions(release.version, appInfo.version) > 0 &&
-                compareVersions(release.version, manifest.version) <= 0
+                compareVersions(release.version, latestVersion) <= 0
               )
             : [];
           const releases = releaseHistory.length > 0
             ? [...releaseHistory].sort((left, right) => compareVersions(left.version, right.version))
-            : [{ version: manifest.version, notes: typeof manifest.notes === "string" ? manifest.notes : "Pembaruan CAESH tersedia." }];
+            : [{ version: latestVersion, notes: typeof manifest.notes === "string" ? manifest.notes : "Pembaruan CAESH tersedia." }];
           setAvailableUpdate({
-            version: manifest.version,
+            version: latestVersion,
             apkUrl: manifest.apkUrl,
             sha256: manifest.sha256.toLowerCase(),
             notes: typeof manifest.notes === "string" ? manifest.notes : undefined,
