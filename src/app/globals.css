@@ -1340,3 +1340,26 @@ body.caesh-modal-open {
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 }
+
+/* CAESH v1.10.10: dedicated home-screen expense widget settings. */
+.expense-widget-modal{width:min(100%,560px);max-height:min(90dvh,900px);overflow-y:auto}
+.expense-widget-modal>input:not([type=file]),.expense-widget-modal>select{width:100%;border:1px solid var(--line);border-radius:8px;padding:11px 12px;background:var(--surface);color:var(--ink);font-size:12px}
+.expense-widget-modal .expense-widget-wallets{display:flex;align-items:center;gap:10px 16px;flex-wrap:wrap;margin:14px 0;padding:13px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.expense-widget-modal .expense-widget-wallets>.field-label{width:100%;margin:0}
+.expense-widget-modal .expense-widget-date-grid{margin-top:8px}
+.expense-widget-modal .expense-widget-date-grid input{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;background:var(--surface);color:var(--ink)}
+.expense-widget-limit{display:grid;gap:10px;padding:14px 0;border-bottom:1px solid var(--line)}
+.expense-widget-limit>.expense-widget-wallet-option{align-items:flex-start;line-height:1.5}
+.expense-widget-limit>.expense-widget-wallet-option input{margin-top:2px}
+.expense-widget-photo-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 0;border-top:1px solid var(--line)}
+.expense-widget-photo-row>div{display:flex;flex:1;min-width:170px;flex-direction:column;gap:4px}
+.expense-widget-photo-row strong,.expense-widget-install strong{font-size:12px;color:var(--ink)}
+.expense-widget-photo-row span,.expense-widget-install p,.expense-widget-install li{font-size:11px;color:var(--muted);line-height:1.55}
+.expense-widget-preview{display:flex;flex-direction:column;gap:7px;padding:16px;margin-top:14px;border-radius:12px;background:var(--surface-soft);color:var(--ink)}
+.expense-widget-preview>strong{font-size:24px;font-weight:800}
+.expense-widget-preview>span:not(.section-kicker){font-size:10px;color:var(--muted)}
+.expense-widget-preview em{font-size:11px;font-style:normal;font-weight:700;color:#b65d48}
+.expense-widget-install{display:grid;gap:7px;padding:15px 0}
+.expense-widget-install ol{margin:0;padding-left:20px}
+.expense-widget-install .outline-button{justify-self:start}
+@media(max-width:620px){.expense-widget-modal{padding:20px}.expense-widget-photo-row{align-items:flex-start}}
