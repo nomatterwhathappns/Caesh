@@ -405,9 +405,8 @@ export default function CaeshApp() {
     try {
       const transaction = buildDebtTransaction(noteWallet, cashWallet, value, debtAction);
       const result = await recordDebtMovement(noteWallet.id, transaction, debtAction);
-      const [savedTransactions, savedWallets] = await Promise.all([getTransactions(), getWallets()]);
-      setTransactions(savedTransactions);
-      setWallets(savedWallets);
+      setTransactions((current) => [transaction, ...current].sort((a, b) => b.date.localeCompare(a.date) || b.createdAt - a.createdAt));
+      if (result.closed) setWallets((current) => current.filter((wallet) => wallet.id !== noteWallet.id));
       setDebtAction(null);
       setDebtTargetWalletId(null);
       setDebtAmount("");
@@ -542,18 +541,18 @@ export default function CaeshApp() {
     const balance = parseRupiahInput(newWalletBalance);
     if (!name) { setError("Nama wallet wajib diisi."); return; }
     if (newWalletCategory === "standard" && (!Number.isSafeInteger(balance) || balance < 0)) { setError("Saldo awal harus berupa angka rupiah bulat, minimal nol."); return; }
-    if (wallets.some((wallet) => wallet.name.toLocaleLowerCase() === name.toLocaleLowerCase())) {
-      setError("Nama wallet tersebut sudah digunakan."); return;
+    const duplicateWallet = wallets.find((wallet) => wallet.name.trim().toLocaleLowerCase() === name.toLocaleLowerCase());
+    if (duplicateWallet) {
+      setError(newWalletCategory === "notes" && duplicateWallet.category === "notes"
+        ? "Notes untuk orang ini masih aktif. Tambahkan utangnya dari detail Notes yang sudah ada."
+        : "Nama wallet tersebut sudah digunakan.");
+      return;
     }
     if (newWalletCategory === "notes") {
       const debtValue = parseRupiahInput(newDebtAmount);
       const cashWallet = regularWallets.find((item) => item.id === newDebtCashWalletId);
       if (!Number.isSafeInteger(debtValue) || debtValue <= 0) { setError("Masukkan nominal utang lebih dari nol."); return; }
       if (!cashWallet) { setError("Pilih wallet biasa untuk menerima atau memberikan uang."); return; }
-      if (wallets.some((item) => item.category === "notes" && item.name.trim().toLocaleLowerCase() === name.toLocaleLowerCase())) {
-        setError("Notes untuk orang ini masih aktif. Tambahkan utangnya dari detail Notes yang sudah ada.");
-        return;
-      }
       const noteWallet: Wallet = {
         id: crypto.randomUUID(), name, initialBalance: 0, createdAt: Date.now(),
         category: "notes", debtDirection: newDebtDirection,
@@ -720,7 +719,7 @@ export default function CaeshApp() {
             </div>}
           </section>
           <section className="overview-wallet-panel" aria-label="Wallet">
-            <div className="overview-wallet-heading"><div><span className="section-kicker">TEMPAT PENYIMPANAN UANG</span><strong>Wallet kamu</strong></div><button type="button" aria-label="Tambah wallet" onClick={() => setShowWalletForm(true)}>＋</button></div>
+            <div className="overview-wallet-heading"><div><span className="section-kicker">TEMPAT PENYIMPANAN UANG</span><strong>Wallet kamu</strong></div><button type="button" aria-label="Tambah wallet" onClick={() => { setNewWalletCategory("standard"); setNewWalletName(""); setNewWalletBalance("0"); setNewDebtAmount(""); setNewDebtCashWalletId(regularWallets[0]?.id ?? ""); setShowWalletForm(true); }}>＋</button></div>
             <div className="overview-wallet-list">
               {walletBalances.map((wallet) => <article className={`overview-wallet-item${wallet.photo ? " has-photo" : ""}`} key={wallet.id} role="button" tabIndex={0} aria-label={`Lihat detail wallet ${wallet.name}`} onClick={() => { setDetailWalletId(wallet.id); setDetailWalletNote(wallet.note ?? ""); }} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setDetailWalletId(wallet.id); setDetailWalletNote(wallet.note ?? ""); } }}>{wallet.photo && <img className="wallet-card-photo" src={wallet.photo} alt="" style={{ objectPosition: `${wallet.photoX ?? 50}% ${wallet.photoY ?? 50}%`, transform: `scale(${wallet.photoZoom ?? 1.15})` }} />}<div className="overview-wallet-item-top"><strong className="wallet-name">{wallet.name}</strong><button type="button" className="wallet-delete-button" aria-label={`Hapus wallet ${wallet.name}`} title="Hapus wallet" onClick={(event) => { event.stopPropagation(); handleWalletDelete(wallet.id); }}>×</button></div><div className="overview-wallet-bottom"><div className="wallet-balance">{ready ? wallet.category === "notes" ? rupiah(Math.abs(wallet.balance)) : rupiah(wallet.balance) : "Memuat..."}</div><div className="wallet-start">{wallet.category === "notes" ? wallet.debtDirection === "lent" ? "Piutang · belum lunas" : "Utang · belum lunas" : `Saldo awal ${rupiah(wallet.initialBalance)}`}</div></div><button type="button" className="wallet-photo-button" aria-label={`Atur foto wallet ${wallet.name}`} title="Atur foto wallet" onClick={(event) => { event.stopPropagation(); openWalletPhotoEditor(wallet.id); }}><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/><path d="M19 16v6M16 19h6"/></svg></button></article>)}
               {wallets.length === 0 && ready && <div className="wallet-empty">Belum ada wallet. Tambahkan wallet pertamamu.</div>}
