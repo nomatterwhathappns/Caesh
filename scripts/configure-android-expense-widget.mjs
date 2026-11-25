@@ -203,7 +203,7 @@ public class ExpenseWidgetProvider extends AppWidgetProvider {
 `);
 
 const configJava = [
-  "package \" + appId + \";",
+  "package " + appId + ";",
   "",
   "import android.app.Activity;",
   "import android.appwidget.AppWidgetManager;",
@@ -227,7 +227,7 @@ const configJava = [
   "        finish();",
   "    }",
   "}"
-].join("\\n");
+].join("\n");
 await writeFile(javaDir + "/ExpenseWidgetConfigActivity.java", configJava);
 
 await writeFile(`${javaDir}/ExpenseWidgetPlugin.java`, `package ${appId};
