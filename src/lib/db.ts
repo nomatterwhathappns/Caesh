@@ -405,11 +405,25 @@ export async function saveTransaction(transaction: Transaction): Promise<void> {
 export async function removeTransaction(id: string): Promise<void> {
   const db = await openDatabase();
   return new Promise((resolve, reject) => {
-    const request = db.transaction(TRANSACTION_STORE, "readwrite").objectStore(TRANSACTION_STORE).delete(id);
-    request.onsuccess = () => { db.close(); resolve(); };
-    request.onerror = () => {
+    const store = db.transaction(TRANSACTION_STORE, "readwrite").objectStore(TRANSACTION_STORE);
+    const lookup = store.get(id);
+    lookup.onsuccess = () => {
+      const target = lookup.result as Transaction | undefined;
+      if (target?.category === "Utang") {
+        db.close();
+        reject(new Error("Riwayat utang tidak dapat dihapus langsung agar saldo dan pelunasan tetap akurat."));
+        return;
+      }
+      const request = store.delete(id);
+      request.onsuccess = () => { db.close(); resolve(); };
+      request.onerror = () => {
+        db.close();
+        reject(request.error ?? new Error("Gagal menghapus transaksi."));
+      };
+    };
+    lookup.onerror = () => {
       db.close();
-      reject(request.error ?? new Error("Gagal menghapus transaksi."));
+      reject(lookup.error ?? new Error("Transaksi gagal diperiksa sebelum dihapus."));
     };
   });
 }
