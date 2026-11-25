@@ -1464,3 +1464,17 @@ body.caesh-modal-open {
 .expense-widget-modal .expense-widget-limit > .expense-widget-wallet-option input[type="checkbox"] {
   margin-top: 2px;
 }
+
+
+/* CAESH v1.12.0: branded transaction deletion confirmation. */
+.delete-confirm-modal { width: min(100%, 390px); text-align: center; padding: 28px; }
+.delete-confirm-icon { width: 46px; height: 46px; margin: 0 auto 16px; display: grid; place-items: center; border-radius: 15px; background: #b75c4d18; color: #b75c4d; font: 800 24px 'Manrope',sans-serif; }
+.delete-confirm-modal > .section-kicker { margin-bottom: 7px; }
+.delete-confirm-modal h2 { margin: 0; color: var(--ink); font: 750 19px 'Manrope',sans-serif; letter-spacing: -.45px; }
+.delete-confirm-modal p { margin: 12px 0 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.delete-confirm-modal p strong { color: var(--ink); }
+.delete-confirm-modal .modal-actions { display: grid; grid-template-columns: 1fr 1fr; margin-top: 23px; }
+.delete-confirm-modal .modal-actions button { min-height: 43px; border-radius: 11px; font-size: 12px; font-weight: 700; }
+.delete-confirm-button { border: 1px solid #b75c4d; background: #b75c4d; color: #fff; cursor: pointer; }
+.delete-confirm-button:hover { background: #a64d40; }
+@media (max-width: 620px) { .delete-confirm-modal { width: 100%; padding: 23px 20px; } }
