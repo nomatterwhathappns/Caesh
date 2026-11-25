@@ -1,5 +1,5 @@
 {
-  "version": "1.7.7",
-  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.7.7/Caesh.apk",
-  "notes": "CAESH 1.7.7: penambahan verifikasi integritas SHA-256 untuk APK pembaruan. Aplikasi mencocokkan hash APK setelah diunduh sebelum membuka installer Android."
+  "version": "1.7.8",
+  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.7.8/Caesh.apk",
+  "notes": "CAESH 1.7.8: perbaikan tombol Back Android. Tombol Back menutup dialog/pengaturan, kembali ke Ringkasan, atau keluar dari aplikasi saat berada di halaman utama."
 }

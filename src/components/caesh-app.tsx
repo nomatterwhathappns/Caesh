@@ -321,6 +321,68 @@ export default function CaeshApp() {
     window.localStorage.setItem("caesh-theme", theme);
   }, [theme]);
 
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    let cancelled = false;
+    let removeListener: (() => void) | undefined;
+
+    void App.addListener("backButton", () => {
+      if (updateLoading) return;
+
+      if (showWalletForm) {
+        setShowWalletForm(false);
+      } else if (showPhotoEditor) {
+        setShowPhotoEditor(false);
+      } else if (purchaseTarget) {
+        setPurchaseTarget(null);
+      } else if (showWishlistForm) {
+        setShowWishlistForm(false);
+      } else if (debtAction) {
+        setDebtAction(null);
+        setDebtTargetWalletId(null);
+      } else if (showForm) {
+        setShowForm(false);
+      } else if (availableUpdate) {
+        setAvailableUpdate(null);
+      } else if (detailWalletId) {
+        setDetailWalletId(null);
+        setDetailWalletNote("");
+      } else if (showExpenseWidgetSettings) {
+        setShowExpenseWidgetSettings(false);
+      } else if (showBalanceFilter) {
+        setShowBalanceFilter(false);
+      } else if (walletSettingsOpenId) {
+        setWalletSettingsOpenId(null);
+      } else if (activeNav !== "overview") {
+        setActiveNav("overview");
+      } else {
+        App.exitApp();
+      }
+    }).then((listener) => {
+      removeListener = () => { void listener.remove(); };
+      if (cancelled) removeListener();
+    });
+
+    return () => {
+      cancelled = true;
+      removeListener?.();
+    };
+  }, [
+    activeNav,
+    availableUpdate,
+    debtAction,
+    detailWalletId,
+    purchaseTarget,
+    showBalanceFilter,
+    showExpenseWidgetSettings,
+    showForm,
+    showPhotoEditor,
+    showWalletForm,
+    showWishlistForm,
+    updateLoading,
+    walletSettingsOpenId,
+  ]);
+
   const walletBalances = useMemo(() => wallets.map((wallet) => {
     const movement = transactions.reduce((sum, item) => {
       if (item.kind === "transfer") {
