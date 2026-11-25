@@ -1,5 +1,5 @@
 {
-  "version": "1.2.6",
-  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.2.6/Caesh.apk",
-  "notes": "CAESH 1.2.6: Menghapus logo di top bar dan mengganti font khusus nama aplikasi CAESH."
+  "version": "1.3.6",
+  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.3.6/Caesh.apk",
+  "notes": "CAESH 1.3.6: Filter wallet untuk perhitungan total saldo di Ringkasan. Pilihan tersimpan dan terpisah dari pengaturan widget pengeluaran."
 }
