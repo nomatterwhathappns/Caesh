@@ -75,7 +75,7 @@ export function normalizeExpenseWidgetSettings(value: unknown): ExpenseWidgetSet
     endDate: validDate(raw.endDate),
     limitEnabled: raw.limitEnabled === true,
     monthlyLimit: Number.isSafeInteger(raw.monthlyLimit) && Number(raw.monthlyLimit) > 0 ? Number(raw.monthlyLimit) : 0,
-    beforeImage: typeof raw.beforeImage === "string" && raw.beforeImage.startsWith("data:image/") ? raw.beforeImage : "",
+    baseImage: typeof raw.baseImage === "string" && raw.baseImage.startsWith("data:image/") ? raw.baseImage : "",\n    beforeImage: typeof raw.beforeImage === "string" && raw.beforeImage.startsWith("data:image/") ? raw.beforeImage : "",
     afterImage: typeof raw.afterImage === "string" && raw.afterImage.startsWith("data:image/") ? raw.afterImage : "",
   };
 }
