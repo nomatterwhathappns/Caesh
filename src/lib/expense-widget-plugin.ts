@@ -6,7 +6,7 @@ export interface ExpenseWidgetBridge {
     amount: string;
     periodLabel: string;\n    period: "daily" | "weekly" | "monthly" | "yearly" | "custom";\n    periodKey: string;
     transactionCount: number;
-    overLimit: boolean;
+    overLimit: boolean;\n    limitEnabled: boolean;
     baseImage?: string;\n    beforeImage?: string;
     afterImage?: string;
     enabled: boolean;
