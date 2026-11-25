@@ -1,8 +1,12 @@
 {
-  "version": "1.10.10",
-  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.10.10/Caesh.apk",
-  "notes": "Menambahkan widget pengeluaran di home screen Android dengan periode fleksibel, pilihan wallet, dan background opsional berdasarkan batas pengeluaran.",
+  "version": "1.10.11",
+  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.10.11/Caesh.apk",
+  "notes": "Memperjelas seluruh pop-up, meningkatkan kontras tema gelap, dan memperbaiki area scroll agar konten panjang tidak tertutup navigasi bawah.",
   "releases": [
+    {
+      "version": "1.10.11",
+      "notes": "Memperjelas seluruh pop-up, meningkatkan kontras tema gelap, dan memperbaiki area scroll agar konten panjang tidak tertutup navigasi bawah."
+    },
     {
       "version": "1.10.10",
       "notes": "Menambahkan widget pengeluaran di home screen Android dengan periode fleksibel, pilihan wallet, dan background opsional berdasarkan batas pengeluaran."
