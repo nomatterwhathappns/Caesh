@@ -136,13 +136,33 @@ jobs:
 
       - name: Publish direct APK download
         if: ((github.event_name == 'push' && github.ref == 'refs/heads/caesh') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/caesh')) && steps.signing_check.outputs.enabled == 'true'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: caesh-v${{ steps.app_version.outputs.version }}
-          name: CAESH v${{ steps.app_version.outputs.version }}
-          prerelease: true
-          make_latest: false
-          files: android/app/build/outputs/apk/release/Caesh.apk
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.app_version.outputs.version }}
+        run: |
+          set -euo pipefail
+          TAG="caesh-v${VERSION}"
+          for attempt in 1 2 3 4 5; do
+            if gh release view "$TAG" >/dev/null 2>&1; then
+              break
+            fi
+            if gh release create "$TAG" --title "CAESH v${VERSION}" --prerelease --latest=false; then
+              break
+            fi
+            if [ "$attempt" -eq 5 ]; then
+              echo "Could not create release $TAG after 5 attempts."
+              exit 1
+            fi
+            sleep $((attempt * 5))
+          done
+          for attempt in 1 2 3 4 5; do
+            if gh release upload "$TAG" android/app/build/outputs/apk/release/Caesh.apk --clobber; then
+              echo "Published Caesh.apk to $TAG."
+              exit 0
+            fi
+            [ "$attempt" -eq 5 ] && exit 1
+            sleep $((attempt * 5))
+          done
 
       - name: Generate SHA-256 update manifest
         if: ((github.event_name == 'push' && github.ref == 'refs/heads/caesh') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/caesh')) && steps.signing_check.outputs.enabled == 'true'
@@ -175,13 +195,27 @@ jobs:
 
       - name: Publish verified update manifest
         if: ((github.event_name == 'push' && github.ref == 'refs/heads/caesh') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/caesh')) && steps.signing_check.outputs.enabled == 'true'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: caesh-update
-          name: CAESH Update Manifest
-          prerelease: true
-          make_latest: false
-          files: update-manifest/update.json
-          overwrite_files: true
-          fail_on_unmatched_files: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="caesh-update"
+          for attempt in 1 2 3 4 5; do
+            if gh release view "$TAG" >/dev/null 2>&1; then
+              break
+            fi
+            if gh release create "$TAG" --title "CAESH Update Manifest" --prerelease --latest=false; then
+              break
+            fi
+            [ "$attempt" -eq 5 ] && exit 1
+            sleep $((attempt * 5))
+          done
+          for attempt in 1 2 3 4 5; do
+            if gh release upload "$TAG" update-manifest/update.json --clobber; then
+              echo "Published update.json to $TAG."
+              exit 0
+            fi
+            [ "$attempt" -eq 5 ] && exit 1
+            sleep $((attempt * 5))
+          done
 
