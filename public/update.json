@@ -1,8 +1,12 @@
 {
-  "version": "1.11.12",
-  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.11.12/Caesh.apk",
-  "notes": "Memperbaiki posisi nominal widget agar berada di kiri bawah, sementara judul tetap di kiri atas pada ketiga ukuran widget.",
+  "version": "1.11.13",
+  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.11.13/Caesh.apk",
+  "notes": "Memperbaiki kegagalan memuat widget Android dan mempertahankan posisi judul di kiri atas serta nominal di kiri bawah.",
   "releases": [
+    {
+      "version": "1.11.13",
+      "notes": "Memperbaiki kegagalan memuat widget Android dan mempertahankan posisi judul di kiri atas serta nominal di kiri bawah."
+    },
     {
       "version": "1.11.12",
       "notes": "Memperbaiki posisi nominal widget agar berada di kiri bawah, sementara judul tetap di kiri atas pada ketiga ukuran widget."
