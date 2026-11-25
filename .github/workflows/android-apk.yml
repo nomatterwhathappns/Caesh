@@ -155,8 +155,9 @@ jobs:
             fi
             sleep $((attempt * 5))
           done
+          gh release delete-asset "$TAG" Caesh.apk --yes >/dev/null 2>&1 || true
           for attempt in 1 2 3 4 5; do
-            if gh release upload "$TAG" android/app/build/outputs/apk/release/Caesh.apk --clobber; then
+            if gh release upload "$TAG" android/app/build/outputs/apk/release/Caesh.apk; then
               echo "Published Caesh.apk to $TAG."
               exit 0
             fi
@@ -210,8 +211,9 @@ jobs:
             [ "$attempt" -eq 5 ] && exit 1
             sleep $((attempt * 5))
           done
+          gh release delete-asset "$TAG" update.json --yes >/dev/null 2>&1 || true
           for attempt in 1 2 3 4 5; do
-            if gh release upload "$TAG" update-manifest/update.json --clobber; then
+            if gh release upload "$TAG" update-manifest/update.json; then
               echo "Published update.json to $TAG."
               exit 0
             fi
