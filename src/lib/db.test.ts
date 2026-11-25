@@ -11,7 +11,7 @@ Object.defineProperty(globalThis, "localStorage", {
 });
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { createBackup, getTransactions, getWallets, getWishlist, restoreBackup, Transaction, Wallet, WishlistItem } from "./db";
+import { createBackup, createDebtNote, getTransactions, getWallets, getWishlist, recordDebtMovement, removeTransaction, restoreBackup, Transaction, Wallet, WishlistItem } from "./db";
 
 const DB_NAME = "caesh-local";
 function openSeedDatabase(version: number, seed: (db: IDBDatabase) => void): Promise<void> {
@@ -124,9 +124,109 @@ test("invalid or empty-wallet backups are rejected without changing existing rec
     preferences: { theme: "light", categories: null },
   };
   await restoreBackup(original);
-  await assert.rejects(() => restoreBackup({ ...original, wallets: [] }), /tidak memiliki wallet/);
+  await assert.rejects(() => restoreBackup({ ...original, wallets: [] }), /minimal satu wallet biasa/);
+  await assert.rejects(() => restoreBackup({ ...original, wallets: [{ ...wallet, initialBalance: 0, category: "notes" as const, debtDirection: "lent" as const }] }), /minimal satu wallet biasa/);
   await assert.rejects(() => restoreBackup({ format: "wrong" }), /tidak valid/);
   assert.deepEqual(await getTransactions(), original.transactions);
   assert.deepEqual(await getWallets(), original.wallets);
   assert.deepEqual(await getWishlist(), original.wishlist);
+});
+
+
+const cashWallet: Wallet = { id: "cash-main", name: "BCA", initialBalance: 1000000, createdAt: 1767225600000 };
+function debtTransaction(
+  id: string,
+  amount: number,
+  walletId: string,
+  walletName: string,
+  toWalletId: string,
+  toWalletName: string,
+  note: string,
+): Transaction {
+  return {
+    id, kind: "transfer", amount, category: "Utang", note,
+    date: "2026-01-02", walletId, walletName, toWalletId, toWalletName,
+    createdAt: 1767312000000,
+  };
+}
+async function seedDebtDatabase() {
+  await deleteDatabase();
+  await openSeedDatabase(3, (db) => {
+    const transactions = db.createObjectStore("transactions", { keyPath: "id" });
+    transactions.createIndex("date", "date", { unique: false });
+    db.createObjectStore("wallets", { keyPath: "id" }).put(cashWallet);
+    db.createObjectStore("wishlist", { keyPath: "id" });
+  });
+}
+
+test("lent debt supports adding before settlement, partial payment, and auto-closes at zero", async () => {
+  await seedDebtDatabase();
+  const note: Wallet = { id: "notes-andi", name: "Andi", initialBalance: 0, createdAt: 1767312000000, category: "notes", debtDirection: "lent" };
+  await createDebtNote(note, debtTransaction("debt-1", 500000, cashWallet.id, cashWallet.name, note.id, note.name, "Utang diberikan"));
+  await recordDebtMovement(note.id, debtTransaction("debt-2", 100000, cashWallet.id, cashWallet.name, note.id, note.name, "Tambahan utang"), "add");
+  await recordDebtMovement(note.id, debtTransaction("debt-3", 200000, note.id, note.name, cashWallet.id, cashWallet.name, "Pembayaran sebagian"), "payment");
+  let wallets = await getWallets();
+  let transactions = await getTransactions();
+  assert.equal(wallets.find((item) => item.id === note.id)?.id, note.id);
+  assert.equal(transactions.length, 3);
+  const noteBalance = transactions.reduce((sum, item) => sum + (item.toWalletId === note.id ? item.amount : item.walletId === note.id ? -item.amount : 0), 0);
+  assert.equal(noteBalance, 400000);
+  const closed = await recordDebtMovement(note.id, debtTransaction("debt-4", 400000, note.id, note.name, cashWallet.id, cashWallet.name, "Pelunasan"), "payment");
+  wallets = await getWallets();
+  transactions = await getTransactions();
+  assert.deepEqual(closed, { closed: true, remaining: 0 });
+  assert.equal(wallets.some((item) => item.id === note.id), false);
+  assert.equal(transactions.length, 4);
+  assert.equal(transactions.every((item) => item.category === "Utang"), true);
+  assert.equal(transactions.every((item) => item.walletName === note.name || item.toWalletName === note.name), true);
+  const nextNote: Wallet = { id: "notes-andi-new", name: "Andi", initialBalance: 0, createdAt: 1768003200000, category: "notes", debtDirection: "lent" };
+  await createDebtNote(nextNote, debtTransaction("debt-5", 50000, cashWallet.id, cashWallet.name, nextNote.id, nextNote.name, "Utang baru setelah lunas"));
+  wallets = await getWallets();
+  transactions = await getTransactions();
+  assert.equal(wallets.some((item) => item.id === nextNote.id), true);
+  assert.equal(wallets.some((item) => item.id === note.id), false);
+  assert.equal(transactions.length, 5);
+});
+
+test("borrowed debt increases destination cash and repayment decreases it without double counting", async () => {
+  await seedDebtDatabase();
+  const note: Wallet = { id: "notes-budi", name: "Budi", initialBalance: 0, createdAt: 1767312000000, category: "notes", debtDirection: "borrowed" };
+  await createDebtNote(note, debtTransaction("borrow-1", 300000, note.id, note.name, cashWallet.id, cashWallet.name, "Utang diterima"));
+  let transactions = await getTransactions();
+  let wallets = await getWallets();
+  const cashAfterBorrow = cashWallet.initialBalance + transactions.reduce((sum, item) => sum + (item.toWalletId === cashWallet.id ? item.amount : item.walletId === cashWallet.id ? -item.amount : 0), 0);
+  const debtBalance = transactions.reduce((sum, item) => sum + (item.toWalletId === note.id ? item.amount : item.walletId === note.id ? -item.amount : 0), 0);
+  assert.equal(cashAfterBorrow, 1300000);
+  assert.equal(debtBalance, -300000);
+  await recordDebtMovement(note.id, debtTransaction("borrow-2", 100000, cashWallet.id, cashWallet.name, note.id, note.name, "Bayar sebagian"), "payment");
+  transactions = await getTransactions();
+  wallets = await getWallets();
+  assert.equal(wallets.some((item) => item.id === note.id), true);
+  const remaining = transactions.reduce((sum, item) => sum + (item.toWalletId === note.id ? item.amount : item.walletId === note.id ? -item.amount : 0), 0);
+  assert.equal(remaining, -200000);
+  await recordDebtMovement(note.id, debtTransaction("borrow-3", 200000, cashWallet.id, cashWallet.name, note.id, note.name, "Pelunasan"), "payment");
+  wallets = await getWallets();
+  transactions = await getTransactions();
+  assert.equal(wallets.some((item) => item.id === note.id), false);
+  assert.equal(transactions.length, 3);
+});
+
+test("debt operations reject insufficient cash and overpayment without writing partial records", async () => {
+  await seedDebtDatabase();
+  const note: Wallet = { id: "notes-cici", name: "Cici", initialBalance: 0, createdAt: 1767312000000, category: "notes", debtDirection: "lent" };
+  await assert.rejects(
+    () => createDebtNote(note, debtTransaction("bad-lend", 2000000, cashWallet.id, cashWallet.name, note.id, note.name, "Utang diberikan")),
+    /Saldo wallet sumber tidak mencukupi/,
+  );
+  assert.equal((await getWallets()).some((item) => item.id === note.id), false);
+  assert.equal((await getTransactions()).length, 0);
+  await createDebtNote(note, debtTransaction("good-lend", 100000, cashWallet.id, cashWallet.name, note.id, note.name, "Utang diberikan"));
+  await assert.rejects(
+    () => recordDebtMovement(note.id, debtTransaction("bad-pay", 100001, note.id, note.name, cashWallet.id, cashWallet.name, "Pembayaran"), "payment"),
+    /melebihi sisa utang/,
+  );
+  assert.equal((await getTransactions()).length, 1);
+  assert.equal((await getWallets()).some((item) => item.id === note.id), true);
+  await assert.rejects(() => removeTransaction("good-lend"), /Riwayat utang tidak dapat dihapus/);
+  assert.equal((await getTransactions()).length, 1);
 });

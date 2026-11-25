@@ -1299,3 +1299,12 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
 .wallet-detail-note-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:9px}
 .wallet-detail-note-footer>span{font-size:11px;color:var(--muted,#777)}
 @media(max-width:480px){.wallet-detail-totals{grid-template-columns:1fr}.wallet-detail-modal{padding:18px}.wallet-detail-history .transaction-row{gap:8px}.wallet-detail-history .transaction-info{min-width:0}}
+
+
+/* CAESH v1.5.6: debt Notes, payment actions, and transaction history. */
+.debt-create-fields{margin-top:12px;padding:13px;border:1px solid var(--line);border-radius:11px;background:var(--surface-soft)}
+.debt-create-fields .wallet-form-hint{margin:9px 0 0}
+.debt-detail-actions{padding:14px;border:1px solid var(--line);border-radius:12px;margin:0 0 16px}
+.debt-detail-actions p{font-size:12px;color:var(--muted);margin:0 0 12px}
+.debt-detail-actions .modal-actions{margin-top:0;justify-content:flex-start}
+.debt-detail-actions .modal-actions button{flex:1}

@@ -1,4 +1,6 @@
 export type TransactionKind = "income" | "expense" | "transfer";
+export type WalletCategory = "standard" | "notes";
+export type DebtDirection = "lent" | "borrowed";
 export type WishlistStatus = "pending" | "purchased";
 export type WishlistItem = {
   id: string;
@@ -21,6 +23,8 @@ export type Wallet = {
   photoY?: number;
   photoZoom?: number;
   note?: string;
+  category?: WalletCategory;
+  debtDirection?: DebtDirection;
 };
 
 export type Transaction = {
@@ -151,7 +155,7 @@ export async function removeWallet(id: string): Promise<void> {
 
     walletsRequest.onsuccess = () => {
       const wallets = walletsRequest.result as Wallet[];
-      if (wallets.length <= 1) {
+      if (wallets.filter((item) => item.category !== "notes").length <= 1) {
         failure = new Error("Caesh harus memiliki minimal satu wallet.");
         tx.abort();
         return;
@@ -159,6 +163,11 @@ export async function removeWallet(id: string): Promise<void> {
       const wallet = wallets.find((item) => item.id === id);
       if (!wallet) {
         failure = new Error("Wallet tidak ditemukan.");
+        tx.abort();
+        return;
+      }
+      if (wallet.category === "notes") {
+        failure = new Error("Notes utang hanya dapat ditutup melalui pembayaran lunas.");
         tx.abort();
         return;
       }
@@ -182,7 +191,7 @@ export async function removeWallet(id: string): Promise<void> {
     transactionsRequest.onsuccess = () => {
       if (walletsRequest.readyState !== "done") return;
       const wallets = walletsRequest.result as Wallet[];
-      if (wallets.length <= 1) {
+      if (wallets.filter((item) => item.category !== "notes").length <= 1) {
         failure = new Error("Caesh harus memiliki minimal satu wallet.");
         tx.abort();
         return;
@@ -190,6 +199,11 @@ export async function removeWallet(id: string): Promise<void> {
       const wallet = wallets.find((item) => item.id === id);
       if (!wallet) {
         failure = new Error("Wallet tidak ditemukan.");
+        tx.abort();
+        return;
+      }
+      if (wallet.category === "notes") {
+        failure = new Error("Notes utang hanya dapat ditutup melalui pembayaran lunas.");
         tx.abort();
         return;
       }
@@ -217,6 +231,147 @@ export async function removeWallet(id: string): Promise<void> {
     tx.onerror = () => {
       failure = failure ?? tx.error ?? new Error("Wallet gagal dihapus.");
     };
+  });
+}
+
+
+function calculateWalletBalance(wallet: Wallet, transactions: Transaction[]): number {
+  const movement = transactions.reduce((sum, item) => {
+    if (item.kind === "transfer") {
+      if (item.walletId === wallet.id) return sum - item.amount;
+      if (item.toWalletId === wallet.id) return sum + item.amount;
+      return sum;
+    }
+    return item.walletId === wallet.id ? sum + (item.kind === "income" ? item.amount : -item.amount) : sum;
+  }, 0);
+  return wallet.initialBalance + movement;
+}
+
+function validateDebtTransfer(transaction: Transaction, noteWallet: Wallet, action: "add" | "payment"): string {
+  if (transaction.kind !== "transfer" || transaction.category !== "Utang"
+    || !Number.isSafeInteger(transaction.amount) || transaction.amount <= 0) {
+    throw new Error("Data transaksi utang tidak valid.");
+  }
+  const direction = noteWallet.debtDirection;
+  if (noteWallet.category !== "notes" || !direction) throw new Error("Wallet Notes tidak valid.");
+  const noteIsSource = transaction.walletId === noteWallet.id;
+  const noteIsDestination = transaction.toWalletId === noteWallet.id;
+  if (noteIsSource === noteIsDestination) throw new Error("Arah transaksi utang tidak valid.");
+  const expectedNoteSource = action === "add" ? direction === "borrowed" : direction === "lent";
+  if (noteIsSource !== expectedNoteSource) throw new Error("Arah perpindahan uang tidak sesuai dengan jenis utang.");
+  return noteIsSource ? (transaction.toWalletId ?? "") : transaction.walletId;
+}
+
+/** Create a Notes wallet and its first cash movement atomically. */
+export async function createDebtNote(wallet: Wallet, transaction: Transaction): Promise<void> {
+  if (wallet.category !== "notes" || !wallet.debtDirection || wallet.initialBalance !== 0 || !wallet.name.trim()) {
+    throw new Error("Data Notes baru tidak valid.");
+  }
+  const db = await openDatabase();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction([WALLET_STORE, TRANSACTION_STORE], "readwrite");
+    const walletStore = tx.objectStore(WALLET_STORE);
+    const transactionStore = tx.objectStore(TRANSACTION_STORE);
+    const walletsRequest = walletStore.getAll();
+    const transactionsRequest = transactionStore.getAll();
+    let failure: Error | null = null;
+    let processed = false;
+    const process = () => {
+      if (processed || walletsRequest.readyState !== "done" || transactionsRequest.readyState !== "done") return;
+      processed = true;
+      try {
+        const wallets = walletsRequest.result as Wallet[];
+        const transactions = transactionsRequest.result as Transaction[];
+        if (wallets.some((item) => item.category === "notes" && item.name.trim().toLocaleLowerCase() === wallet.name.trim().toLocaleLowerCase())) {
+          throw new Error("Notes untuk orang ini masih aktif. Tambahkan utangnya dari Notes yang sudah ada.");
+        }
+        const cashWalletId = validateDebtTransfer(transaction, wallet, "add");
+        const cashWallet = wallets.find((item) => item.id === cashWalletId && item.category !== "notes");
+        if (!cashWallet) throw new Error("Pilih wallet biasa yang masih aktif.");
+        if (wallets.some((item) => item.id === wallet.id) || transactions.some((item) => item.id === transaction.id)) {
+          throw new Error("ID data utang sudah digunakan. Coba lagi.");
+        }
+        if (wallet.debtDirection === "lent" && calculateWalletBalance(cashWallet, transactions) < transaction.amount) {
+          throw new Error("Saldo wallet sumber tidak mencukupi untuk memberikan utang.");
+        }
+        walletStore.add(wallet);
+        transactionStore.add(transaction);
+      } catch (reason) {
+        failure = reason instanceof Error ? reason : new Error("Notes gagal dibuat.");
+        try { tx.abort(); } catch { /* The transaction may already be aborting. */ }
+      }
+    };
+    walletsRequest.onsuccess = process;
+    transactionsRequest.onsuccess = process;
+    tx.oncomplete = () => { db.close(); resolve(); };
+    tx.onabort = () => { db.close(); reject(failure ?? tx.error ?? new Error("Notes gagal dibuat.")); };
+    tx.onerror = () => { failure = failure ?? tx.error ?? new Error("Notes gagal dibuat."); };
+  });
+}
+
+/** Add debt or record a payment, updating the Notes wallet and history in one transaction. */
+export async function recordDebtMovement(
+  noteWalletId: string,
+  transaction: Transaction,
+  action: "add" | "payment",
+): Promise<{ closed: boolean; remaining: number }> {
+  const db = await openDatabase();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction([WALLET_STORE, TRANSACTION_STORE], "readwrite");
+    const walletStore = tx.objectStore(WALLET_STORE);
+    const transactionStore = tx.objectStore(TRANSACTION_STORE);
+    const walletsRequest = walletStore.getAll();
+    const transactionsRequest = transactionStore.getAll();
+    let failure: Error | null = null;
+    let result: { closed: boolean; remaining: number } = { closed: false, remaining: 0 };
+    let processed = false;
+    const process = () => {
+      if (processed || walletsRequest.readyState !== "done" || transactionsRequest.readyState !== "done") return;
+      processed = true;
+      try {
+        const wallets = walletsRequest.result as Wallet[];
+        const transactions = transactionsRequest.result as Transaction[];
+        const noteWallet = wallets.find((item) => item.id === noteWalletId);
+        if (!noteWallet || noteWallet.category !== "notes" || !noteWallet.debtDirection) {
+          throw new Error("Notes ini sudah lunas atau tidak ditemukan.");
+        }
+        const cashWalletId = validateDebtTransfer(transaction, noteWallet, action);
+        const cashWallet = wallets.find((item) => item.id === cashWalletId && item.category !== "notes");
+        if (!cashWallet) throw new Error("Pilih wallet biasa yang masih aktif.");
+        if (transactions.some((item) => item.id === transaction.id)) throw new Error("ID transaksi sudah digunakan. Coba lagi.");
+        const current = calculateWalletBalance(noteWallet, transactions);
+        const sign = noteWallet.debtDirection === "lent" ? 1 : -1;
+        if ((noteWallet.debtDirection === "lent" && current <= 0) || (noteWallet.debtDirection === "borrowed" && current >= 0)) {
+          throw new Error("Saldo Notes tidak sesuai. Periksa riwayat utangnya terlebih dahulu.");
+        }
+        const remainingBefore = Math.abs(current);
+        if (action === "payment" && transaction.amount > remainingBefore) {
+          throw new Error("Nominal pembayaran melebihi sisa utang.");
+        }
+        if ((action === "add" && noteWallet.debtDirection === "lent")
+          || (action === "payment" && noteWallet.debtDirection === "borrowed")) {
+          if (calculateWalletBalance(cashWallet, transactions) < transaction.amount) {
+            throw new Error(action === "add" ? "Saldo wallet sumber tidak mencukupi untuk memberikan utang." : "Saldo wallet tidak mencukupi untuk membayar utang.");
+          }
+        }
+        const signedChange = action === "add" ? sign * transaction.amount : -sign * transaction.amount;
+        const nextBalance = current + signedChange;
+        if (action === "add" && nextBalance * sign <= 0) throw new Error("Penambahan utang menghasilkan saldo yang tidak valid.");
+        if (action === "payment" && nextBalance * sign < 0) throw new Error("Nominal pembayaran melebihi sisa utang.");
+        transactionStore.add(transaction);
+        const closed = action === "payment" && nextBalance === 0;
+        if (closed) walletStore.delete(noteWalletId);
+        result = { closed, remaining: Math.abs(nextBalance) };
+      } catch (reason) {
+        failure = reason instanceof Error ? reason : new Error("Transaksi utang gagal disimpan.");
+        try { tx.abort(); } catch { /* The transaction may already be aborting. */ }
+      }
+    };
+    walletsRequest.onsuccess = process;
+    transactionsRequest.onsuccess = process;
+    tx.oncomplete = () => { db.close(); resolve(result); };
+    tx.onabort = () => { db.close(); reject(failure ?? tx.error ?? new Error("Transaksi utang gagal disimpan.")); };
+    tx.onerror = () => { failure = failure ?? tx.error ?? new Error("Transaksi utang gagal disimpan."); };
   });
 }
 
@@ -250,11 +405,25 @@ export async function saveTransaction(transaction: Transaction): Promise<void> {
 export async function removeTransaction(id: string): Promise<void> {
   const db = await openDatabase();
   return new Promise((resolve, reject) => {
-    const request = db.transaction(TRANSACTION_STORE, "readwrite").objectStore(TRANSACTION_STORE).delete(id);
-    request.onsuccess = () => { db.close(); resolve(); };
-    request.onerror = () => {
+    const store = db.transaction(TRANSACTION_STORE, "readwrite").objectStore(TRANSACTION_STORE);
+    const lookup = store.get(id);
+    lookup.onsuccess = () => {
+      const target = lookup.result as Transaction | undefined;
+      if (target?.category === "Utang") {
+        db.close();
+        reject(new Error("Riwayat utang tidak dapat dihapus langsung agar saldo dan pelunasan tetap akurat."));
+        return;
+      }
+      const request = store.delete(id);
+      request.onsuccess = () => { db.close(); resolve(); };
+      request.onerror = () => {
+        db.close();
+        reject(request.error ?? new Error("Gagal menghapus transaksi."));
+      };
+    };
+    lookup.onerror = () => {
       db.close();
-      reject(request.error ?? new Error("Gagal menghapus transaksi."));
+      reject(lookup.error ?? new Error("Transaksi gagal diperiksa sebelum dihapus."));
     };
   });
 }
@@ -385,7 +554,10 @@ function isWallet(value: unknown): value is Wallet {
     && (value.photo === undefined || typeof value.photo === "string")
     && (value.photoX === undefined || (typeof value.photoX === "number" && Number.isFinite(value.photoX)))
     && (value.photoY === undefined || (typeof value.photoY === "number" && Number.isFinite(value.photoY)))
-    && (value.photoZoom === undefined || (typeof value.photoZoom === "number" && Number.isFinite(value.photoZoom)));
+    && (value.photoZoom === undefined || (typeof value.photoZoom === "number" && Number.isFinite(value.photoZoom)))
+    && (value.category === undefined || value.category === "standard" || value.category === "notes")
+    && (value.debtDirection === undefined || value.debtDirection === "lent" || value.debtDirection === "borrowed")
+    && (value.category !== "notes" || ((value.debtDirection === "lent" || value.debtDirection === "borrowed") && value.initialBalance === 0));
 }
 
 function isTransaction(value: unknown): value is Transaction {
@@ -436,8 +608,8 @@ function validateBackup(value: unknown): CaeshBackup {
 
 export async function restoreBackup(input: unknown): Promise<CaeshBackup> {
   const backup = validateBackup(input);
-  if (backup.wallets.length === 0) {
-    throw new Error("Backup tidak memiliki wallet. Pemulihan dibatalkan agar Caesh tidak kehilangan wallet utama.");
+  if (!backup.wallets.some((wallet) => wallet.category !== "notes")) {
+    throw new Error("Backup harus memiliki minimal satu wallet biasa. Pemulihan dibatalkan agar pembayaran utang tetap bisa dilakukan.");
   }
   const db = await openDatabase();
   try {
