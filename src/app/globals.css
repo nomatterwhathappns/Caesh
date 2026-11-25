@@ -1253,3 +1253,15 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
 .expense-widget-select-all{padding:4px 0}
 .expense-widget-empty{font-size:11px;color:#92998f;margin:0}
 @media(max-width:620px){.expense-widget-settings{grid-template-columns:1fr}.expense-widget-wallets{grid-column:auto}.expense-widget-date-grid{grid-template-columns:1fr 1fr}.expense-widget-total{gap:6px 10px}}
+
+
+/* CAESH v1.2.6: remove the topbar mark and restyle only the app name. */
+.topbar .topbar-brand { gap: 0; }
+.topbar .topbar-brand-name {
+  display: inline-block;
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  font-weight: 900;
+  letter-spacing: -0.8px;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
