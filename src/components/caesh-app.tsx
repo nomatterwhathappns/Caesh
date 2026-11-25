@@ -114,6 +114,37 @@ export default function CaeshApp() {
   const [walletPrivacyLoaded, setWalletPrivacyLoaded] = useState(false);
   const [walletSettingsOpenId, setWalletSettingsOpenId] = useState<string | null>(null);
 
+  const hasOpenModal = Boolean(
+    showForm || showWalletForm || showWishlistForm || purchaseTarget || showPhotoEditor ||
+    debtAction || detailWallet || availableUpdate
+  );
+
+  useEffect(() => {
+    if (!hasOpenModal) return;
+    document.documentElement.classList.add("caesh-modal-open");
+    document.body.classList.add("caesh-modal-open");
+    return () => {
+      document.documentElement.classList.remove("caesh-modal-open");
+      document.body.classList.remove("caesh-modal-open");
+    };
+  }, [hasOpenModal]);
+
+  useEffect(() => {
+    if (!walletSettingsOpenId) return;
+    const closeIfOutside = (event: PointerEvent) => {
+      const target = event.target;
+      if (target instanceof Element && target.closest(".wallet-settings-trigger, .wallet-settings-menu")) return;
+      setWalletSettingsOpenId(null);
+    };
+    const closeOnScroll = () => setWalletSettingsOpenId(null);
+    document.addEventListener("pointerdown", closeIfOutside, true);
+    document.addEventListener("scroll", closeOnScroll, true);
+    return () => {
+      document.removeEventListener("pointerdown", closeIfOutside, true);
+      document.removeEventListener("scroll", closeOnScroll, true);
+    };
+  }, [walletSettingsOpenId]);
+
   useEffect(() => {
     try {
       const rawBalanceFilter = window.localStorage.getItem("caesh-balance-wallet-filter");
@@ -869,7 +900,7 @@ export default function CaeshApp() {
           </section>
           <section className="overview-wallet-panel" aria-label="Wallet">
             <div className="overview-wallet-heading"><div><span className="section-kicker">TEMPAT PENYIMPANAN UANG</span><strong>Wallet kamu</strong></div><button type="button" className="wallet-add-button" aria-label="Tambah wallet" title="Tambah wallet" onClick={() => { setNewWalletCategory("standard"); setNewWalletName(""); setNewWalletBalance("0"); setNewDebtAmount(""); setNewDebtCashWalletId(regularWallets[0]?.id ?? ""); setShowWalletForm(true); }}>＋</button></div>
-            <div className="overview-wallet-list">
+            <div className="overview-wallet-list" onScroll={() => setWalletSettingsOpenId(null)}>
               {walletBalances.map((wallet) => <article className={`overview-wallet-item${wallet.photo ? " has-photo" : ""}`} key={wallet.id} role="button" tabIndex={0} aria-label={`Lihat detail wallet ${wallet.name}`} onClick={() => { setDetailWalletId(wallet.id); setDetailWalletNote(wallet.note ?? ""); }} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setDetailWalletId(wallet.id); setDetailWalletNote(wallet.note ?? ""); } }}>{wallet.photo && <img className="wallet-card-photo" src={wallet.photo} alt="" style={{ objectPosition: `${wallet.photoX ?? 50}% ${wallet.photoY ?? 50}%`, transform: `scale(${wallet.photoZoom ?? 1.15})` }} />}<div className="overview-wallet-item-top"><strong className="wallet-name">{wallet.name}</strong>{wallet.category !== "notes" && <button type="button" className="wallet-settings-trigger" aria-label={`Pengaturan wallet ${wallet.name}`} aria-expanded={walletSettingsOpenId === wallet.id} title="Pengaturan wallet" onClick={(event) => { event.stopPropagation(); setWalletSettingsOpenId((current) => current === wallet.id ? null : wallet.id); }}>•••</button>}</div><div className="overview-wallet-bottom"><div className="wallet-balance">{ready ? displayNominal(wallet.category === "notes" ? Math.abs(wallet.balance) : wallet.balance, summaryNominalsHidden || (wallet.category !== "notes" && isWalletNominalHidden(wallet.id))) : "Memuat..."}</div><div className="wallet-start">{wallet.category === "notes" ? wallet.debtDirection === "lent" ? "Piutang · belum lunas" : "Utang · belum lunas" : (summaryNominalsHidden || isWalletNominalHidden(wallet.id)) ? "Saldo awal ••••••" : `Saldo awal ${rupiah(wallet.initialBalance)}`}</div></div>{wallet.category !== "notes" && walletSettingsOpenId === wallet.id && <div className="wallet-settings-menu" onClick={(event) => event.stopPropagation()}><button type="button" onClick={() => toggleWalletNominal(wallet)}>{isWalletNominalHidden(wallet.id) ? "Tampilkan" : "Hide"}</button><button type="button" onClick={() => { setWalletSettingsOpenId(null); openWalletPhotoEditor(wallet.id); }}>▧ Atur background</button><button type="button" className="wallet-settings-danger" onClick={() => { setWalletSettingsOpenId(null); void handleWalletDelete(wallet.id); }}>× Hapus wallet</button></div>}</article>)}
               {wallets.length === 0 && ready && <div className="wallet-empty">Belum ada wallet. Tambahkan wallet pertamamu.</div>}
             </div>
