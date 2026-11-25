@@ -557,7 +557,7 @@ function isWallet(value: unknown): value is Wallet {
     && (value.photoZoom === undefined || (typeof value.photoZoom === "number" && Number.isFinite(value.photoZoom)))
     && (value.category === undefined || value.category === "standard" || value.category === "notes")
     && (value.debtDirection === undefined || value.debtDirection === "lent" || value.debtDirection === "borrowed")
-    && (value.category !== "notes" || (value.debtDirection === "lent" || value.debtDirection === "borrowed"));
+    && (value.category !== "notes" || ((value.debtDirection === "lent" || value.debtDirection === "borrowed") && value.initialBalance === 0));
 }
 
 function isTransaction(value: unknown): value is Transaction {
