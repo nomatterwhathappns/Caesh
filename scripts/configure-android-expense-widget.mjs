@@ -8,6 +8,10 @@ const manifestPath = "android/app/src/main/AndroidManifest.xml";
 let manifest = await readFile(manifestPath, "utf8");
 
 const receiver = `
+        <activity
+            android:name=".ExpenseWidgetConfigActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
         <receiver
             android:name=".ExpenseWidgetProvider"
             android:exported="true"
@@ -31,6 +35,7 @@ await mkdir(`${resDir}/layout`, { recursive: true });
 await mkdir(`${resDir}/xml`, { recursive: true });
 await writeFile(`${resDir}/layout/expense_widget.xml`, `<?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/expense_widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#24352B"
@@ -85,6 +90,7 @@ await writeFile(`${resDir}/layout/expense_widget.xml`, `<?xml version="1.0" enco
 
 await writeFile(`${resDir}/xml/expense_widget_info.xml`, `<?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:configure="com.caesh.finance.ExpenseWidgetConfigActivity"
     android:minWidth="180dp"
     android:minHeight="180dp"
     android:targetCellWidth="2"
@@ -117,24 +123,12 @@ public class ExpenseWidgetProvider extends AppWidgetProvider {
 
     @Override
     public void onUpdate(Context context, AppWidgetManager manager, int[] ids) {
-        int[] allIds = manager.getAppWidgetIds(new ComponentName(context, ExpenseWidgetProvider.class));
-        if (allIds.length > 1) {
-            for (int i = 1; i < allIds.length; i++) {
-                manager.deleteAppWidgetId(allIds[i]);
-            }
-            ids = new int[] { allIds[0] };
-        }
         for (int id : ids) updateOne(context, manager, id);
     }
 
     static void updateAll(Context context) {
         AppWidgetManager manager = AppWidgetManager.getInstance(context);
         int[] ids = manager.getAppWidgetIds(new ComponentName(context, ExpenseWidgetProvider.class));
-        if (ids.length == 0) return;
-        if (ids.length > 1) {
-            for (int i = 1; i < ids.length; i++) manager.deleteAppWidgetId(ids[i]);
-            ids = new int[] { ids[0] };
-        }
         for (int id : ids) updateOne(context, manager, id);
     }
 
