@@ -608,8 +608,8 @@ function validateBackup(value: unknown): CaeshBackup {
 
 export async function restoreBackup(input: unknown): Promise<CaeshBackup> {
   const backup = validateBackup(input);
-  if (backup.wallets.length === 0) {
-    throw new Error("Backup tidak memiliki wallet. Pemulihan dibatalkan agar Caesh tidak kehilangan wallet utama.");
+  if (!backup.wallets.some((wallet) => wallet.category !== "notes")) {
+    throw new Error("Backup harus memiliki minimal satu wallet biasa. Pemulihan dibatalkan agar pembayaran utang tetap bisa dilakukan.");
   }
   const db = await openDatabase();
   try {
