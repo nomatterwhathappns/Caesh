@@ -116,7 +116,7 @@ export default function CaeshApp() {
 
   const hasOpenModal = Boolean(
     showForm || showWalletForm || showWishlistForm || purchaseTarget || showPhotoEditor ||
-    debtAction || detailWallet || availableUpdate
+    debtAction || detailWalletId || availableUpdate
   );
 
   useEffect(() => {
