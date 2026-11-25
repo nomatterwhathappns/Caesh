@@ -1233,3 +1233,23 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
 .update-progress-track span{display:block;height:100%;background:#78966e;border-radius:99px;transition:width .15s ease}
 .update-error{margin-top:13px;padding:10px 12px;border-radius:8px;background:#fff1ed;color:#a34e3d;font-size:10px;line-height:1.55;text-align:left}
 .update-modal .primary-button:disabled,.update-modal .cancel-button:disabled{opacity:.55;cursor:wait}
+
+
+/* Expense summary widget */
+.expense-widget{margin-bottom:14px}
+.expense-widget-heading{align-items:flex-start;gap:12px;margin-bottom:12px}
+.expense-widget-heading h2{font:700 17px 'Manrope',sans-serif;letter-spacing:-.4px;margin:6px 0 0}
+.expense-widget-range{font-size:10px;color:#9aa196;margin:5px 0 0}
+.expense-widget-total{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.expense-widget-total strong{font:700 clamp(23px,2.2vw,30px) 'Manrope',sans-serif;letter-spacing:-.8px;color:var(--deep)}
+.expense-widget-total span{font-size:10px;color:#92998f}
+.expense-widget-settings{border-top:1px solid var(--line);margin-top:15px;padding-top:12px;display:grid;grid-template-columns:minmax(150px,.8fr) minmax(220px,1.2fr);gap:10px 20px}
+.expense-widget-setting-block select,.expense-widget-date-grid input{width:100%;border:1px solid #e5e9e2;border-radius:8px;padding:10px 11px;color:#354032;background:#fff;font-size:11px}
+.expense-widget-date-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.expense-widget-wallets{grid-column:1/-1;display:flex;align-items:center;gap:9px 16px;flex-wrap:wrap}
+.expense-widget-wallets>.field-label{width:100%;margin:2px 0 0}
+.expense-widget-wallet-option{display:inline-flex;align-items:center;gap:7px;font-size:11px;color:var(--text);cursor:pointer}
+.expense-widget-wallet-option input{accent-color:#718b68;width:15px;height:15px}
+.expense-widget-select-all{padding:4px 0}
+.expense-widget-empty{font-size:11px;color:#92998f;margin:0}
+@media(max-width:620px){.expense-widget-settings{grid-template-columns:1fr}.expense-widget-wallets{grid-column:auto}.expense-widget-date-grid{grid-template-columns:1fr 1fr}.expense-widget-total{gap:6px 10px}}
