@@ -523,7 +523,7 @@ export default function CaeshApp() {
       if (typeof reader.result !== "string") { setError("Foto background tidak dapat dibaca."); setWidgetImageTarget(null); return; }
       const image = new Image();
       image.onload = () => {
-        const scale = Math.min(1, 480 / Math.max(image.width, image.height));
+        const scale = Math.min(1, 360 / Math.max(image.width, image.height));
         const canvas = document.createElement("canvas");
         canvas.width = Math.max(1, Math.round(image.width * scale));
         canvas.height = Math.max(1, Math.round(image.height * scale));
