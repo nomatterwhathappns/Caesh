@@ -1,5 +1,5 @@
 {
-  "version": "1.5.7",
-  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.5.7/Caesh.apk",
-  "notes": "CAESH 1.5.7: perbaikan bug TypeScript pada validasi saldo saat pembelian wishlist. Tidak ada fitur baru."
+  "version": "1.6.6",
+  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.6.6/Caesh.apk",
+  "notes": "CAESH 1.6.6: fitur Hide Nominal. Satu tombol menyembunyikan seluruh nominal di Ringkasan; setiap wallet biasa memiliki pengaturan sendiri untuk menyembunyikan nominal. Pengaturan wallet menggabungkan hide/show nominal, background, dan hapus wallet."
 }
