@@ -20,6 +20,7 @@ export type Wallet = {
   photoX?: number;
   photoY?: number;
   photoZoom?: number;
+  note?: string;
 };
 
 export type Transaction = {
