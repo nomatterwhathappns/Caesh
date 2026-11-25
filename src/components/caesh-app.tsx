@@ -26,7 +26,8 @@ const parseRupiahInput = (value: string) => Number(value.replace(/\D/g, ""));
 const rupiah = (value: number) => new Intl.NumberFormat("id-ID", {
   style: "currency", currency: "IDR", maximumFractionDigits: 0,
 }).format(value);
-type CaeshUpdate = { version: string; apkUrl: string; sha256: string; notes?: string };
+type CaeshReleaseNote = { version: string; notes: string };
+type CaeshUpdate = { version: string; apkUrl: string; sha256: string; notes?: string; releases?: CaeshReleaseNote[] };
 const UPDATE_MANIFEST_URL = "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-update/update.json";
 function compareVersions(left: string, right: string) {
   const a = left.split(".").map((part) => Number.parseInt(part, 10) || 0);
@@ -214,7 +215,27 @@ export default function CaeshApp() {
         const expectedApkUrl = `https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v${manifest.version}/Caesh.apk`;
         if (manifest.apkUrl !== expectedApkUrl) return;
         if (compareVersions(manifest.version, appInfo.version) > 0) {
-          setAvailableUpdate({ version: manifest.version, apkUrl: manifest.apkUrl, sha256: manifest.sha256.toLowerCase(), notes: typeof manifest.notes === "string" ? manifest.notes : undefined });
+          const releaseHistory = Array.isArray(manifest.releases)
+            ? manifest.releases.filter((release): release is CaeshReleaseNote =>
+                !!release &&
+                typeof release.version === "string" &&
+                /^\\d+(?:\\.\\d+){1,2}$/.test(release.version) &&
+                typeof release.notes === "string" &&
+                release.notes.trim().length > 0 &&
+                compareVersions(release.version, appInfo.version) > 0 &&
+                compareVersions(release.version, manifest.version) <= 0
+              )
+            : [];
+          const releases = releaseHistory.length > 0
+            ? [...releaseHistory].sort((left, right) => compareVersions(left.version, right.version))
+            : [{ version: manifest.version, notes: typeof manifest.notes === "string" ? manifest.notes : "Pembaruan CAESH tersedia." }];
+          setAvailableUpdate({
+            version: manifest.version,
+            apkUrl: manifest.apkUrl,
+            sha256: manifest.sha256.toLowerCase(),
+            notes: typeof manifest.notes === "string" ? manifest.notes : undefined,
+            releases,
+          });
         } else {
           setAvailableUpdate(null);
         }
@@ -923,7 +944,7 @@ export default function CaeshApp() {
         {pendingPhoto && <div className="photo-adjustments"><label>Geser horizontal <input className="photo-range" type="range" min="0" max="100" value={photoX} onChange={(event) => setPhotoX(Number(event.target.value))} /></label><label>Geser vertikal <input className="photo-range" type="range" min="0" max="100" value={photoY} onChange={(event) => setPhotoY(Number(event.target.value))} /></label><label>Zoom <input className="photo-range" type="range" min="1" max="2.5" step="0.05" value={photoZoom} onChange={(event) => setPhotoZoom(Number(event.target.value))} /></label></div>}
         <div className="modal-actions">{pendingPhoto && <button type="button" className="cancel-button" onClick={() => setPendingPhoto("")}>Hapus foto</button>}<button type="button" className="cancel-button" onClick={() => setShowPhotoEditor(false)}>Batal</button><button type="button" className="primary-button" onClick={handlePhotoSave}>Simpan foto</button></div>
       </section></div>}
-      {availableUpdate && <div className="modal-backdrop update-backdrop" role="presentation"><section className="modal-card update-modal" role="dialog" aria-modal="true" aria-labelledby="update-modal-title"><div className="update-mark" aria-hidden="true">↻</div><div className="section-kicker">PEMBARUAN CAESH</div><h2 id="update-modal-title">Update CAESH tersedia</h2><p>Versi baru <strong>{availableUpdate.version}</strong> sudah tersedia. Lu bisa update sekarang atau nanti.</p>{availableUpdate.notes && <div className="update-notes">{availableUpdate.notes}</div>}{updateDownloadProgress !== null && <div className="update-progress"><div className="update-progress-label"><span>{downloadedUpdatePath ? "APK berhasil diunduh" : "Mengunduh pembaruan..."}</span><strong>{updateDownloadProgress}%</strong></div><div className="update-progress-track"><span style={{ width: `${updateDownloadProgress}%` }} /></div></div>}{updateError && <div className="update-error">{updateError}</div>}<div className="modal-actions update-actions"><button type="button" className="cancel-button" onClick={() => setAvailableUpdate(null)} disabled={updateLoading}>Nanti saja</button><button type="button" className="primary-button" onClick={downloadAndInstallUpdate} disabled={updateLoading}>{updateLoading ? "Memproses..." : downloadedUpdatePath ? "Pasang update" : "Download & update"}</button></div><small>Data CAESH tetap tersimpan selama pembaruan dipasang sebagai update dengan tanda tangan yang sama.</small></section></div>}
+      {availableUpdate && <div className="modal-backdrop update-backdrop" role="presentation"><section className="modal-card update-modal" role="dialog" aria-modal="true" aria-labelledby="update-modal-title"><div className="update-mark" aria-hidden="true">↻</div><div className="section-kicker">PEMBARUAN CAESH</div><h2 id="update-modal-title">Update CAESH tersedia</h2><p>Versi baru <strong>{availableUpdate.version}</strong> sudah tersedia. Lu bisa update sekarang atau nanti.</p><div className="update-notes"><strong>{availableUpdate.releases.length} pembaruan sejak versi yang terpasang</strong><div className="update-release-list">{availableUpdate.releases.map((release) => <div className="update-release-item" key={release.version}><strong>v{release.version}</strong><span>{release.notes}</span></div>)}</div></div>{updateDownloadProgress !== null && <div className="update-progress"><div className="update-progress-label"><span>{downloadedUpdatePath ? "APK berhasil diunduh" : "Mengunduh pembaruan..."}</span><strong>{updateDownloadProgress}%</strong></div><div className="update-progress-track"><span style={{ width: `${updateDownloadProgress}%` }} /></div></div>}{updateError && <div className="update-error">{updateError}</div>}<div className="modal-actions update-actions"><button type="button" className="cancel-button" onClick={() => setAvailableUpdate(null)} disabled={updateLoading}>Nanti saja</button><button type="button" className="primary-button" onClick={downloadAndInstallUpdate} disabled={updateLoading}>{updateLoading ? "Memproses..." : downloadedUpdatePath ? "Pasang update" : "Download & update"}</button></div><small>Data CAESH tetap tersimpan selama pembaruan dipasang sebagai update dengan tanda tangan yang sama.</small></section></div>}
 
       {detailWallet && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !detailWalletSaving) setDetailWalletId(null); }}><section className="modal-card wallet-detail-modal" role="dialog" aria-modal="true" aria-labelledby="wallet-detail-title"><div className="modal-heading"><div><div className="section-kicker">INFORMASI WALLET</div><h2 id="wallet-detail-title">{detailWallet.name}</h2></div><button className="modal-close" onClick={() => setDetailWalletId(null)} aria-label="Tutup detail wallet" disabled={detailWalletSaving}>×</button></div>
         <div className="wallet-detail-balance"><span>{detailWallet.category === "notes" ? "Sisa utang" : "Saldo saat ini"}</span><strong>{displayNominal(detailWallet.category === "notes" ? Math.abs(detailWalletBalance) : detailWalletBalance, detailWallet.category !== "notes" && isWalletNominalHidden(detailWallet.id))}</strong></div>
