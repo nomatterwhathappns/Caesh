@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { calculateExpenseSummary, getExpenseDateRange, isExpenseLimitExceeded, normalizeExpenseWidgetSettings } from "./expense-widget";
+import { calculateExpenseSummary, getExpenseDateRange, getExpensePeriodKey, isExpenseLimitExceeded, normalizeExpenseWidgetSettings } from "./expense-widget";
 import type { Transaction } from "./db";
 
 const tx = (overrides: Partial<Transaction> = {}): Transaction => ({
@@ -43,4 +43,12 @@ test("settings normalization keeps safe supported values and defaults invalid fi
   assert.equal(settings.monthlyLimit, 1000);
   assert.equal(settings.beforeImage, "data:image/png;base64,abc");
   assert.equal(settings.afterImage, "");
+});
+
+test("period keys change at the correct daily, weekly, monthly, and yearly boundaries", () => {
+  assert.equal(getExpensePeriodKey("daily", new Date(2026, 10, 25), "", ""), "2026-11-25");
+  assert.equal(getExpensePeriodKey("weekly", new Date(2026, 10, 25), "", ""), "2026-11-23");
+  assert.equal(getExpensePeriodKey("monthly", new Date(2026, 10, 25), "", ""), "2026-11");
+  assert.equal(getExpensePeriodKey("yearly", new Date(2026, 10, 25), "", ""), "2026");
+  assert.equal(getExpensePeriodKey("custom", new Date(2026, 10, 25), "2026-11-01", "2026-11-30"), "2026-11-01|2026-11-30");
 });
