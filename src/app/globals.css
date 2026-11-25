@@ -1265,3 +1265,13 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
   text-transform: uppercase;
   line-height: 1.2;
 }
+
+
+/* CAESH v1.3.6: independent wallet selection for the overview total balance. */
+.balance-filter-trigger{position:relative;z-index:2;margin-top:10px;padding:0;border:0;background:transparent;color:#dce8d6;font:600 10px 'Manrope',sans-serif;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.balance-filter-panel{position:relative;z-index:3;margin-top:12px;padding:12px;border:1px solid rgba(255,255,255,.2);border-radius:11px;background:rgba(19,35,24,.94);display:flex;flex-wrap:wrap;gap:10px 16px}
+.balance-filter-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;font-size:10px;color:#fff}
+.balance-filter-select-all{padding:2px 0;border:0;background:transparent;color:#dce8d6;font:600 10px 'Manrope',sans-serif;text-decoration:underline;cursor:pointer}
+.balance-filter-option{display:inline-flex;align-items:center;gap:7px;color:#f2f6ef;font-size:10px;cursor:pointer}
+.balance-filter-option input{width:14px;height:14px;margin:0;accent-color:#a9c49d}
+.balance-filter-panel .expense-widget-empty{color:#dce8d6}
