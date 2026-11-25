@@ -108,23 +108,23 @@ const layoutXml = (padding, titleSize, amountSize, captionSize) => `<?xml versio
     </LinearLayout>
 </FrameLayout>
 `;
-await writeFile(`\${resDir}/layout/expense_widget_small.xml`, layoutXml(9, 11, 16, 9));
-await writeFile(`\${resDir}/layout/expense_widget.xml`, layoutXml(16, 13, 23, 10));
-await writeFile(`\${resDir}/layout/expense_widget_large.xml`, layoutXml(20, 15, 27, 12));
-await writeFile(`\${resDir}/drawable/expense_widget_shape.xml`, `<?xml version="1.0" encoding="utf-8"?>
+await writeFile(`${resDir}/layout/expense_widget_small.xml`, layoutXml(9, 11, 16, 9));
+await writeFile(`${resDir}/layout/expense_widget.xml`, layoutXml(16, 13, 23, 10));
+await writeFile(`${resDir}/layout/expense_widget_large.xml`, layoutXml(20, 15, 27, 12));
+await writeFile(`${resDir}/drawable/expense_widget_shape.xml`, `<?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
     <solid android:color="#24352B" />
     <corners android:radius="22dp" />
 </shape>
 `);
-await writeFile(`\${resDir}/drawable/expense_widget_overlay.xml`, `<?xml version="1.0" encoding="utf-8"?>
+await writeFile(`${resDir}/drawable/expense_widget_overlay.xml`, `<?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
     <solid android:color="#330D1711" />
     <corners android:radius="22dp" />
 </shape>
 `);
 
-await writeFile(`\${resDir}/xml/expense_widget_info.xml`, `<?xml version="1.0" encoding="utf-8"?>
+await writeFile(`${resDir}/xml/expense_widget_info.xml`, `<?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:configure="com.caesh.finance.ExpenseWidgetConfigActivity"
     android:minWidth="110dp"
@@ -140,7 +140,7 @@ await writeFile(`\${resDir}/xml/expense_widget_info.xml`, `<?xml version="1.0" e
     android:description="@string/app_name" />
 `);
 
-await writeFile(`\${javaDir}/ExpenseWidgetProvider.java`, `package \${appId};
+await writeFile(`${javaDir}/ExpenseWidgetProvider.java`, `package ${appId};
 
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
