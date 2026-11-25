@@ -178,6 +178,13 @@ test("lent debt supports adding before settlement, partial payment, and auto-clo
   assert.equal(transactions.length, 4);
   assert.equal(transactions.every((item) => item.category === "Utang"), true);
   assert.equal(transactions.every((item) => item.walletName === note.name || item.toWalletName === note.name), true);
+  const nextNote: Wallet = { id: "notes-andi-new", name: "Andi", initialBalance: 0, createdAt: 1768003200000, category: "notes", debtDirection: "lent" };
+  await createDebtNote(nextNote, debtTransaction("debt-5", 50000, cashWallet.id, cashWallet.name, nextNote.id, nextNote.name, "Utang baru setelah lunas"));
+  wallets = await getWallets();
+  transactions = await getTransactions();
+  assert.equal(wallets.some((item) => item.id === nextNote.id), true);
+  assert.equal(wallets.some((item) => item.id === note.id), false);
+  assert.equal(transactions.length, 5);
 });
 
 test("borrowed debt increases destination cash and repayment decreases it without double counting", async () => {
