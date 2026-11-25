@@ -514,11 +514,25 @@ export default function CaeshApp() {
     event.target.value = "";
     if (!file || !widgetImageTarget) return;
     if (!file.type.startsWith("image/")) { setError("File background harus berupa gambar."); return; }
-    if (file.size > 600 * 1024) { setError("Ukuran foto maksimal 600 KB agar widget dan penyimpanan tetap ringan."); return; }
+    if (file.size > 10 * 1024 * 1024) { setError("Ukuran foto maksimal 10 MB."); return; }
     const reader = new FileReader();
     reader.onload = () => {
-      if (typeof reader.result === "string") setExpenseWidgetSettings((current) => ({ ...current, [widgetImageTarget]: reader.result as string }));
-      setWidgetImageTarget(null);
+      if (typeof reader.result !== "string") { setError("Foto background tidak dapat dibaca."); setWidgetImageTarget(null); return; }
+      const image = new Image();
+      image.onload = () => {
+        const scale = Math.min(1, 480 / Math.max(image.width, image.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(image.width * scale));
+        canvas.height = Math.max(1, Math.round(image.height * scale));
+        const context = canvas.getContext("2d");
+        if (!context) { setError("Foto background gagal diproses."); setWidgetImageTarget(null); return; }
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        const optimizedImage = canvas.toDataURL("image/jpeg", 0.78);
+        setExpenseWidgetSettings((current) => ({ ...current, [widgetImageTarget]: optimizedImage }));
+        setWidgetImageTarget(null);
+      };
+      image.onerror = () => { setError("Format foto background tidak didukung."); setWidgetImageTarget(null); };
+      image.src = reader.result;
     };
     reader.onerror = () => { setError("Foto background gagal dibaca."); setWidgetImageTarget(null); };
     reader.readAsDataURL(file);
