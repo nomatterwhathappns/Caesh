@@ -1441,3 +1441,26 @@ body.caesh-modal-open {
   .modal-actions > button { flex: 1 1 auto; }
   .update-modal { padding: 22px 20px; }
 }
+
+
+/* CAESH v1.11.14: normalize checkbox controls inside the widget settings dialog. */
+.expense-widget-modal .expense-widget-wallet-option input[type="checkbox"] {
+  appearance: auto;
+  -webkit-appearance: checkbox;
+  display: inline-block;
+  flex: 0 0 18px;
+  width: 18px;
+  min-width: 18px;
+  height: 18px;
+  min-height: 18px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  accent-color: #8eae84;
+}
+.expense-widget-modal .expense-widget-limit > .expense-widget-wallet-option input[type="checkbox"] {
+  margin-top: 2px;
+}
