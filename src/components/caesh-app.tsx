@@ -834,7 +834,7 @@ export default function CaeshApp() {
   async function handleDelete(id: string) {
     const target = transactions.find((item) => item.id === id);
     if (target?.category === "Utang") { setError("Riwayat utang tidak bisa dihapus langsung agar saldo dan status pelunasan tetap akurat."); return; }
-    setDeleteTransactionTarget(target);
+    setDeleteTransactionTarget(target ?? null);
   }
 
   async function confirmDeleteTransaction() {
