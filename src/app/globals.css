@@ -1321,3 +1321,22 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
 .wallet-settings-menu button{width:100%;padding:10px 11px;border:0;border-radius:8px;background:transparent;color:var(--ink);text-align:left;font:500 11px 'DM Sans',sans-serif;cursor:pointer}
 .wallet-settings-menu button:hover{background:var(--surface-soft,#f1f3ef)}
 .wallet-settings-menu button.wallet-settings-danger{color:#b75c4d}
+
+
+/* v1.8.10: lock the page behind dialogs while keeping the dialog itself scrollable. */
+html.caesh-modal-open,
+body.caesh-modal-open {
+  overflow: hidden !important;
+  overscroll-behavior: none;
+}
+
+.modal-backdrop {
+  overscroll-behavior: contain;
+}
+
+.modal-card {
+  max-height: calc(100dvh - 36px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
