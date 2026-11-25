@@ -1,8 +1,12 @@
 {
-  "version": "1.11.15",
-  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.11.15/Caesh.apk",
-  "notes": "Memperbaiki verifikasi SHA-256 pembaruan agar APK dan manifest selalu berasal dari build yang sama, sekaligus merapikan checkbox popup pengaturan widget.",
+  "version": "1.12.0",
+  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.12.0/Caesh.apk",
+  "notes": "Memperbarui popup konfirmasi hapus transaksi dengan tampilan CAESH yang konsisten, informasi transaksi yang akan dihapus, dan tombol konfirmasi yang lebih jelas.",
   "releases": [
+    {
+      "version": "1.12.0",
+      "notes": "Memperbarui popup konfirmasi hapus transaksi dengan tampilan CAESH yang konsisten, informasi transaksi yang akan dihapus, dan tombol konfirmasi yang lebih jelas."
+    },
     {
       "version": "1.11.15",
       "notes": "Memperbaiki verifikasi SHA-256 pembaruan agar APK dan manifest selalu berasal dari build yang sama, sekaligus merapikan checkbox popup pengaturan widget."
@@ -38,10 +42,6 @@
     {
       "version": "1.7.9",
       "notes": "Merapikan tampilan Wallet: tombol tambah hanya ikon plus dan ikon titik tiga diratakan di tengah."
-    },
-    {
-      "version": "1.8.9",
-      "notes": "Menampilkan daftar semua pembaruan yang terlewat sejak versi CAESH yang terpasang, bukan hanya versi terbaru."
     }
   ]
 }
