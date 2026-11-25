@@ -11,7 +11,7 @@ Object.defineProperty(globalThis, "localStorage", {
 });
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { createBackup, createDebtNote, getTransactions, getWallets, getWishlist, recordDebtMovement, restoreBackup, Transaction, Wallet, WishlistItem } from "./db";
+import { createBackup, createDebtNote, getTransactions, getWallets, getWishlist, recordDebtMovement, removeTransaction, restoreBackup, Transaction, Wallet, WishlistItem } from "./db";
 
 const DB_NAME = "caesh-local";
 function openSeedDatabase(version: number, seed: (db: IDBDatabase) => void): Promise<void> {
@@ -226,4 +226,6 @@ test("debt operations reject insufficient cash and overpayment without writing p
   );
   assert.equal((await getTransactions()).length, 1);
   assert.equal((await getWallets()).some((item) => item.id === note.id), true);
+  await assert.rejects(() => removeTransaction("good-lend"), /Riwayat utang tidak dapat dihapus/);
+  assert.equal((await getTransactions()).length, 1);
 });
