@@ -202,6 +202,34 @@ public class ExpenseWidgetProvider extends AppWidgetProvider {
 }
 `);
 
+const configJava = [
+  "package \" + appId + \";",
+  "",
+  "import android.app.Activity;",
+  "import android.appwidget.AppWidgetManager;",
+  "import android.content.ComponentName;",
+  "import android.content.Intent;",
+  "import android.os.Bundle;",
+  "",
+  "public class ExpenseWidgetConfigActivity extends Activity {",
+  "    @Override",
+  "    protected void onCreate(Bundle savedInstanceState) {",
+  "        super.onCreate(savedInstanceState);",
+  "        setResult(RESULT_CANCELED);",
+  "        int widgetId = getIntent().getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);",
+  "        if (widgetId == AppWidgetManager.INVALID_APPWIDGET_ID) { finish(); return; }",
+  "        int[] existingIds = AppWidgetManager.getInstance(this).getAppWidgetIds(new ComponentName(this, ExpenseWidgetProvider.class));",
+  "        if (existingIds.length > 1) { finish(); return; }",
+  "        Intent result = new Intent();",
+  "        result.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);",
+  "        setResult(RESULT_OK, result);",
+  "        ExpenseWidgetProvider.updateAll(this);",
+  "        finish();",
+  "    }",
+  "}"
+].join("\\n");
+await writeFile(javaDir + "/ExpenseWidgetConfigActivity.java", configJava);
+
 await writeFile(`${javaDir}/ExpenseWidgetPlugin.java`, `package ${appId};
 
 import android.appwidget.AppWidgetManager;
