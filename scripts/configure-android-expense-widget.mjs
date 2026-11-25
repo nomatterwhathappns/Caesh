@@ -151,15 +151,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Build;
+import android.os.Bundle;
 import android.util.Base64;
-import android.util.SizeF;
 import android.widget.RemoteViews;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.LinkedHashMap;
 import java.util.Locale;
-import java.util.Map;
 
 public class ExpenseWidgetProvider extends AppWidgetProvider {
     static final String PREFS = "caesh_expense_widget";
@@ -167,6 +164,11 @@ public class ExpenseWidgetProvider extends AppWidgetProvider {
     @Override
     public void onUpdate(Context context, AppWidgetManager manager, int[] ids) {
         for (int id : ids) updateOne(context, manager, id);
+    }
+
+    @Override
+    public void onAppWidgetOptionsChanged(Context context, AppWidgetManager manager, int id, Bundle newOptions) {
+        updateOne(context, manager, id);
     }
 
     static void updateAll(Context context) {
@@ -243,15 +245,16 @@ public class ExpenseWidgetProvider extends AppWidgetProvider {
             pending = PendingIntent.getActivity(context, 0, launch,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            Map<SizeF, RemoteViews> layouts = new LinkedHashMap<>();
-            layouts.put(new SizeF(110f, 110f), createViews(context, R.layout.expense_widget_small, title, amount, periodLabel, transactionCount, bitmap, pending));
-            layouts.put(new SizeF(180f, 180f), createViews(context, R.layout.expense_widget, title, amount, periodLabel, transactionCount, bitmap, pending));
-            layouts.put(new SizeF(250f, 180f), createViews(context, R.layout.expense_widget_large, title, amount, periodLabel, transactionCount, bitmap, pending));
-            manager.updateAppWidget(id, new RemoteViews(layouts));
-        } else {
-            manager.updateAppWidget(id, createViews(context, R.layout.expense_widget, title, amount, periodLabel, transactionCount, bitmap, pending));
+        Bundle options = manager.getAppWidgetOptions(id);
+        int availableWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH);
+        int availableHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT);
+        int layoutId = R.layout.expense_widget;
+        if (availableWidth < 135 || availableHeight < 135) {
+            layoutId = R.layout.expense_widget_small;
+        } else if (availableWidth >= 220) {
+            layoutId = R.layout.expense_widget_large;
         }
+        manager.updateAppWidget(id, createViews(context, layoutId, title, amount, periodLabel, transactionCount, bitmap, pending));
     }
 
     private static Bitmap decodeImage(String dataUrl) {
