@@ -1,8 +1,12 @@
 {
-  "version": "1.10.11",
-  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.10.11/Caesh.apk",
-  "notes": "Memperjelas seluruh pop-up, meningkatkan kontras tema gelap, dan memperbaiki area scroll agar konten panjang tidak tertutup navigasi bawah.",
+  "version": "1.11.11",
+  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.11.11/Caesh.apk",
+  "notes": "Menyediakan tiga ukuran widget, sudut kartu lebih rounded, foto lebih natural, dan tata letak judul, nominal, periode, serta jumlah transaksi yang lebih rapi.",
   "releases": [
+    {
+      "version": "1.11.11",
+      "notes": "Menyediakan tiga ukuran widget, sudut kartu lebih rounded, foto lebih natural, dan tata letak judul, nominal, periode, serta jumlah transaksi yang lebih rapi."
+    },
     {
       "version": "1.10.11",
       "notes": "Memperjelas seluruh pop-up, meningkatkan kontras tema gelap, dan memperbaiki area scroll agar konten panjang tidak tertutup navigasi bawah."

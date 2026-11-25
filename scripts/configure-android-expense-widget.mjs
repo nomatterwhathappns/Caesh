@@ -33,76 +33,114 @@ if (!manifest.includes('android:name=".ExpenseWidgetProvider"')) {
 await mkdir(javaDir, { recursive: true });
 await mkdir(`${resDir}/layout`, { recursive: true });
 await mkdir(`${resDir}/xml`, { recursive: true });
-await writeFile(`${resDir}/layout/expense_widget.xml`, `<?xml version="1.0" encoding="utf-8"?>
+const layoutXml = (padding, titleSize, amountSize, captionSize) => \`<?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/expense_widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#24352B"
+    android:background="@drawable/expense_widget_shape"
     android:padding="0dp">
     <ImageView
         android:id="@+id/expense_widget_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@drawable/expense_widget_shape"
+        android:clipToOutline="true"
         android:scaleType="centerCrop"
         android:contentDescription="@null" />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:gravity="bottom"
-        android:padding="16dp"
-        android:background="#990D1711">
+        android:gravity="top"
+        android:padding="\${padding}dp"
+        android:background="@drawable/expense_widget_overlay"
+        android:clipToOutline="true">
         <TextView
             android:id="@+id/expense_widget_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Pengeluaran Bulanan"
             android:textColor="#FFFFFF"
-            android:textSize="13sp"
-            android:maxLines="2"
+            android:textSize="\${titleSize}sp"
+            android:maxLines="1"
             android:ellipsize="end"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:shadowColor="#99000000"
+            android:shadowRadius="3" />
         <TextView
             android:id="@+id/expense_widget_amount"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="7dp"
+            android:layout_marginTop="5dp"
             android:text="Rp0"
             android:textColor="#FFFFFF"
-            android:textSize="22sp"
+            android:textSize="\${amountSize}sp"
             android:maxLines="1"
             android:ellipsize="end"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:shadowColor="#99000000"
+            android:shadowRadius="4" />
         <TextView
-            android:id="@+id/expense_widget_caption"
+            android:id="@+id/expense_widget_period"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:text="Bulan ini"
-            android:textColor="#E6FFFFFF"
-            android:textSize="10sp"
-            android:maxLines="2"
-            android:ellipsize="end" />
+            android:textColor="#F2FFFFFF"
+            android:textSize="\${captionSize}sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:shadowColor="#99000000"
+            android:shadowRadius="2" />
+        <TextView
+            android:id="@+id/expense_widget_count"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="0 transaksi"
+            android:textColor="#F2FFFFFF"
+            android:textSize="\${captionSize}sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:shadowColor="#99000000"
+            android:shadowRadius="2" />
     </LinearLayout>
 </FrameLayout>
-`);
+\`;
+await writeFile(\`\${resDir}/layout/expense_widget_small.xml\`, layoutXml(9, 11, 16, 9));
+await writeFile(\`\${resDir}/layout/expense_widget.xml\`, layoutXml(16, 13, 23, 10));
+await writeFile(\`\${resDir}/layout/expense_widget_large.xml\`, layoutXml(20, 15, 27, 12));
+await writeFile(\`\${resDir}/drawable/expense_widget_shape.xml\`, \`<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#24352B" />
+    <corners android:radius="22dp" />
+</shape>
+\`);
+await writeFile(\`\${resDir}/drawable/expense_widget_overlay.xml\`, \`<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#330D1711" />
+    <corners android:radius="22dp" />
+</shape>
+\`);
 
-await writeFile(`${resDir}/xml/expense_widget_info.xml`, `<?xml version="1.0" encoding="utf-8"?>
+await writeFile(\`\${resDir}/xml/expense_widget_info.xml\`, \`<?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:configure="com.caesh.finance.ExpenseWidgetConfigActivity"
-    android:minWidth="180dp"
-    android:minHeight="180dp"
+    android:minWidth="110dp"
+    android:minHeight="110dp"
+    android:minResizeWidth="110dp"
+    android:minResizeHeight="110dp"
     android:targetCellWidth="2"
     android:targetCellHeight="2"
     android:updatePeriodMillis="1800000"
     android:initialLayout="@layout/expense_widget"
-    android:resizeMode="none"
+    android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen"
     android:description="@string/app_name" />
-`);
+\`);
 
-await writeFile(`${javaDir}/ExpenseWidgetProvider.java`, `package ${appId};
+await writeFile(\`\${javaDir}/ExpenseWidgetProvider.java\`, \`package \${appId};
 
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -113,13 +151,18 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.util.Base64;
+import android.util.SizeF;
 import android.widget.RemoteViews;
-import java.nio.charset.StandardCharsets;\nimport java.text.SimpleDateFormat;\nimport java.util.Calendar;\nimport java.util.Locale;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.LinkedHashMap;
+import java.util.Locale;
+import java.util.Map;
 
 public class ExpenseWidgetProvider extends AppWidgetProvider {
     static final String PREFS = "caesh_expense_widget";
-    static final String KEY_DATA = "payload";
 
     @Override
     public void onUpdate(Context context, AppWidgetManager manager, int[] ids) {
@@ -146,6 +189,8 @@ public class ExpenseWidgetProvider extends AppWidgetProvider {
             .putString("periodKey", currentKey)
             .putString("amount", "Rp0")
             .putString("caption", label + " · 0 transaksi")
+            .putString("periodLabel", label)
+            .putString("transactionCount", "0")
             .putString("image", image)
             .putBoolean("overLimit", false)
             .apply();
@@ -163,29 +208,50 @@ public class ExpenseWidgetProvider extends AppWidgetProvider {
         return new SimpleDateFormat("yyyy-MM", Locale.ROOT).format(calendar.getTime());
     }
 
+    private static RemoteViews createViews(Context context, int layoutId, String title, String amount,
+            String periodLabel, String transactionCount, Bitmap bitmap, PendingIntent pending) {
+        RemoteViews views = new RemoteViews(context.getPackageName(), layoutId);
+        views.setTextViewText(R.id.expense_widget_title, title);
+        views.setTextViewText(R.id.expense_widget_amount, amount);
+        views.setTextViewText(R.id.expense_widget_period, periodLabel);
+        views.setTextViewText(R.id.expense_widget_count, transactionCount + " transaksi");
+        if (bitmap != null) views.setImageViewBitmap(R.id.expense_widget_background, bitmap);
+        if (pending != null) {
+            views.setOnClickPendingIntent(R.id.expense_widget_root, pending);
+            views.setOnClickPendingIntent(R.id.expense_widget_title, pending);
+            views.setOnClickPendingIntent(R.id.expense_widget_amount, pending);
+            views.setOnClickPendingIntent(R.id.expense_widget_period, pending);
+            views.setOnClickPendingIntent(R.id.expense_widget_count, pending);
+        }
+        return views;
+    }
+
     private static void updateOne(Context context, AppWidgetManager manager, int id) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         refreshPeriodIfNeeded(prefs);
         String title = prefs.getString("title", "Pengeluaran Bulanan");
         String amount = prefs.getString("amount", "Rp0");
-        String caption = prefs.getString("caption", "Bulan ini");
+        String periodLabel = prefs.getString("periodLabel", prefs.getString("caption", "Bulan ini"));
+        String transactionCount = prefs.getString("transactionCount", "0");
+        if (prefs.getBoolean("overLimit", false)) periodLabel = "Batas pengeluaran terlampaui";
         String image = prefs.getString("image", "");
-        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.expense_widget);
-        views.setTextViewText(R.id.expense_widget_title, title);
-        views.setTextViewText(R.id.expense_widget_amount, amount);
-        views.setTextViewText(R.id.expense_widget_caption, caption);
         Bitmap bitmap = decodeImage(image);
-        if (bitmap != null) views.setImageViewBitmap(R.id.expense_widget_background, bitmap);
         Intent launch = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
+        PendingIntent pending = null;
         if (launch != null) {
             launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            PendingIntent pending = PendingIntent.getActivity(context, 0, launch,
+            pending = PendingIntent.getActivity(context, 0, launch,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-            views.setOnClickPendingIntent(R.id.expense_widget_root, pending);\n            views.setOnClickPendingIntent(R.id.expense_widget_title, pending);
-            views.setOnClickPendingIntent(R.id.expense_widget_amount, pending);
-            views.setOnClickPendingIntent(R.id.expense_widget_caption, pending);
         }
-        manager.updateAppWidget(id, views);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            Map<SizeF, RemoteViews> layouts = new LinkedHashMap<>();
+            layouts.put(new SizeF(110f, 110f), createViews(context, R.layout.expense_widget_small, title, amount, periodLabel, transactionCount, bitmap, pending));
+            layouts.put(new SizeF(180f, 180f), createViews(context, R.layout.expense_widget, title, amount, periodLabel, transactionCount, bitmap, pending));
+            layouts.put(new SizeF(250f, 180f), createViews(context, R.layout.expense_widget_large, title, amount, periodLabel, transactionCount, bitmap, pending));
+            manager.updateAppWidget(id, new RemoteViews(layouts));
+        } else {
+            manager.updateAppWidget(id, createViews(context, R.layout.expense_widget, title, amount, periodLabel, transactionCount, bitmap, pending));
+        }
     }
 
     private static Bitmap decodeImage(String dataUrl) {
@@ -200,7 +266,7 @@ public class ExpenseWidgetProvider extends AppWidgetProvider {
         }
     }
 }
-`);
+\`);
 
 const configJava = [
   "package " + appId + ";",
@@ -273,10 +339,11 @@ public class ExpenseWidgetPlugin extends Plugin {
             .putString("title", title)
             .putString("amount", amount)
             .putString("caption", caption)
+            .putString("periodLabel", overLimit ? "Batas pengeluaran terlampaui" : periodLabel)
+            .putString("transactionCount", transactionCount)
             .putString("image", image)
             .putString("period", period)
             .putString("periodKey", periodKey)
-            .putString("periodLabel", periodLabel)
             .putString("baseImage", baseImage)
             .putString("beforeImage", beforeImage)
             .putString("afterImage", afterImage)
