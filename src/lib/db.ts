@@ -39,6 +39,7 @@ export type Transaction = {
   toWalletId?: string;
   toWalletName?: string;
   createdAt: number;
+  hiddenFromHistory?: boolean;
 };
 
 const DB_NAME = "caesh-local";
@@ -402,29 +403,105 @@ export async function saveTransaction(transaction: Transaction): Promise<void> {
   });
 }
 
-export async function removeTransaction(id: string): Promise<void> {
+export async function removeTransaction(id: string, includeDebtHistory = false): Promise<void> {
   const db = await openDatabase();
   return new Promise((resolve, reject) => {
-    const store = db.transaction(TRANSACTION_STORE, "readwrite").objectStore(TRANSACTION_STORE);
-    const lookup = store.get(id);
-    lookup.onsuccess = () => {
-      const target = lookup.result as Transaction | undefined;
-      if (target?.category === "Utang") {
-        db.close();
-        reject(new Error("Riwayat utang tidak dapat dihapus langsung agar saldo dan pelunasan tetap akurat."));
+    const tx = db.transaction([TRANSACTION_STORE, WALLET_STORE], "readwrite");
+    const transactionStore = tx.objectStore(TRANSACTION_STORE);
+    const walletStore = tx.objectStore(WALLET_STORE);
+    let failure: Error | null = null;
+    const transactionsRequest = transactionStore.getAll();
+    const walletsRequest = walletStore.getAll();
+    let processed = false;
+    const process = () => {
+      if (processed || transactionsRequest.readyState !== "done" || walletsRequest.readyState !== "done") return;
+      processed = true;
+      const transactions = transactionsRequest.result as Transaction[];
+      const wallets = walletsRequest.result as Wallet[];
+      const target = transactions.find((item) => item.id === id);
+      if (!target) {
+        failure = new Error("Transaksi tidak ditemukan.");
+        tx.abort();
         return;
       }
-      const request = store.delete(id);
-      request.onsuccess = () => { db.close(); resolve(); };
-      request.onerror = () => {
-        db.close();
-        reject(request.error ?? new Error("Gagal menghapus transaksi."));
-      };
+      if (target.category !== "Utang") {
+        transactionStore.delete(id);
+        return;
+      }
+      if (!includeDebtHistory) {
+        // Keep the financial movement in storage so wallet/debt balances remain unchanged;
+        // only hide this record from history screens.
+        transactionStore.put({ ...target, hiddenFromHistory: true });
+        return;
+      }
+
+      const noteWallet = wallets.find((wallet) => wallet.category === "notes"
+        && (wallet.id === target.walletId || wallet.id === target.toWalletId));
+      let noteWalletId = noteWallet?.id;
+      if (!noteWalletId) {
+        // A fully paid Notes wallet is already closed; identify its stable ID by
+        // finding the endpoint shared by the debt's transfer history.
+        const debtRecords = transactions.filter((item) => item.category === "Utang" && item.kind === "transfer");
+        const endpointIds = [target.walletId, target.toWalletId].filter((value): value is string => !!value);
+        noteWalletId = endpointIds.find((candidate) =>
+          debtRecords.filter((item) => item.walletId === candidate || item.toWalletId === candidate).length > 1
+        );
+      }
+      if (!noteWalletId) {
+        failure = new Error("Riwayat utang terkait tidak dapat dikenali. Data tidak diubah.");
+        tx.abort();
+        return;
+      }
+      transactions.filter((item) => item.category === "Utang"
+        && item.kind === "transfer"
+        && (item.walletId === noteWalletId || item.toWalletId === noteWalletId))
+        .forEach((item) => transactionStore.delete(item.id));
+      if (noteWallet) walletStore.delete(noteWalletId);
     };
-    lookup.onerror = () => {
-      db.close();
-      reject(lookup.error ?? new Error("Transaksi gagal diperiksa sebelum dihapus."));
+    transactionsRequest.onsuccess = process;
+    walletsRequest.onsuccess = process;
+    tx.oncomplete = () => { db.close(); resolve(); };
+    tx.onabort = () => { db.close(); reject(failure ?? tx.error ?? new Error("Transaksi gagal dihapus.")); };
+    tx.onerror = () => { failure = failure ?? tx.error ?? new Error("Transaksi gagal dihapus."); };
+  });
+}
+
+/** Close an outstanding debt manually without recording a cash movement. */
+export async function settleDebtNote(noteWalletId: string): Promise<void> {
+  const db = await openDatabase();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction([WALLET_STORE, TRANSACTION_STORE], "readwrite");
+    const walletStore = tx.objectStore(WALLET_STORE);
+    const transactionsRequest = tx.objectStore(TRANSACTION_STORE).getAll();
+    const walletsRequest = walletStore.getAll();
+    let failure: Error | null = null;
+    let processed = false;
+    const process = () => {
+      if (processed || transactionsRequest.readyState !== "done" || walletsRequest.readyState !== "done") return;
+      processed = true;
+      const wallets = walletsRequest.result as Wallet[];
+      const note = wallets.find((wallet) => wallet.id === noteWalletId && wallet.category === "notes");
+      if (!note) {
+        failure = new Error("Catatan utang tidak ditemukan atau sudah diselesaikan.");
+        tx.abort();
+        return;
+      }
+      const records = transactionsRequest.result as Transaction[];
+      const balance = calculateWalletBalance(note, records);
+      if (!Number.isFinite(balance) || balance === 0) {
+        failure = new Error("Utang ini sudah tidak memiliki sisa saldo.");
+        tx.abort();
+        return;
+      }
+      // Removing only the Notes ledger closes the debt; cash-wallet transactions
+      // are intentionally retained, so no wallet balance is changed.
+      walletStore.delete(noteWalletId);
     };
+    transactionsRequest.onsuccess = process;
+    walletsRequest.onsuccess = process;
+    tx.oncomplete = () => { db.close(); resolve(); };
+    tx.onabort = () => { db.close(); reject(failure ?? tx.error ?? new Error("Utang gagal diselesaikan.")); };
+    tx.onerror = () => { failure = failure ?? tx.error ?? new Error("Utang gagal diselesaikan."); };
   });
 }
 
