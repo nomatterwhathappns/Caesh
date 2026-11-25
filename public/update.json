@@ -1,8 +1,12 @@
 {
-  "version": "1.11.13",
-  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.11.13/Caesh.apk",
-  "notes": "Memperbaiki kegagalan memuat widget Android dan mempertahankan posisi judul di kiri atas serta nominal di kiri bawah.",
+  "version": "1.11.14",
+  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.11.14/Caesh.apk",
+  "notes": "Memperbaiki tampilan checkbox di seluruh bagian popup pengaturan widget agar tidak memiliki kotak dan padding berlebih.",
   "releases": [
+    {
+      "version": "1.11.14",
+      "notes": "Memperbaiki tampilan checkbox di seluruh bagian popup pengaturan widget agar tidak memiliki kotak dan padding berlebih."
+    },
     {
       "version": "1.11.13",
       "notes": "Memperbaiki kegagalan memuat widget Android dan mempertahankan posisi judul di kiri atas serta nominal di kiri bawah."
@@ -38,10 +42,6 @@
     {
       "version": "1.8.10",
       "notes": "Memperbaiki perilaku pop-up agar halaman latar terkunci, serta menutup menu pengaturan wallet saat klik di luar atau saat daftar wallet digeser."
-    },
-    {
-      "version": "1.9.10",
-      "notes": "Memindahkan tombol Hide Nominal ke pojok kanan atas kartu Total Saldo, menggantikan logo lama."
     }
   ]
 }
