@@ -1478,3 +1478,24 @@ body.caesh-modal-open {
 .delete-confirm-button { border: 1px solid #b75c4d; background: #b75c4d; color: #fff; cursor: pointer; }
 .delete-confirm-button:hover { background: #a64d40; }
 @media (max-width: 620px) { .delete-confirm-modal { width: 100%; padding: 23px 20px; } }
+
+
+.debt-delete-history-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 18px 0 6px;
+  padding: 12px 14px;
+  border: 1px solid var(--border, rgba(128, 128, 128, .25));
+  border-radius: 12px;
+  font-size: .92rem;
+  line-height: 1.45;
+  cursor: pointer;
+}
+.debt-delete-history-option input {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  margin: 1px 0 0;
+  accent-color: var(--accent, #6d5dfc);
+}
