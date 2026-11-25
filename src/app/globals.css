@@ -1312,7 +1312,7 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
 
 /* CAESH v1.6.6: grouped wallet privacy and management controls. */
 .balance-card{position:relative}
-.summary-privacy-toggle{position:absolute;right:16px;top:48px;z-index:2;width:34px;height:34px;border:1px solid #ffffff35;border-radius:10px;background:#ffffff12;color:#fff;font-size:17px;cursor:pointer}
+.summary-privacy-toggle{position:absolute;right:16px;top:48px;z-index:2;min-width:76px;width:auto;height:34px;padding:0 9px;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;border:1px solid #ffffff35;border-radius:10px;background:#ffffff12;color:#fff;font:600 11px 'DM Sans',sans-serif;cursor:pointer}
 .summary-privacy-toggle:hover{background:#ffffff22}
 .wallet-add-button{padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:600 11px 'Manrope',sans-serif;cursor:pointer}
 .wallet-settings-trigger{width:30px;height:28px;display:grid;place-items:center;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--muted);font-size:17px;letter-spacing:1px;cursor:pointer}
