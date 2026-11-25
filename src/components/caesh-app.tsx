@@ -117,6 +117,7 @@ export default function CaeshApp() {
   const [hiddenWalletNominals, setHiddenWalletNominals] = useState<string[]>([]);
   const [walletPrivacyLoaded, setWalletPrivacyLoaded] = useState(false);
   const [walletSettingsOpenId, setWalletSettingsOpenId] = useState<string | null>(null);
+  const [deleteTransactionTarget, setDeleteTransactionTarget] = useState<Transaction | null>(null);
 
   const hasOpenModal = Boolean(
     showForm || showWalletForm || showWishlistForm || purchaseTarget || showPhotoEditor || showExpenseWidgetSettings ||
@@ -833,9 +834,14 @@ export default function CaeshApp() {
   async function handleDelete(id: string) {
     const target = transactions.find((item) => item.id === id);
     if (target?.category === "Utang") { setError("Riwayat utang tidak bisa dihapus langsung agar saldo dan status pelunasan tetap akurat."); return; }
-    if (!window.confirm("Hapus transaksi ini?")) return;
+    setDeleteTransactionTarget(target);
+  }
+
+  async function confirmDeleteTransaction() {
+    if (!deleteTransactionTarget) return;
     try {
-      await removeTransaction(id);
+      await removeTransaction(deleteTransactionTarget.id);
+      setDeleteTransactionTarget(null);
       setTransactions((current) => current.filter((item) => item.id !== id));
     } catch { setError("Transaksi gagal dihapus."); }
   }
@@ -1024,6 +1030,8 @@ export default function CaeshApp() {
         <input ref={widgetImagePickerRef} className="visually-hidden-file" type="file" accept="image/png,image/jpeg,image/webp" onChange={handleWidgetImageFileChange} />
         <div className="modal-actions"><button type="button" className="primary-button" onClick={() => setShowExpenseWidgetSettings(false)}>Selesai</button></div>
       </section></div>}
+      {deleteTransactionTarget && <div className="modal-backdrop delete-confirm-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteTransactionTarget(null); }}><section className="modal-card delete-confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-confirm-title" aria-describedby="delete-confirm-description"><div className="delete-confirm-icon" aria-hidden="true">!</div><div className="section-kicker">KONFIRMASI HAPUS</div><h2 id="delete-confirm-title">Hapus transaksi ini?</h2><p id="delete-confirm-description">Transaksi <strong>{deleteTransactionTarget.note || deleteTransactionTarget.category}</strong> sebesar <strong>{rupiah(deleteTransactionTarget.amount)}</strong> akan dihapus dari riwayat. Tindakan ini tidak bisa dibatalkan.</p><div className="modal-actions"><button type="button" className="cancel-button" onClick={() => setDeleteTransactionTarget(null)}>Batal</button><button type="button" className="delete-confirm-button" onClick={confirmDeleteTransaction}>Ya, hapus</button></div></section></div>}
+
       {showForm && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowForm(false); }}><section className="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div className="modal-heading"><div><div className="section-kicker">CATATAN BARU</div><h2 id="modal-title">Tambah transaksi</h2></div><button className="modal-close" onClick={() => setShowForm(false)} aria-label="Tutup">×</button></div>
         <form onSubmit={handleSubmit}><div className="kind-switch"><button type="button" className={kind === "expense" ? "active expense-choice" : ""} onClick={() => changeKind("expense")}>Pengeluaran</button><button type="button" className={kind === "income" ? "active income-choice" : ""} onClick={() => changeKind("income")}>Pemasukan</button><button type="button" className={kind === "transfer" ? "active transfer-choice" : ""} onClick={() => changeKind("transfer")}>Transfer</button></div>
           <label className="field-label" htmlFor="amount">Nominal (Rp)</label><div className="currency-input-wrap"><span>Rp</span><input id="amount" className="amount-input" inputMode="numeric" type="text" placeholder="0" value={amount} onChange={(event) => setAmount(formatRupiahInput(event.target.value))} required /></div>
