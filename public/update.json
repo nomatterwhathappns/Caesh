@@ -1,5 +1,5 @@
 {
-  "version": "1.3.6",
-  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.3.6/Caesh.apk",
-  "notes": "CAESH 1.3.6: Filter wallet untuk perhitungan total saldo di Ringkasan. Pilihan tersimpan dan terpisah dari pengaturan widget pengeluaran."
+  "version": "1.4.6",
+  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.4.6/Caesh.apk",
+  "notes": "CAESH 1.4.6: Detail wallet berisi saldo, riwayat pemasukan/pengeluaran/transfer, total pemasukan dan pengeluaran, serta catatan khusus yang tersimpan."
 }

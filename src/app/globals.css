@@ -1275,3 +1275,27 @@ body{background:var(--paper);color:var(--ink);transition:background .2s ease,col
 .balance-filter-option{display:inline-flex;align-items:center;gap:7px;color:#f2f6ef;font-size:10px;cursor:pointer}
 .balance-filter-option input{width:14px;height:14px;margin:0;accent-color:#a9c49d}
 .balance-filter-panel .expense-widget-empty{color:#dce8d6}
+
+
+/* CAESH v1.4.6: wallet detail view and persistent wallet notes. */
+.overview-wallet-item[role="button"]{cursor:pointer}
+.overview-wallet-item[role="button"]:focus-visible{outline:2px solid var(--accent,#8aa77c);outline-offset:3px}
+.wallet-detail-modal{width:min(100%,620px);max-height:min(88vh,820px);overflow-y:auto}
+.wallet-detail-balance{display:flex;flex-direction:column;gap:6px;padding:18px;border-radius:14px;background:var(--surface-soft,#f3f5f1);margin:4px 0 14px}
+.wallet-detail-balance span,.wallet-detail-totals span{font-size:12px;color:var(--muted,#777)}
+.wallet-detail-balance strong{font-size:clamp(24px,5vw,32px);font-weight:800;letter-spacing:-1px}
+.wallet-detail-totals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:18px}
+.wallet-detail-totals>div{display:flex;flex-direction:column;gap:7px;padding:13px;border:1px solid var(--border,#e7e9e5);border-radius:12px;min-width:0}
+.wallet-detail-totals strong{font-size:14px;overflow-wrap:anywhere}
+.wallet-detail-totals strong.income{color:var(--income,#24845a)}
+.wallet-detail-totals strong.expense{color:var(--expense,#c35c50)}
+.wallet-detail-history{margin:8px 0 18px}
+.wallet-detail-history .panel-heading{margin-bottom:10px}
+.wallet-detail-history .panel-heading h3{font-size:15px;margin:0}
+.wallet-detail-history .transaction-list{max-height:260px;overflow-y:auto}
+.wallet-detail-history .transaction-row{padding:10px 0}
+.wallet-detail-history .transaction-amount{white-space:nowrap;font-size:12px}
+.wallet-detail-note textarea{width:100%;resize:vertical;min-height:76px;padding:11px 12px;border:1px solid var(--border,#dfe3dc);border-radius:10px;background:var(--surface,#fff);color:var(--text,#222);font:inherit}
+.wallet-detail-note-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:9px}
+.wallet-detail-note-footer>span{font-size:11px;color:var(--muted,#777)}
+@media(max-width:480px){.wallet-detail-totals{grid-template-columns:1fr}.wallet-detail-modal{padding:18px}.wallet-detail-history .transaction-row{gap:8px}.wallet-detail-history .transaction-info{min-width:0}}
