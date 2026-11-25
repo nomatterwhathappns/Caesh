@@ -6,7 +6,7 @@ import { App } from "@capacitor/app";
 import { Directory, Filesystem } from "@capacitor/filesystem";
 import { FileTransfer } from "@capacitor/file-transfer";
 import { AppInstallPlugin } from "../lib/app-install-plugin";
-import { calculateExpenseSummary, getExpenseDateRange, isExpenseLimitExceeded, normalizeExpenseWidgetSettings, DEFAULT_EXPENSE_WIDGET_SETTINGS, ExpenseWidgetPeriod, ExpenseWidgetSettings } from "@/lib/expense-widget";
+import { calculateExpenseSummary, getExpenseDateRange, getExpensePeriodKey, isExpenseLimitExceeded, normalizeExpenseWidgetSettings, DEFAULT_EXPENSE_WIDGET_SETTINGS, ExpenseWidgetPeriod, ExpenseWidgetSettings } from "@/lib/expense-widget";
 import { ExpenseWidgetPlugin } from "@/lib/expense-widget-plugin";
 import {
   createDebtNote, recordDebtMovement, getTransactions, getWallets, removeTransaction, removeWallet, saveTransaction, saveWallet,
@@ -500,7 +500,7 @@ export default function CaeshApp() {
     ExpenseWidgetPlugin.syncExpenseWidget({
       title: expenseWidgetSettings.title,
       amount: rupiah(expenseWidgetSummary.total),
-      periodLabel: expenseWidgetRangeLabel,
+      periodLabel: expenseWidgetRangeLabel,\n      period: expenseWidgetSettings.period,\n      periodKey: getExpensePeriodKey(expenseWidgetSettings.period, new Date(), expenseWidgetSettings.startDate, expenseWidgetSettings.endDate),
       transactionCount: expenseWidgetSummary.count,
       overLimit,
       baseImage: expenseWidgetSettings.baseImage,\n      beforeImage: expenseWidgetSettings.beforeImage,
