@@ -26,8 +26,8 @@ const parseRupiahInput = (value: string) => Number(value.replace(/\D/g, ""));
 const rupiah = (value: number) => new Intl.NumberFormat("id-ID", {
   style: "currency", currency: "IDR", maximumFractionDigits: 0,
 }).format(value);
-type CaeshUpdate = { version: string; apkUrl: string; notes?: string };
-const UPDATE_MANIFEST_URL = "https://raw.githubusercontent.com/nomatterwhathappns/Caesh/caesh/public/update.json";
+type CaeshUpdate = { version: string; apkUrl: string; sha256: string; notes?: string };
+const UPDATE_MANIFEST_URL = "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-update/update.json";
 function compareVersions(left: string, right: string) {
   const a = left.split(".").map((part) => Number.parseInt(part, 10) || 0);
   const b = right.split(".").map((part) => Number.parseInt(part, 10) || 0);
@@ -210,9 +210,9 @@ export default function CaeshApp() {
           if (!response.ok) throw new Error(`Update manifest returned HTTP ${response.status}`);
           manifest = await response.json() as Partial<CaeshUpdate>;
         }
-        if (cancelled || typeof manifest.version !== "string" || typeof manifest.apkUrl !== "string" || !/^https:\/\//i.test(manifest.apkUrl)) return;
+        if (cancelled || typeof manifest.version !== "string" || typeof manifest.apkUrl !== "string" || !/^https:\/\//i.test(manifest.apkUrl) || typeof manifest.sha256 !== "string" || !/^[a-f0-9]{64}$/i.test(manifest.sha256)) return;
         if (compareVersions(manifest.version, appInfo.version) > 0) {
-          setAvailableUpdate({ version: manifest.version, apkUrl: manifest.apkUrl, notes: typeof manifest.notes === "string" ? manifest.notes : undefined });
+          setAvailableUpdate({ version: manifest.version, apkUrl: manifest.apkUrl, sha256: manifest.sha256.toLowerCase(), notes: typeof manifest.notes === "string" ? manifest.notes : undefined });
         } else {
           setAvailableUpdate(null);
         }
@@ -251,6 +251,21 @@ export default function CaeshApp() {
         setUpdateDownloadProgress(100);
       }
 
+      if (!apkPath) throw new Error("File APK pembaruan tidak ditemukan.");
+
+      const verification = await AppInstallPlugin.verifyApkSha256({
+        filePath: apkPath,
+        expectedSha256: availableUpdate.sha256,
+      });
+      if (!verification.valid) {
+        try {
+          await Filesystem.deleteFile({ directory: Directory.Cache, path: "caesh-update.apk" });
+        } catch { /* The cache file may already have been removed. */ }
+        setDownloadedUpdatePath(null);
+        setUpdateDownloadProgress(null);
+        throw new Error("Verifikasi SHA-256 gagal. APK tidak akan dipasang. Silakan unduh ulang pembaruan.");
+      }
+
       const permission = await AppInstallPlugin.canInstallUnknownApps();
       if (!permission.granted) {
         await AppInstallPlugin.openInstallUnknownAppsSettings();
@@ -258,7 +273,6 @@ export default function CaeshApp() {
         return;
       }
 
-      if (!apkPath) throw new Error("File APK pembaruan tidak ditemukan.");
       const result = await AppInstallPlugin.installApk({ filePath: apkPath });
       if (!result.completed) throw new Error(result.message || "Installer Android tidak dapat dibuka.");
     } catch (reason) {
