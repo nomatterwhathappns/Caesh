@@ -1499,3 +1499,10 @@ body.caesh-modal-open {
   margin: 1px 0 0;
   accent-color: var(--accent, #6d5dfc);
 }
+
+.debt-detail-actions .modal-actions {
+  flex-wrap: wrap;
+}
+.debt-detail-actions .modal-actions > button {
+  flex: 1 1 130px;
+}
