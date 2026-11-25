@@ -155,7 +155,7 @@ export async function removeWallet(id: string): Promise<void> {
 
     walletsRequest.onsuccess = () => {
       const wallets = walletsRequest.result as Wallet[];
-      if (wallets.length <= 1) {
+      if (wallets.filter((item) => item.category !== "notes").length <= 1) {
         failure = new Error("Caesh harus memiliki minimal satu wallet.");
         tx.abort();
         return;
@@ -191,7 +191,7 @@ export async function removeWallet(id: string): Promise<void> {
     transactionsRequest.onsuccess = () => {
       if (walletsRequest.readyState !== "done") return;
       const wallets = walletsRequest.result as Wallet[];
-      if (wallets.length <= 1) {
+      if (wallets.filter((item) => item.category !== "notes").length <= 1) {
         failure = new Error("Caesh harus memiliki minimal satu wallet.");
         tx.abort();
         return;
