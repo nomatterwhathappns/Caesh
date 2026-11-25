@@ -1,5 +1,9 @@
 name: Build Android APK
 
+concurrency:
+  group: caesh-android-release
+  cancel-in-progress: false
+
 on:
   push:
     branches: [caesh]

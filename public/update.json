@@ -1,8 +1,12 @@
 {
-  "version": "1.11.14",
-  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.11.14/Caesh.apk",
-  "notes": "Memperbaiki tampilan checkbox di seluruh bagian popup pengaturan widget agar tidak memiliki kotak dan padding berlebih.",
+  "version": "1.11.15",
+  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.11.15/Caesh.apk",
+  "notes": "Memperbaiki verifikasi SHA-256 pembaruan agar APK dan manifest selalu berasal dari build yang sama, sekaligus merapikan checkbox popup pengaturan widget.",
   "releases": [
+    {
+      "version": "1.11.15",
+      "notes": "Memperbaiki verifikasi SHA-256 pembaruan agar APK dan manifest selalu berasal dari build yang sama, sekaligus merapikan checkbox popup pengaturan widget."
+    },
     {
       "version": "1.11.14",
       "notes": "Memperbaiki tampilan checkbox di seluruh bagian popup pengaturan widget agar tidak memiliki kotak dan padding berlebih."
@@ -38,10 +42,6 @@
     {
       "version": "1.8.9",
       "notes": "Menampilkan daftar semua pembaruan yang terlewat sejak versi CAESH yang terpasang, bukan hanya versi terbaru."
-    },
-    {
-      "version": "1.8.10",
-      "notes": "Memperbaiki perilaku pop-up agar halaman latar terkunci, serta menutup menu pengaturan wallet saat klik di luar atau saat daftar wallet digeser."
     }
   ]
 }
