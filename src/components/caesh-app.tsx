@@ -219,7 +219,7 @@ export default function CaeshApp() {
             ? manifest.releases.filter((release): release is CaeshReleaseNote =>
                 !!release &&
                 typeof release.version === "string" &&
-                /^\\d+(?:\\.\\d+){1,2}$/.test(release.version) &&
+                /^\d+(?:\.\d+){1,2}$/.test(release.version) &&
                 typeof release.notes === "string" &&
                 release.notes.trim().length > 0 &&
                 compareVersions(release.version, appInfo.version) > 0 &&
