@@ -179,16 +179,7 @@ export default function CaeshApp() {
   useEffect(() => {
     try {
       const rawWidgetSettings = window.localStorage.getItem("caesh-expense-widget");
-      if (rawWidgetSettings) {
-        const parsed = JSON.parse(rawWidgetSettings) as Partial<ExpenseWidgetSettings>;
-        const periods: ExpenseWidgetPeriod[] = ["daily", "weekly", "monthly", "custom"];
-        setExpenseWidgetSettings({
-          period: periods.includes(parsed.period as ExpenseWidgetPeriod) ? parsed.period as ExpenseWidgetPeriod : "monthly",
-          walletIds: parsed.walletIds === null || parsed.walletIds === undefined ? null : Array.isArray(parsed.walletIds) ? parsed.walletIds.filter((id): id is string => typeof id === "string") : null,
-          startDate: typeof parsed.startDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(parsed.startDate) ? parsed.startDate : today(),
-          endDate: typeof parsed.endDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(parsed.endDate) ? parsed.endDate : today(),
-        });
-      }
+      if (rawWidgetSettings) setExpenseWidgetSettings(normalizeExpenseWidgetSettings(JSON.parse(rawWidgetSettings)));
     } catch { /* Use safe defaults when saved widget preferences are unreadable. */ }
     setExpenseWidgetSettingsLoaded(true);
     const savedTheme = window.localStorage.getItem("caesh-theme");
@@ -505,6 +496,7 @@ export default function CaeshApp() {
       periodKey: getExpensePeriodKey(expenseWidgetSettings.period, new Date(), expenseWidgetSettings.startDate, expenseWidgetSettings.endDate),
       transactionCount: expenseWidgetSummary.count,
       overLimit,
+      limitEnabled: expenseWidgetSettings.limitEnabled,
       baseImage: expenseWidgetSettings.baseImage,
       beforeImage: expenseWidgetSettings.beforeImage,
       afterImage: expenseWidgetSettings.afterImage,
