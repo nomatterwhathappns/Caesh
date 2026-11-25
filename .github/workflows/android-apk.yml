@@ -140,3 +140,45 @@ jobs:
           prerelease: true
           make_latest: false
           files: android/app/build/outputs/apk/release/Caesh.apk
+
+      - name: Generate SHA-256 update manifest
+        if: ((github.event_name == 'push' && github.ref == 'refs/heads/caesh') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/caesh')) && steps.signing_check.outputs.enabled == 'true'
+        run: |
+          node --input-type=module <<'NODE'
+          import { createHash } from "node:crypto";
+          import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+
+          const packageInfo = JSON.parse(readFileSync("package.json", "utf8"));
+          const sourceManifest = JSON.parse(readFileSync("public/update.json", "utf8"));
+          const version = packageInfo.version;
+          if (sourceManifest.version !== version) {
+            throw new Error(`Update manifest version (${sourceManifest.version}) does not match package version (${version}).`);
+          }
+
+          const apkPath = "android/app/build/outputs/apk/release/Caesh.apk";
+          const apk = readFileSync(apkPath);
+          if (apk.length === 0) throw new Error("Signed release APK is empty.");
+          const sha256 = createHash("sha256").update(apk).digest("hex");
+          const expectedApkUrl = `https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v${version}/Caesh.apk`;
+          if (sourceManifest.apkUrl !== expectedApkUrl) {
+            throw new Error("Update manifest APK URL does not match the versioned release URL.");
+          }
+
+          const manifest = { ...sourceManifest, sha256 };
+          mkdirSync("update-manifest", { recursive: true });
+          writeFileSync("update-manifest/update.json", JSON.stringify(manifest, null, 2) + "\n");
+          console.log(`Generated SHA-256 for CAESH v${version}: ${sha256}`);
+          NODE
+
+      - name: Publish verified update manifest
+        if: ((github.event_name == 'push' && github.ref == 'refs/heads/caesh') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/caesh')) && steps.signing_check.outputs.enabled == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: caesh-update
+          name: CAESH Update Manifest
+          prerelease: true
+          make_latest: false
+          files: update-manifest/update.json
+          overwrite_files: true
+          fail_on_unmatched_files: true
+

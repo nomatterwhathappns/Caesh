@@ -56,6 +56,9 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 import java.io.File;
+import java.io.FileInputStream;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 
 @CapacitorPlugin(name = "AppInstallPlugin")
 public class AppInstallPlugin extends Plugin {
@@ -80,6 +83,51 @@ public class AppInstallPlugin extends Plugin {
         );
         getActivity().startActivity(intent);
         call.resolve();
+    }
+
+    @PluginMethod
+    public void verifyApkSha256(PluginCall call) {
+        String filePath = call.getString("filePath");
+        String expectedSha256 = call.getString("expectedSha256");
+        if (filePath == null || filePath.trim().isEmpty()) {
+            call.reject("Lokasi file APK tidak diberikan.");
+            return;
+        }
+        if (expectedSha256 == null || !expectedSha256.matches("(?i)[0-9a-f]{64}")) {
+            call.reject("Hash SHA-256 pada manifest tidak valid.");
+            return;
+        }
+
+        File apkFile = new File(filePath);
+        if (!apkFile.isFile()) {
+            call.reject("File APK pembaruan tidak ditemukan.");
+            return;
+        }
+
+        try (FileInputStream input = new FileInputStream(apkFile)) {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+            while ((bytesRead = input.read(buffer)) != -1) {
+                digest.update(buffer, 0, bytesRead);
+            }
+
+            StringBuilder actualSha256 = new StringBuilder(64);
+            for (byte value : digest.digest()) {
+                actualSha256.append(String.format(java.util.Locale.ROOT, "%02x", value & 0xff));
+            }
+
+            boolean valid = MessageDigest.isEqual(
+                expectedSha256.toLowerCase(java.util.Locale.ROOT).getBytes(StandardCharsets.US_ASCII),
+                actualSha256.toString().getBytes(StandardCharsets.US_ASCII)
+            );
+            JSObject result = new JSObject();
+            result.put("valid", valid);
+            result.put("actualSha256", actualSha256.toString());
+            call.resolve(result);
+        } catch (Exception error) {
+            call.reject("Gagal memverifikasi integritas APK.", error);
+        }
     }
 
     @PluginMethod
