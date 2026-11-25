@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { calculateExpenseSummary, getExpenseDateRange } from "./expense-widget";
+import { calculateExpenseSummary, getExpenseDateRange, getExpensePeriodKey, isExpenseLimitExceeded, normalizeExpenseWidgetSettings } from "./expense-widget";
 import type { Transaction } from "./db";
 
 const tx = (overrides: Partial<Transaction> = {}): Transaction => ({
@@ -24,4 +24,31 @@ test("summary filters wallet, expense kind, and inclusive date bounds", () => {
 test("empty selection and reversed dates safely return zero", () => {
   assert.deepEqual(calculateExpenseSummary([tx()], [], {start:"2026-11-01",end:"2026-11-30"}), {total:0,count:0});
   assert.deepEqual(calculateExpenseSummary([tx()], ["wallet-a"], {start:"2026-11-30",end:"2026-11-01"}), {total:0,count:0});
+});
+
+test("yearly period covers January through December of the reference year", () => {
+  assert.deepEqual(getExpenseDateRange("yearly", new Date(2026, 10, 25), "", ""), { start: "2026-01-01", end: "2026-12-31" });
+});
+test("limit warning is optional and triggers only above the configured amount", () => {
+  const settings = { limitEnabled: true, monthlyLimit: 500 };
+  assert.equal(isExpenseLimitExceeded(500, settings), false);
+  assert.equal(isExpenseLimitExceeded(501, settings), true);
+  assert.equal(isExpenseLimitExceeded(900, { ...settings, limitEnabled: false }), false);
+});
+test("settings normalization keeps safe supported values and defaults invalid fields", () => {
+  const settings = normalizeExpenseWidgetSettings({ title: "  Belanja  ", period: "yearly", walletIds: ["a", 2], limitEnabled: true, monthlyLimit: 1000, beforeImage: "data:image/png;base64,abc", afterImage: "https://invalid" });
+  assert.equal(settings.title, "Belanja");
+  assert.equal(settings.period, "yearly");
+  assert.deepEqual(settings.walletIds, ["a"]);
+  assert.equal(settings.monthlyLimit, 1000);
+  assert.equal(settings.beforeImage, "data:image/png;base64,abc");
+  assert.equal(settings.afterImage, "");
+});
+
+test("period keys change at the correct daily, weekly, monthly, and yearly boundaries", () => {
+  assert.equal(getExpensePeriodKey("daily", new Date(2026, 10, 25), "", ""), "2026-11-25");
+  assert.equal(getExpensePeriodKey("weekly", new Date(2026, 10, 25), "", ""), "2026-11-23");
+  assert.equal(getExpensePeriodKey("monthly", new Date(2026, 10, 25), "", ""), "2026-11");
+  assert.equal(getExpensePeriodKey("yearly", new Date(2026, 10, 25), "", ""), "2026");
+  assert.equal(getExpensePeriodKey("custom", new Date(2026, 10, 25), "2026-11-01", "2026-11-30"), "2026-11-01|2026-11-30");
 });

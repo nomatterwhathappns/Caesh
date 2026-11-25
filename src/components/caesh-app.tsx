@@ -6,7 +6,8 @@ import { App } from "@capacitor/app";
 import { Directory, Filesystem } from "@capacitor/filesystem";
 import { FileTransfer } from "@capacitor/file-transfer";
 import { AppInstallPlugin } from "../lib/app-install-plugin";
-import { calculateExpenseSummary, getExpenseDateRange, ExpenseWidgetPeriod, ExpenseWidgetSettings } from "@/lib/expense-widget";
+import { calculateExpenseSummary, getExpenseDateRange, getExpensePeriodKey, isExpenseLimitExceeded, normalizeExpenseWidgetSettings, DEFAULT_EXPENSE_WIDGET_SETTINGS, ExpenseWidgetPeriod, ExpenseWidgetSettings } from "@/lib/expense-widget";
+import { ExpenseWidgetPlugin } from "@/lib/expense-widget-plugin";
 import {
   createDebtNote, recordDebtMovement, getTransactions, getWallets, removeTransaction, removeWallet, saveTransaction, saveWallet,
   DebtDirection, Transaction, TransactionKind, Wallet, WishlistItem, getWishlist, saveWishlist, removeWishlist, purchaseWishlist,
@@ -102,7 +103,10 @@ export default function CaeshApp() {
   const [updateDownloadProgress, setUpdateDownloadProgress] = useState<number | null>(null);
   const [downloadedUpdatePath, setDownloadedUpdatePath] = useState<string | null>(null);
   const [updateError, setUpdateError] = useState("");
-  const [expenseWidgetSettings, setExpenseWidgetSettings] = useState<ExpenseWidgetSettings>({ period: "monthly", walletIds: null, startDate: today(), endDate: today() });
+  const [expenseWidgetSettings, setExpenseWidgetSettings] = useState<ExpenseWidgetSettings>({ ...DEFAULT_EXPENSE_WIDGET_SETTINGS });
+  const [expenseWidgetInstalled, setExpenseWidgetInstalled] = useState(false);
+  const [widgetImageTarget, setWidgetImageTarget] = useState<"baseImage" | "beforeImage" | "afterImage" | null>(null);
+  const widgetImagePickerRef = useRef<HTMLInputElement>(null);
   const [expenseWidgetSettingsLoaded, setExpenseWidgetSettingsLoaded] = useState(false);
   const [showExpenseWidgetSettings, setShowExpenseWidgetSettings] = useState(false);
   const [balanceFilterWalletIds, setBalanceFilterWalletIds] = useState<string[] | null>(null);
@@ -115,7 +119,7 @@ export default function CaeshApp() {
   const [walletSettingsOpenId, setWalletSettingsOpenId] = useState<string | null>(null);
 
   const hasOpenModal = Boolean(
-    showForm || showWalletForm || showWishlistForm || purchaseTarget || showPhotoEditor ||
+    showForm || showWalletForm || showWishlistForm || purchaseTarget || showPhotoEditor || showExpenseWidgetSettings ||
     debtAction || detailWalletId || availableUpdate
   );
 
@@ -370,6 +374,16 @@ export default function CaeshApp() {
   }, [expenseWidgetSettings, expenseWidgetSettingsLoaded]);
 
   useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    let active = true;
+    ExpenseWidgetPlugin.getExpenseWidgetStatus()
+      .then((status) => { if (active) setExpenseWidgetInstalled(status.installed); })
+      .catch((reason: unknown) => console.warn("CAESH widget status unavailable.", reason));
+    return () => { active = false; };
+  }, []);
+
+
+  useEffect(() => {
     document.documentElement.dataset.theme = theme;
     window.localStorage.setItem("caesh-theme", theme);
   }, [theme]);
@@ -474,9 +488,70 @@ export default function CaeshApp() {
   const expenseWidgetWalletIds = expenseWidgetSettings.walletIds === null ? regularWallets.map((wallet) => wallet.id) : expenseWidgetSettings.walletIds.filter((id) => regularWallets.some((wallet) => wallet.id === id));
   const expenseWidgetRange = getExpenseDateRange(expenseWidgetSettings.period, new Date(), expenseWidgetSettings.startDate, expenseWidgetSettings.endDate);
   const expenseWidgetSummary = calculateExpenseSummary(transactions, expenseWidgetWalletIds, expenseWidgetRange);
+  const expenseWidgetOverLimit = isExpenseLimitExceeded(expenseWidgetSummary.total, expenseWidgetSettings);
+
   const expenseWidgetRangeLabel = expenseWidgetRange.start && expenseWidgetRange.end
     ? `${new Date(expenseWidgetRange.start + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })} – ${new Date(expenseWidgetRange.end + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}`
     : "Pilih rentang tanggal";
+
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform() || !ready || !expenseWidgetSettingsLoaded) return;
+    const overLimit = isExpenseLimitExceeded(expenseWidgetSummary.total, expenseWidgetSettings);
+    ExpenseWidgetPlugin.syncExpenseWidget({
+      title: expenseWidgetSettings.title,
+      amount: rupiah(expenseWidgetSummary.total),
+      periodLabel: expenseWidgetRangeLabel,\n      period: expenseWidgetSettings.period,\n      periodKey: getExpensePeriodKey(expenseWidgetSettings.period, new Date(), expenseWidgetSettings.startDate, expenseWidgetSettings.endDate),
+      transactionCount: expenseWidgetSummary.count,
+      overLimit,
+      baseImage: expenseWidgetSettings.baseImage,\n      beforeImage: expenseWidgetSettings.beforeImage,
+      afterImage: expenseWidgetSettings.afterImage,
+      enabled: true,
+    }).then((status) => setExpenseWidgetInstalled(status.installed))
+      .catch((reason: unknown) => console.warn("CAESH widget could not refresh.", reason));
+  }, [ready, expenseWidgetSettingsLoaded, expenseWidgetSettings, expenseWidgetSummary.total, expenseWidgetSummary.count, expenseWidgetRangeLabel]);
+  async function handleWidgetImageFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || !widgetImageTarget) return;
+    if (!file.type.startsWith("image/")) { setError("File background harus berupa gambar."); return; }
+    if (file.size > 10 * 1024 * 1024) { setError("Ukuran foto maksimal 10 MB."); return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result !== "string") { setError("Foto background tidak dapat dibaca."); setWidgetImageTarget(null); return; }
+      const image = new Image();
+      image.onload = () => {
+        const scale = Math.min(1, 480 / Math.max(image.width, image.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(image.width * scale));
+        canvas.height = Math.max(1, Math.round(image.height * scale));
+        const context = canvas.getContext("2d");
+        if (!context) { setError("Foto background gagal diproses."); setWidgetImageTarget(null); return; }
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        const optimizedImage = canvas.toDataURL("image/jpeg", 0.78);
+        setExpenseWidgetSettings((current) => ({ ...current, [widgetImageTarget]: optimizedImage }));
+        setWidgetImageTarget(null);
+      };
+      image.onerror = () => { setError("Format foto background tidak didukung."); setWidgetImageTarget(null); };
+      image.src = reader.result;
+    };
+    reader.onerror = () => { setError("Foto background gagal dibaca."); setWidgetImageTarget(null); };
+    reader.readAsDataURL(file);
+  }
+
+  async function addExpenseWidgetToHomeScreen() {
+    if (!Capacitor.isNativePlatform()) {
+      setError("Pemasangan widget home screen hanya tersedia di aplikasi Android CAESH.");
+      return;
+    }
+    try {
+      const result = await ExpenseWidgetPlugin.requestPinExpenseWidget();
+      setExpenseWidgetInstalled(result.installed);
+      if (result.requested) setError("Permintaan pemasangan dikirim. Konfirmasi penambahan widget pada layar home screen Android.");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Widget belum dapat dipasang dari perangkat ini. Ikuti panduan pemasangan manual.");
+    }
+  }
+
   function toggleExpenseWidgetWallet(walletId: string) {
     const current = expenseWidgetSettings.walletIds === null ? regularWallets.map((wallet) => wallet.id) : expenseWidgetSettings.walletIds.filter((id) => regularWallets.some((wallet) => wallet.id === id));
     const next = current.includes(walletId) ? current.filter((id) => id !== walletId) : [...current, walletId];
@@ -865,7 +940,7 @@ export default function CaeshApp() {
       </aside>
 
       <section className="main-panel" id="overview">
-        <header className="topbar"><a className="brand topbar-brand" href="#" aria-label="Caesh beranda"><span className="topbar-brand-name">caesh<span className="brand-period">.</span></span></a><div className="topbar-right"><span className="top-date">{todayLabel}</span><button className="theme-toggle" onClick={() => setTheme((current) => current === "light" ? "dark" : "light")} aria-label={theme === "light" ? "Aktifkan tema gelap" : "Aktifkan tema terang"} title={theme === "light" ? "Tema gelap" : "Tema terang"}><span aria-hidden="true">{theme === "light" ? "☾" : "☀"}</span><span>{theme === "light" ? "Gelap" : "Terang"}</span></button></div></header>
+        <header className="topbar"><a className="brand topbar-brand" href="#" aria-label="Caesh beranda"><span className="topbar-brand-name">caesh<span className="brand-period">.</span></span></a><div className="topbar-right"><span className="top-date">{todayLabel}</span><button className="theme-toggle" onClick={() => setShowExpenseWidgetSettings(true)} aria-label="Pengaturan widget CAESH" title="Widget CAESH"><span aria-hidden="true">▦</span><span>Widget</span></button><button className="theme-toggle" onClick={() => setTheme((current) => current === "light" ? "dark" : "light")} aria-label={theme === "light" ? "Aktifkan tema gelap" : "Aktifkan tema terang"} title={theme === "light" ? "Tema gelap" : "Tema terang"}><span aria-hidden="true">{theme === "light" ? "☾" : "☀"}</span><span>{theme === "light" ? "Gelap" : "Terang"}</span></button></div></header>
         <div className={activeNav === "overview" ? "content overview-content" : "content"}>
           <div className="welcome-row"><div><div className="eyebrow">{({ overview: "PERSONAL FINANCE OVERVIEW", wallets: "MONEY STORAGE", transactions: "TRANSACTION HISTORY", insights: "FINANCIAL INSIGHTS", wishlist: "YOUR WISHLIST" })[activeNav]}</div><h1>{({ overview: <>Uangmu, lebih <em>terarah.</em></>, wallets: <>Kelola <em>wallet.</em></>, transactions: <>Semua <em>transaksi.</em></>, insights: <>Kenali pola <em>keuangan.</em></>, wishlist: <>Daftar <em>keinginan.</em></> })[activeNav]}</h1></div>{activeNav !== "wishlist" && <button className="primary-button" onClick={() => { setKind("expense"); setShowForm(true); }}><span>＋</span> Tambah transaksi</button>}</div>
           {error && <div className="error-banner" role="alert">{error}<button onClick={() => setError("")}>Tutup</button></div>}
@@ -883,21 +958,7 @@ export default function CaeshApp() {
             <article className="stat-card"><div className="stat-top"><span>Total pemasukan</span><span className="stat-icon income-icon">↙</span></div><div className="stat-value">{ready ? displayNominal(totals.income, summaryNominalsHidden) : "Memuat..."}</div><div className="stat-foot">Uang yang masuk pada periode ini</div></article>
             <article className="stat-card"><div className="stat-top"><span>Total pengeluaran</span><span className="stat-icon expense-icon">↗</span></div><div className="stat-value">{ready ? displayNominal(totals.expense, summaryNominalsHidden) : "Memuat..."}</div><div className="stat-foot">Uang yang digunakan pada periode ini</div></article>
           </section>
-          <section className="panel-card expense-widget" aria-label="Widget hitung pengeluaran">
-            <div className="panel-heading expense-widget-heading">
-              <div><div className="section-kicker">WIDGET PENGELUARAN</div><h2>Total pengeluaran</h2><p className="expense-widget-range">{expenseWidgetRangeLabel}</p></div>
-              <button type="button" className="text-button" aria-expanded={showExpenseWidgetSettings} onClick={() => setShowExpenseWidgetSettings((visible) => !visible)}>{showExpenseWidgetSettings ? "Tutup pengaturan" : "Atur widget"}</button>
-            </div>
-            <div className="expense-widget-total"><strong>{ready ? displayNominal(expenseWidgetSummary.total, summaryNominalsHidden) : "Memuat..."}</strong><span>{expenseWidgetSummary.count} transaksi pengeluaran</span></div>
-            {showExpenseWidgetSettings && <div className="expense-widget-settings">
-              <div className="expense-widget-setting-block"><label className="field-label" htmlFor="expense-widget-period">Periode pengeluaran</label><select id="expense-widget-period" value={expenseWidgetSettings.period} onChange={(event) => setExpenseWidgetSettings((settings) => ({ ...settings, period: event.target.value as ExpenseWidgetPeriod }))}><option value="daily">Harian</option><option value="weekly">Mingguan</option><option value="monthly">Bulanan</option><option value="custom">Rentang tanggal sendiri</option></select></div>
-              {expenseWidgetSettings.period === "custom" && <div className="expense-widget-date-grid"><div><label className="field-label" htmlFor="expense-widget-start">Dari tanggal</label><input id="expense-widget-start" type="date" value={expenseWidgetSettings.startDate} max={expenseWidgetSettings.endDate || undefined} onChange={(event) => setExpenseWidgetSettings((settings) => ({ ...settings, startDate: event.target.value }))} /></div><div><label className="field-label" htmlFor="expense-widget-end">Sampai tanggal</label><input id="expense-widget-end" type="date" value={expenseWidgetSettings.endDate} min={expenseWidgetSettings.startDate || undefined} onChange={(event) => setExpenseWidgetSettings((settings) => ({ ...settings, endDate: event.target.value }))} /></div></div>}
-              <div className="expense-widget-wallets"><span className="field-label">Hitung dari wallet</span>
-                {regularWallets.length === 0 ? <p className="expense-widget-empty">Belum ada wallet biasa yang bisa dipilih.</p> : regularWallets.map((wallet) => <label className="expense-widget-wallet-option" key={wallet.id}><input type="checkbox" checked={expenseWidgetWalletIds.includes(wallet.id)} onChange={() => toggleExpenseWidgetWallet(wallet.id)} /><span>{wallet.name}</span></label>)}
-                <button type="button" className="text-button expense-widget-select-all" onClick={() => setExpenseWidgetSettings((settings) => ({ ...settings, walletIds: settings.walletIds === null || settings.walletIds.filter((id) => regularWallets.some((wallet) => wallet.id === id)).length === regularWallets.length ? [] : regularWallets.map((wallet) => wallet.id) }))}>{expenseWidgetWalletIds.length === regularWallets.length ? "Kosongkan pilihan" : "Pilih semua wallet"}</button>
-              </div>
-            </div>}
-          </section>
+
           <section className="overview-wallet-panel" aria-label="Wallet">
             <div className="overview-wallet-heading"><div><span className="section-kicker">TEMPAT PENYIMPANAN UANG</span><strong>Wallet kamu</strong></div><button type="button" className="wallet-add-button" aria-label="Tambah wallet" title="Tambah wallet" onClick={() => { setNewWalletCategory("standard"); setNewWalletName(""); setNewWalletBalance("0"); setNewDebtAmount(""); setNewDebtCashWalletId(regularWallets[0]?.id ?? ""); setShowWalletForm(true); }}>＋</button></div>
             <div className="overview-wallet-list" onScroll={() => setWalletSettingsOpenId(null)}>
@@ -948,6 +1009,25 @@ export default function CaeshApp() {
                   </div>
       </section>
 
+      {showExpenseWidgetSettings && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowExpenseWidgetSettings(false); }}><section className="modal-card expense-widget-modal" role="dialog" aria-modal="true" aria-labelledby="expense-widget-title"><div className="modal-heading"><div><div className="section-kicker">WIDGET HOME SCREEN</div><h2 id="expense-widget-title">Pengaturan widget</h2></div><button className="modal-close" onClick={() => setShowExpenseWidgetSettings(false)} aria-label="Tutup">×</button></div>
+        <p className="wallet-form-hint">Atur kartu pengeluaran yang akan tampil di home screen. Pengaturan tetap tersimpan meskipun widget belum dipasang.</p>
+        <label className="field-label" htmlFor="expense-widget-custom-title">Judul widget</label><input id="expense-widget-custom-title" type="text" maxLength={40} value={expenseWidgetSettings.title} onChange={(event) => setExpenseWidgetSettings((current) => ({ ...current, title: event.target.value }))} />
+        <label className="field-label" htmlFor="expense-widget-period">Periode pengeluaran</label><select id="expense-widget-period" value={expenseWidgetSettings.period} onChange={(event) => setExpenseWidgetSettings((current) => ({ ...current, period: event.target.value as ExpenseWidgetPeriod }))}><option value="daily">Harian</option><option value="weekly">Mingguan</option><option value="monthly">Bulanan</option><option value="yearly">Tahunan</option><option value="custom">Rentang tanggal sendiri</option></select>
+        {expenseWidgetSettings.period === "custom" && <div className="expense-widget-date-grid"><div><label className="field-label" htmlFor="expense-widget-start">Dari tanggal</label><input id="expense-widget-start" type="date" value={expenseWidgetSettings.startDate} max={expenseWidgetSettings.endDate || undefined} onChange={(event) => setExpenseWidgetSettings((current) => ({ ...current, startDate: event.target.value }))} /></div><div><label className="field-label" htmlFor="expense-widget-end">Sampai tanggal</label><input id="expense-widget-end" type="date" value={expenseWidgetSettings.endDate} min={expenseWidgetSettings.startDate || undefined} onChange={(event) => setExpenseWidgetSettings((current) => ({ ...current, endDate: event.target.value }))} /></div></div>}
+        <div className="expense-widget-wallets"><span className="field-label">Hitung pengeluaran dari wallet</span>{regularWallets.length === 0 ? <p className="expense-widget-empty">Belum ada wallet biasa yang bisa dipilih.</p> : regularWallets.map((wallet) => <label className="expense-widget-wallet-option" key={wallet.id}><input type="checkbox" checked={expenseWidgetWalletIds.includes(wallet.id)} onChange={() => toggleExpenseWidgetWallet(wallet.id)} /><span>{wallet.name}</span></label>)}<button type="button" className="text-button expense-widget-select-all" onClick={() => setExpenseWidgetSettings((current) => ({ ...current, walletIds: expenseWidgetWalletIds.length === regularWallets.length ? [] : regularWallets.map((wallet) => wallet.id) }))}>{expenseWidgetWalletIds.length === regularWallets.length ? "Kosongkan pilihan" : "Pilih semua wallet"}</button></div>
+        {!expenseWidgetSettings.limitEnabled && <div className="expense-widget-photo-row"><div><strong>Background widget</strong><span>{expenseWidgetSettings.baseImage ? "Foto sudah dipilih" : "Gunakan background bawaan atau upload foto"}</span></div><button type="button" className="outline-button" onClick={() => { setWidgetImageTarget("baseImage"); widgetImagePickerRef.current?.click(); }}>Pilih foto</button>{expenseWidgetSettings.baseImage && <button type="button" className="text-button" onClick={() => setExpenseWidgetSettings((current) => ({ ...current, baseImage: "" }))}>Hapus</button>}</div>}\n        <div className="expense-widget-limit"><label className="expense-widget-wallet-option"><input type="checkbox" checked={expenseWidgetSettings.limitEnabled} onChange={(event) => setExpenseWidgetSettings((current) => ({ ...current, limitEnabled: event.target.checked }))} /><strong>Aktifkan perubahan background saat pengeluaran melewati batas</strong></label>
+          {expenseWidgetSettings.limitEnabled && <><label className="field-label" htmlFor="expense-widget-limit">Batas pengeluaran (Rp)</label><input id="expense-widget-limit" type="text" inputMode="numeric" value={expenseWidgetSettings.monthlyLimit ? formatRupiahInput(String(expenseWidgetSettings.monthlyLimit)) : ""} placeholder="Contoh: 2.000.000" onChange={(event) => setExpenseWidgetSettings((current) => ({ ...current, monthlyLimit: parseRupiahInput(event.target.value) || 0 }))} />
+            <div className="expense-widget-photo-row"><div><strong>Background sebelum melewati batas</strong><span>{expenseWidgetSettings.beforeImage ? "Foto sudah dipilih" : "Belum ada foto"}</span></div><button type="button" className="outline-button" onClick={() => { setWidgetImageTarget("beforeImage"); widgetImagePickerRef.current?.click(); }}>Pilih foto</button>{expenseWidgetSettings.beforeImage && <button type="button" className="text-button" onClick={() => setExpenseWidgetSettings((current) => ({ ...current, beforeImage: "" }))}>Hapus</button>}</div>
+            <div className="expense-widget-photo-row"><div><strong>Background setelah melewati batas</strong><span>{expenseWidgetSettings.afterImage ? "Foto sudah dipilih" : "Belum ada foto"}</span></div><button type="button" className="outline-button" onClick={() => { setWidgetImageTarget("afterImage"); widgetImagePickerRef.current?.click(); }}>Pilih foto</button>{expenseWidgetSettings.afterImage && <button type="button" className="text-button" onClick={() => setExpenseWidgetSettings((current) => ({ ...current, afterImage: "" }))}>Hapus</button>}</div>
+            {(!expenseWidgetSettings.beforeImage || !expenseWidgetSettings.afterImage || expenseWidgetSettings.monthlyLimit <= 0) && <p className="wallet-form-hint">Isi nominal batas dan pilih kedua foto agar perubahan background aktif sepenuhnya.</p>}
+            <p className="wallet-form-hint">Status akan kembali ke foto pertama saat periode yang dipilih dimulai lagi.</p>
+          </>}
+        </div>
+        <div className="expense-widget-preview"><span className="section-kicker">PRATINJAU SAAT INI</span><strong>{rupiah(expenseWidgetSummary.total)}</strong><span>{expenseWidgetRangeLabel} · {expenseWidgetSummary.count} transaksi</span>{expenseWidgetOverLimit && <em>Batas pengeluaran terlampaui</em>}</div>
+        <div className="expense-widget-install"><strong>{expenseWidgetInstalled ? "Widget sudah terpasang" : "Widget belum terpasang di home screen"}</strong><p>{expenseWidgetInstalled ? "Widget akan mengikuti pengaturan dan transaksi terbaru." : "Pengaturan tetap tersimpan. Pasang widget agar kartu pengeluaran terlihat di home screen."}</p><ol><li>Tekan tombol Pasang widget di bawah.</li><li>Konfirmasi penambahan pada layar home screen Android.</li><li>Jika permintaan tidak tersedia, tekan lama area kosong home screen, pilih Widget, lalu cari CAESH.</li></ol><button type="button" className="outline-button" onClick={addExpenseWidgetToHomeScreen}>{expenseWidgetInstalled ? "Periksa status widget" : "Pasang widget ke home screen"}</button></div>
+        <input ref={widgetImagePickerRef} className="visually-hidden-file" type="file" accept="image/png,image/jpeg,image/webp" onChange={handleWidgetImageFileChange} />
+        <div className="modal-actions"><button type="button" className="primary-button" onClick={() => setShowExpenseWidgetSettings(false)}>Selesai</button></div>
+      </section></div>}
       {showForm && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowForm(false); }}><section className="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div className="modal-heading"><div><div className="section-kicker">CATATAN BARU</div><h2 id="modal-title">Tambah transaksi</h2></div><button className="modal-close" onClick={() => setShowForm(false)} aria-label="Tutup">×</button></div>
         <form onSubmit={handleSubmit}><div className="kind-switch"><button type="button" className={kind === "expense" ? "active expense-choice" : ""} onClick={() => changeKind("expense")}>Pengeluaran</button><button type="button" className={kind === "income" ? "active income-choice" : ""} onClick={() => changeKind("income")}>Pemasukan</button><button type="button" className={kind === "transfer" ? "active transfer-choice" : ""} onClick={() => changeKind("transfer")}>Transfer</button></div>
           <label className="field-label" htmlFor="amount">Nominal (Rp)</label><div className="currency-input-wrap"><span>Rp</span><input id="amount" className="amount-input" inputMode="numeric" type="text" placeholder="0" value={amount} onChange={(event) => setAmount(formatRupiahInput(event.target.value))} required /></div>
