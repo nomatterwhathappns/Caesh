@@ -407,8 +407,7 @@ export async function recordDebtMovement(
           const debtRecords = transactions.filter((item) => item.debtNoteId === noteWallet.id);
           const initialAmount = debtRecords
             .filter((item) => item.debtAction === "initial" || item.debtAction === "add")
-            .reduce((sum, item) => sum + item.amount, 0)
-            + (action === "add" ? transaction.amount : 0);
+            .reduce((sum, item) => sum + item.amount, 0);
           const paidAmount = debtRecords
             .filter((item) => item.debtAction === "payment")
             .reduce((sum, item) => sum + item.amount, 0)
