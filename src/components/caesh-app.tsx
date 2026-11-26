@@ -1017,7 +1017,7 @@ export default function CaeshApp() {
                 <div className="balance-filter-heading"><strong>Pilih wallet untuk total saldo</strong><button type="button" className="balance-filter-select-all" onClick={toggleAllBalanceFilterWallets}>{selectedBalanceWalletIds.length === wallets.length ? "Kosongkan" : "Pilih semua"}</button></div>
                 {wallets.length === 0 ? <p className="expense-widget-empty">Belum ada wallet yang bisa dipilih.</p> : wallets.map((wallet) => <label className="balance-filter-option" key={wallet.id}><input type="checkbox" checked={selectedBalanceWalletIds.includes(wallet.id)} onChange={() => toggleBalanceFilterWallet(wallet.id)} /><span>{wallet.name}</span></label>)}
               </div>}
-              <div className="balance-decoration">CAESH</div></article>
+              <div className="balance-decoration" aria-hidden="true" /></article>
             <article className="stat-card"><div className="stat-top"><span>Total pemasukan</span><span className="stat-icon income-icon">↙</span></div><div className="stat-value">{ready ? displayNominal(totals.income, summaryNominalsHidden) : "Memuat..."}</div><div className="stat-foot">Uang yang masuk pada periode ini</div></article>
             <article className="stat-card"><div className="stat-top"><span>Total pengeluaran</span><span className="stat-icon expense-icon">↗</span></div><div className="stat-value">{ready ? displayNominal(totals.expense, summaryNominalsHidden) : "Memuat..."}</div><div className="stat-foot">Uang yang digunakan pada periode ini</div></article>
           </section>
