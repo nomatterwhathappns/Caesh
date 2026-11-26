@@ -23,6 +23,7 @@
 ### Transaksi dan utang
 - Pencatatan pemasukan, pengeluaran, dan transfer antar-wallet.
 - Riwayat transaksi, pencarian, filter, dan edit transaksi langsung dari daftar riwayat.
+- Dialog konfirmasi hapus wallet dan kategori menggunakan popup custom CAESH.
 - Pencatatan utang/piutang per orang.
 - Pembayaran utang bertahap, pelunasan otomatis/manual, dan riwayat penyelesaian utang beserta nominal dibayar serta sisa yang dihapus. Penghapusan transaksi utang langsung memakai perilaku hapus beserta riwayat terkait.
 
@@ -45,9 +46,9 @@
 
 ## Unduh CAESH Android
 
-**Versi terbaru: v1.17.0**
+**Versi terbaru: v1.17.1**
 
-[Unduh CAESH v1.17.0 (APK)](https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.17.0/Caesh.apk)
+[Unduh CAESH v1.17.1 (APK)](https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.17.1/Caesh.apk)
 
 [Semua rilis CAESH](https://github.com/nomatterwhappns/Caesh/releases)
 
