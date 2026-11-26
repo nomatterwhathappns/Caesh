@@ -119,6 +119,42 @@ function openDatabase(): Promise<IDBDatabase> {
   });
 }
 
+/** Remove legacy Notes wallets whose ledger is already fully settled. History is preserved. */
+export async function cleanupClosedDebtNotes(): Promise<number> {
+  const db = await openDatabase();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction([WALLET_STORE, TRANSACTION_STORE], "readwrite");
+    const walletStore = tx.objectStore(WALLET_STORE);
+    const walletsRequest = walletStore.getAll();
+    const transactionsRequest = tx.objectStore(TRANSACTION_STORE).getAll();
+    let removed = 0;
+    let processed = false;
+    let failure: Error | null = null;
+    const process = () => {
+      if (processed || walletsRequest.readyState !== "done" || transactionsRequest.readyState !== "done") return;
+      processed = true;
+      try {
+        const wallets = walletsRequest.result as Wallet[];
+        const transactions = transactionsRequest.result as Transaction[];
+        wallets.forEach((wallet) => {
+          if (wallet.category === "notes" && calculateWalletBalance(wallet, transactions) === 0) {
+            walletStore.delete(wallet.id);
+            removed += 1;
+          }
+        });
+      } catch (reason) {
+        failure = reason instanceof Error ? reason : new Error("Pembersihan Notes lunas gagal.");
+        try { tx.abort(); } catch { /* Transaction may already be aborting. */ }
+      }
+    };
+    walletsRequest.onsuccess = process;
+    transactionsRequest.onsuccess = process;
+    tx.oncomplete = () => { db.close(); resolve(removed); };
+    tx.onabort = () => { db.close(); reject(failure ?? tx.error ?? new Error("Pembersihan Notes lunas gagal.")); };
+    tx.onerror = () => { failure = failure ?? tx.error ?? new Error("Pembersihan Notes lunas gagal."); };
+  });
+}
+
 export async function getWallets(): Promise<Wallet[]> {
   const db = await openDatabase();
   return new Promise((resolve, reject) => {
