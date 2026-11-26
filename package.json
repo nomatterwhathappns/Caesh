@@ -1,6 +1,6 @@
 {
   "name": "caesh",
-  "version": "1.14.0",
+  "version": "1.14.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -18,7 +18,8 @@
     "@capacitor/file-transfer": "^2.0.6",
     "next": "16.4.6",
     "react": "19.3.1",
-    "react-dom": "19.3.1"
+    "react-dom": "19.3.1",
+    "@capacitor/status-bar": "^8.0.0"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.6.2",
