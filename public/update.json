@@ -1,8 +1,12 @@
 {
-  "version": "1.13.0",
-  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.13.0/Caesh.apk",
-  "notes": "Mengganti palet Light dan Dark ke Bordeaux Estate: burgundy, rose muted, dan champagne dengan nuansa old money luxury.",
+  "version": "1.14.0",
+  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.14.0/Caesh.apk",
+  "notes": "Mengganti watermark CAESH pada kartu Total saldo semua wallet dengan motif Liquid Silk bergaya lipatan sutra burgundy dan champagne.",
   "releases": [
+    {
+      "version": "1.14.0",
+      "notes": "Mengganti watermark CAESH pada kartu Total saldo semua wallet dengan motif Liquid Silk bergaya lipatan sutra burgundy dan champagne."
+    },
     {
       "version": "1.13.0",
       "notes": "Mengganti palet Light dan Dark ke Bordeaux Estate: burgundy, rose muted, dan champagne dengan nuansa old money luxury."
