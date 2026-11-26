@@ -1,8 +1,12 @@
 {
-  "version": "1.14.0",
-  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.14.0/Caesh.apk",
-  "notes": "Mengganti watermark CAESH pada kartu Total saldo semua wallet dengan motif Liquid Silk bergaya lipatan sutra burgundy dan champagne.",
+  "version": "1.14.1",
+  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.14.1/Caesh.apk",
+  "notes": "Menyelaraskan warna status bar Android dengan header Light/Dark Mode, mengganti wordmark menjadi DM Serif Display, menghilangkan tap highlight biru, dan menampilkan tanggal pada header mode portrait.",
   "releases": [
+    {
+      "version": "1.14.1",
+      "notes": "Menyelaraskan warna status bar Android dengan header Light/Dark Mode, mengganti wordmark menjadi DM Serif Display, menghilangkan tap highlight biru, dan menampilkan tanggal pada header mode portrait."
+    },
     {
       "version": "1.14.0",
       "notes": "Mengganti watermark CAESH pada kartu Total saldo semua wallet dengan motif Liquid Silk bergaya lipatan sutra burgundy dan champagne."
