@@ -120,10 +120,11 @@ export default function CaeshApp() {
   const [deleteTransactionTarget, setDeleteTransactionTarget] = useState<Transaction | null>(null);
   const [deleteDebtWithHistory, setDeleteDebtWithHistory] = useState(false);
   const [settleDebtTarget, setSettleDebtTarget] = useState<Wallet | null>(null);
+  const [deleteWishlistTarget, setDeleteWishlistTarget] = useState<WishlistItem | null>(null);
 
   const hasOpenModal = Boolean(
     showForm || showWalletForm || showWishlistForm || purchaseTarget || showPhotoEditor || showExpenseWidgetSettings ||
-    debtAction || detailWalletId || availableUpdate || settleDebtTarget
+    debtAction || detailWalletId || availableUpdate || settleDebtTarget || deleteWishlistTarget
   );
 
   useEffect(() => {
@@ -917,11 +918,14 @@ export default function CaeshApp() {
     }
   }
 
-  async function handleWishlistDelete(item: WishlistItem) {
-    if (!window.confirm(`Hapus "${item.name}" dari wishlist?`)) return;
+  async function handleWishlistDelete() {
+    if (!deleteWishlistTarget) return;
+    const item = deleteWishlistTarget;
     try {
       await removeWishlist(item.id);
       setWishlist((current) => current.filter((entry) => entry.id !== item.id));
+      setDeleteWishlistTarget(null);
+      setError("");
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Wishlist gagal dihapus.");
     }
@@ -1028,7 +1032,7 @@ export default function CaeshApp() {
               : <div className="wishlist-grid">{wishlist.filter((item) => item.status === wishlistTab).map((item) => <article className="panel-card wishlist-item" key={item.id}>
                   <div className="wishlist-item-main"><strong>{item.name}</strong><span>{item.status === "purchased" ? `Dibeli · ${new Date(item.purchasedAt ?? item.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}` : `Ditambahkan · ${new Date(item.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}`}</span></div>
                   {item.status === "purchased" ? <div className="wishlist-purchase-detail"><strong>{rupiah(item.purchaseAmount ?? 0)}</strong><span>{walletName(item.walletId ?? "")}</span></div> : <button className="primary-button" onClick={() => { setPurchaseTarget(item); setPurchaseWalletId(regularWallets[0]?.id ?? ""); setPurchaseAmount(""); }}>Beli</button>}
-                  <button type="button" className="delete-button" aria-label={`Hapus ${item.name} dari wishlist`} onClick={() => handleWishlistDelete(item)}>×</button>
+                  <button type="button" className="delete-button" aria-label={`Hapus ${item.name} dari wishlist`} onClick={() => setDeleteWishlistTarget(item)}>×</button>
                 </article>)}</div>}
           </section>}
 
@@ -1060,6 +1064,7 @@ export default function CaeshApp() {
         <input ref={widgetImagePickerRef} className="visually-hidden-file" type="file" accept="image/png,image/jpeg,image/webp" onChange={handleWidgetImageFileChange} />
         <div className="modal-actions"><button type="button" className="primary-button" onClick={() => setShowExpenseWidgetSettings(false)}>Selesai</button></div>
       </section></div>}
+      {deleteWishlistTarget && <div className="modal-backdrop delete-wishlist-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteWishlistTarget(null); }}><section className="modal-card delete-wishlist-modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-wishlist-title" aria-describedby="delete-wishlist-description"><div className="delete-wishlist-icon" aria-hidden="true">×</div><div className="section-kicker">KONFIRMASI WISHLIST</div><h2 id="delete-wishlist-title">Hapus wishlist?</h2><p id="delete-wishlist-description">Item <strong>{deleteWishlistTarget.name}</strong> akan dihapus dari wishlist. Tindakan ini tidak bisa dibatalkan.</p><div className="modal-actions"><button type="button" className="cancel-button" onClick={() => setDeleteWishlistTarget(null)}>Batal</button><button type="button" className="delete-wishlist-confirm-button" onClick={handleWishlistDelete}>Ya, hapus</button></div></section></div>}
       {settleDebtTarget && <div className="modal-backdrop settle-debt-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setSettleDebtTarget(null); }}><section className="modal-card settle-debt-modal" role="alertdialog" aria-modal="true" aria-labelledby="settle-debt-title" aria-describedby="settle-debt-description"><div className="settle-debt-icon" aria-hidden="true">✓</div><div className="section-kicker">KONFIRMASI UTANG</div><h2 id="settle-debt-title">Selesaikan utang?</h2><p id="settle-debt-description">Tandai utang dengan <strong>{settleDebtTarget.name}</strong> sebagai lunas dengan sisa <strong>{rupiah(Math.abs(walletBalances.find((item) => item.id === settleDebtTarget.id)?.balance ?? 0))}</strong>. Tidak ada pembayaran tambahan dan saldo wallet tidak akan berubah.</p><div className="modal-actions"><button type="button" className="cancel-button" onClick={() => setSettleDebtTarget(null)}>Batal</button><button type="button" className="settle-debt-confirm-button" onClick={handleSettleDebt}>Ya, selesaikan</button></div></section></div>}
       {deleteTransactionTarget && <div className="modal-backdrop delete-confirm-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteTransactionTarget(null); }}><section className="modal-card delete-confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-confirm-title" aria-describedby="delete-confirm-description"><div className="delete-confirm-icon" aria-hidden="true">!</div><div className="section-kicker">KONFIRMASI HAPUS</div><h2 id="delete-confirm-title">Hapus transaksi ini?</h2><p id="delete-confirm-description">Transaksi <strong>{deleteTransactionTarget.note || deleteTransactionTarget.category}</strong> sebesar <strong>{rupiah(deleteTransactionTarget.amount)}</strong> akan dihapus dari riwayat. Tindakan ini tidak bisa dibatalkan.</p>{deleteTransactionTarget.category === "Utang" && <label className="debt-delete-history-option"><input type="checkbox" checked={deleteDebtWithHistory} onChange={(event) => setDeleteDebtWithHistory(event.target.checked)} /><span>Hapus transaksi termasuk riwayat</span></label>}<div className="modal-actions"><button type="button" className="cancel-button" onClick={() => setDeleteTransactionTarget(null)}>Batal</button><button type="button" className="delete-confirm-button" onClick={confirmDeleteTransaction}>Ya, hapus</button></div></section></div>}
 
