@@ -200,10 +200,11 @@ export default function CaeshApp() {
     } catch { /* Keep built-in categories if local settings are unreadable. */ }
     setTodayLabel(new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }));
     cleanupClosedDebtNotes()
-      .then(() => Promise.all([getTransactions(), getWallets()]))
-      .then(([savedTransactions, savedWallets]) => {
+      .then(() => Promise.all([getTransactions(), getWallets(), getWishlist()]))
+      .then(([savedTransactions, savedWallets, savedWishlist]) => {
         setTransactions(savedTransactions);
         setWallets(savedWallets);
+        setWishlist(savedWishlist);
         setWalletId(savedWallets.find((wallet) => wallet.category !== "notes")?.id ?? "");
         setToWalletId(savedWallets.filter((wallet) => wallet.category !== "notes")[1]?.id ?? "");
       })
