@@ -777,10 +777,13 @@ export default function CaeshApp() {
         return;
       }
       const source = walletBalances.find((wallet) => wallet.id === walletId);
-      const previousSourceEffect = editingTransaction?.kind === "transfer"
-        ? editingTransaction.walletId === walletId ? editingTransaction.amount : 0
-        : editingTransaction?.walletId === walletId && editingTransaction.kind === "expense" ? editingTransaction.amount
-        : editingTransaction?.walletId === walletId && editingTransaction.kind === "income" ? -editingTransaction.amount : 0;
+      const previousSourceEffect = !editingTransaction ? 0
+        : editingTransaction.kind === "transfer"
+          ? editingTransaction.walletId === walletId ? editingTransaction.amount
+          : editingTransaction.toWalletId === walletId ? -editingTransaction.amount : 0
+        : editingTransaction.walletId === walletId
+          ? editingTransaction.kind === "expense" ? editingTransaction.amount : -editingTransaction.amount
+          : 0;
       if (!source || source.balance + previousSourceEffect < value) {
         setError("Saldo wallet sumber tidak mencukupi untuk transfer ini.");
         return;
