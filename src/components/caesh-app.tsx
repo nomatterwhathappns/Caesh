@@ -662,6 +662,10 @@ export default function CaeshApp() {
   }
 
   function confirmRemoveSelectedCategory() {
+    if (kind !== "income" && kind !== "expense") {
+      setCategoryDeleteConfirmOpen(false);
+      return;
+    }
     const next = { ...categoryOptions, [kind]: categoryOptions[kind].filter((item) => item !== category) };
     persistCategoryOptions(next);
     setCategory(next[kind][0] ?? "Lainnya");
