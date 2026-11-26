@@ -442,8 +442,8 @@ export async function removeTransaction(id: string, includeDebtHistory = false):
         && (wallet.id === target.debtNoteId || wallet.id === target.walletId || wallet.id === target.toWalletId));
       const noteWalletId = target.debtNoteId ?? noteWallet?.id;
       const isInitialDebt = target.debtAction === "initial"
-        || (!target.debtAction && !!noteWallet && (noteWallet.id === target.walletId || noteWallet.id === target.toWalletId)
-          && noteWallet.id === target.debtNoteId);
+        || (!target.debtAction && !!noteWallet
+          && noteWallet.id === (noteWallet.debtDirection === "borrowed" ? target.walletId : target.toWalletId));
 
       if (isInitialDebt) {
         if (!noteWalletId) {
