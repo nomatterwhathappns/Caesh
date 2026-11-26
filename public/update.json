@@ -1,8 +1,12 @@
 {
-  "version": "1.11.21",
-  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.11.21/Caesh.apk",
-  "notes": "Membersihkan Notes utang bersaldo Rp0 secara otomatis saat aplikasi dibuka, tanpa menghapus riwayat transaksi.",
+  "version": "1.11.22",
+  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.11.22/Caesh.apk",
+  "notes": "Memperbaiki tampilan checkbox penghapusan utang dan mengganti konfirmasi Selesaikan Utang dengan popup custom CAESH.",
   "releases": [
+    {
+      "version": "1.11.22",
+      "notes": "Memperbaiki tampilan checkbox penghapusan utang dan mengganti konfirmasi Selesaikan Utang dengan popup custom CAESH."
+    },
     {
       "version": "1.11.21",
       "notes": "Membersihkan Notes utang bersaldo Rp0 secara otomatis saat aplikasi dibuka, tanpa menghapus riwayat transaksi."
