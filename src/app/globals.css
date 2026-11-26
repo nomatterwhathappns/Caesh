@@ -1511,3 +1511,39 @@ body.caesh-modal-open {
 .debt-action-backdrop {
   z-index: 2001;
 }
+
+
+/* CAESH v1.11.22: remove native checkbox focus/paint artifacts in debt deletion option. */
+.debt-delete-history-option input[type="checkbox"] {
+  appearance: auto;
+  -webkit-appearance: checkbox;
+  display: inline-block;
+  width: 18px;
+  min-width: 18px;
+  height: 18px;
+  min-height: 18px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  accent-color: #8eae84;
+}
+.debt-delete-history-option input[type="checkbox"]:focus,
+.debt-delete-history-option input[type="checkbox"]:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.settle-debt-backdrop { z-index: 2100; }
+.settle-debt-modal { width: min(100%, 390px); text-align: center; padding: 28px; }
+.settle-debt-icon { width: 48px; height: 48px; margin: 0 auto 16px; display: grid; place-items: center; border-radius: 15px; background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); font: 800 24px 'Manrope',sans-serif; }
+.settle-debt-modal > .section-kicker { margin-bottom: 7px; }
+.settle-debt-modal h2 { margin: 0; color: var(--ink); font: 750 19px 'Manrope',sans-serif; letter-spacing: -.45px; }
+.settle-debt-modal p { margin: 12px 0 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.settle-debt-modal p strong { color: var(--ink); }
+.settle-debt-modal .modal-actions { display: grid; grid-template-columns: 1fr 1fr; margin-top: 23px; gap: 10px; }
+.settle-debt-modal .modal-actions button { min-height: 45px; border-radius: 12px; font-size: 12px; font-weight: 700; }
+.settle-debt-confirm-button { border: 1px solid var(--accent); background: var(--accent); color: #fff; cursor: pointer; }
+.settle-debt-confirm-button:hover { filter: brightness(.94); }
+@media (max-width: 620px) { .settle-debt-modal { width: 100%; padding: 23px 20px; } }
