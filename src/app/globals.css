@@ -1769,3 +1769,8 @@ button:focus-visible,a:focus-visible,[role="button"]:focus-visible,input:focus-v
     padding-top:var(--caesh-statusbar-height, env(safe-area-inset-top, 0px));
   }
 }
+
+
+/* Transaction rows open the existing transaction editor when selected. */
+.transaction-row-editable { cursor: pointer; }
+.transaction-row-editable:focus-visible { outline: 2px solid var(--accent, currentColor); outline-offset: 3px; border-radius: 10px; }
