@@ -1572,3 +1572,135 @@ body.caesh-modal-open {
 .expense-widget-position-editor .photo-range{width:100%;min-width:0;accent-color:var(--deep)}
 .expense-widget-position-editor>.text-button{grid-column:2;justify-self:start}
 @media(max-width:420px){.expense-widget-position-editor{gap:10px;padding:10px}.expense-widget-position-editor label{font-size:10px}.expense-widget-position-editor>.text-button{font-size:11px}}
+
+
+/* CAESH v1.13.0 — Bordeaux Estate luxury palette */
+:root{
+  color-scheme:light;
+  --paper:#EFE5DF;
+  --surface:#FAF5EF;
+  --surface-soft:#F4EBE5;
+  --surface-muted:#E7D8D1;
+  --ink:#302328;
+  --muted:#8B7775;
+  --text-secondary:#8B7775;
+  --line:#E5D5CE;
+  --field-bg:#FFFAF6;
+  --field-border:#E1CFC7;
+  --nav-active:#E9D8D8;
+  --nav-active-text:#713B45;
+  --deep:#713B45;
+  --green:#B77B80;
+  --mint:#F0E4D9;
+  --accent:#713B45;
+  --accent-strong:#5E3039;
+  --accent-soft:#E9D8D8;
+  --accent-contrast:#FFFFFF;
+  --gold:#B28A69;
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#201719;
+  --surface:#302226;
+  --surface-soft:#38292D;
+  --surface-muted:#463238;
+  --ink:#F0E4D9;
+  --muted:#B99FA0;
+  --text-secondary:#B99FA0;
+  --line:#49343A;
+  --field-bg:#38292D;
+  --field-border:#594047;
+  --nav-active:#493039;
+  --nav-active-text:#F0DCE0;
+  --deep:#4C2932;
+  --green:#B77B80;
+  --mint:#493039;
+  --accent:#C18A8D;
+  --accent-strong:#D09A9D;
+  --accent-soft:#493039;
+  --accent-contrast:#201719;
+  --gold:#C4A17C;
+}
+body{
+  background:
+    radial-gradient(ellipse at 88% 0%,color-mix(in srgb,var(--gold) 8%,transparent),transparent 34%),
+    var(--paper);
+}
+.sidebar{background:color-mix(in srgb,var(--surface) 97%,var(--paper))}
+.nav-link.active{background:var(--nav-active);color:var(--nav-active-text)}
+.nav-link.active::before{background:var(--accent)}
+.brand-mark{background:var(--deep);color:#F0E4D9;box-shadow:0 4px 12px color-mix(in srgb,var(--deep) 20%,transparent)}
+.brand-period,h1 em,.section-kicker,.eyebrow{color:var(--accent)}
+.primary-button{
+  background:var(--deep);
+  color:#fff;
+  box-shadow:0 6px 15px color-mix(in srgb,var(--deep) 18%,transparent);
+}
+.primary-button:hover{background:var(--accent-strong)}
+.text-button,.outline-button{color:var(--accent)}
+.outline-button{border-color:color-mix(in srgb,var(--accent) 28%,var(--line))}
+.outline-button:hover,.theme-toggle:hover{border-color:var(--accent)}
+.theme-toggle{border-color:var(--line)}
+.theme-toggle:hover{color:var(--accent)}
+.period-tabs button.selected,.kind-switch button.active{color:var(--accent)}
+.period-tabs button.selected{box-shadow:0 2px 8px color-mix(in srgb,var(--deep) 9%,transparent)}
+.balance-card{
+  background:
+    radial-gradient(circle at 92% 10%,color-mix(in srgb,var(--gold) 22%,transparent),transparent 36%),
+    var(--deep);
+  border-color:var(--deep);
+  box-shadow:0 10px 28px color-mix(in srgb,var(--deep) 18%,transparent);
+}
+.balance-card .stat-top,.balance-card .stat-foot{color:#F0DCE0}
+.balance-card .stat-symbol{color:var(--gold)}
+.balance-dot{background:var(--gold)}
+.balance-decoration{color:#FFFFFF0D}
+.stat-icon.income-icon,.transaction-icon.income{background:#E8F0E6;color:#64865E}
+.transaction-amount.income{color:#6B9463}
+.stat-icon.expense-icon,.transaction-icon.expense{background:#F6E9E4;color:#B66B58}
+.transaction-amount.expense{color:#B66B58}
+.transaction-icon.transfer{background:#E9EAF4;color:#6678B8}
+.transaction-amount.transfer,.kind-switch .transfer-choice{color:#7585BD}
+:root[data-theme="dark"] .stat-icon.income-icon,
+:root[data-theme="dark"] .transaction-icon.income{background:#293A30;color:#9BC18F}
+:root[data-theme="dark"] .transaction-amount.income{color:#9BC18F}
+:root[data-theme="dark"] .stat-icon.expense-icon,
+:root[data-theme="dark"] .transaction-icon.expense{background:#482E2D;color:#D99480}
+:root[data-theme="dark"] .transaction-amount.expense{color:#D99480}
+:root[data-theme="dark"] .transaction-icon.transfer{background:#30364E;color:#BDC8FF}
+:root[data-theme="dark"] .transaction-amount.transfer{color:#BDC8FF}
+.wallet-symbol,.empty-art,.wishlist-item-icon{background:var(--accent-soft);color:var(--accent)}
+.wallet-add-card{background:var(--surface-soft);border-color:color-mix(in srgb,var(--accent) 40%,var(--line));color:var(--accent)}
+.wallet-add-card>span{color:var(--accent)}
+.wallet-photo-button:hover,.wallet-delete-button:focus-visible{border-color:var(--accent);color:var(--accent)}
+.photo-adjustments .photo-range,.expense-widget-position-editor .photo-range{accent-color:var(--accent)}
+.modal-card input:focus,.modal-card select:focus,.modal-card textarea:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 15%,transparent);
+}
+.category-bar-track span{background:var(--accent)}
+.insight-note{background:var(--surface-soft);color:var(--accent)}
+.insight-note p{color:var(--text-secondary)}
+.local-indicator{color:var(--accent)}
+.local-indicator i,.privacy-status i{background:var(--accent)}
+.privacy-icon,.privacy-status{color:var(--accent)}
+.avatar{background:var(--accent-soft);color:var(--accent)}
+.error-banner{background:#F8EAE5;border-color:#E9CFC6;color:#963F31}
+:root[data-theme="dark"] .error-banner{background:#482E2D;border-color:#704137;color:#FFC0AD}
+.delete-confirm-icon{background:#B75C4D18;color:#B75C4D}
+.delete-wishlist-icon{background:#D96C651F;color:#D96C65}
+.expense-widget-position-preview{background:var(--deep)}
+.expense-widget-position-editor{background:var(--surface-soft);border-color:var(--line)}
+@media(min-width:621px){
+  .balance-card:hover{box-shadow:0 15px 34px color-mix(in srgb,var(--deep) 24%,transparent)}
+  .stat-card:not(.balance-card):hover,.panel-card:hover,.overview-wallet-item:hover{
+    border-color:color-mix(in srgb,var(--accent) 22%,var(--line));
+  }
+  .nav-link.active::before{background:var(--accent)}
+  .nav-link:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{
+    outline-color:color-mix(in srgb,var(--accent) 75%,transparent);
+  }
+}
+@media(prefers-reduced-motion:no-preference){
+  .primary-button,.theme-toggle,.nav-link,.wallet-symbol,.empty-art{transition:background-color .22s ease,color .22s ease,border-color .22s ease,box-shadow .22s ease,transform .22s ease}
+}
