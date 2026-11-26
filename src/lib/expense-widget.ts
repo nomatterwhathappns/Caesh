@@ -1,0 +1,132 @@
+import type { Transaction } from "./db";
+
+export type ExpenseWidgetPeriod = "daily" | "weekly" | "monthly" | "yearly" | "custom";
+export type ExpenseWidgetSettings = {
+  title: string;
+  period: ExpenseWidgetPeriod;
+  walletIds: string[] | null;
+  startDate: string;
+  endDate: string;
+  limitEnabled: boolean;
+  monthlyLimit: number;
+  baseImage: string;
+  beforeImage: string;
+  afterImage: string;
+  baseImageX: number;
+  baseImageY: number;
+  baseImageZoom: number;
+  beforeImageX: number;
+  beforeImageY: number;
+  beforeImageZoom: number;
+  afterImageX: number;
+  afterImageY: number;
+  afterImageZoom: number;
+};
+export type ExpenseDateRange = { start: string; end: string };
+
+export const DEFAULT_EXPENSE_WIDGET_SETTINGS: ExpenseWidgetSettings = {
+  title: "Pengeluaran Bulanan",
+  period: "monthly",
+  walletIds: null,
+  startDate: "",
+  endDate: "",
+  limitEnabled: false,
+  monthlyLimit: 0,
+  baseImage: "",
+  beforeImage: "",
+  afterImage: "",
+  baseImageX: 50,
+  baseImageY: 50,
+  baseImageZoom: 1,
+  beforeImageX: 50,
+  beforeImageY: 50,
+  beforeImageZoom: 1,
+  afterImageX: 50,
+  afterImageY: 50,
+  afterImageZoom: 1,
+};
+
+function toLocalDateString(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+export function getExpenseDateRange(period: ExpenseWidgetPeriod, referenceDate: Date, customStart: string, customEnd: string): ExpenseDateRange {
+  if (period === "custom") return { start: customStart, end: customEnd };
+  const start = new Date(referenceDate.getFullYear(), referenceDate.getMonth(), referenceDate.getDate());
+  const end = new Date(start);
+  if (period === "weekly") {
+    const daysSinceMonday = (start.getDay() + 6) % 7;
+    start.setDate(start.getDate() - daysSinceMonday);
+    end.setTime(start.getTime());
+    end.setDate(end.getDate() + 6);
+  } else if (period === "monthly") {
+    start.setDate(1);
+    end.setMonth(end.getMonth() + 1, 0);
+  } else if (period === "yearly") {
+    start.setMonth(0, 1);
+    end.setMonth(11, 31);
+  }
+  return { start: toLocalDateString(start), end: toLocalDateString(end) };
+}
+
+
+export function getExpensePeriodKey(period: ExpenseWidgetPeriod, referenceDate: Date, customStart: string, customEnd: string): string {
+  if (period === "custom") return `${customStart}|${customEnd}`;
+  const date = new Date(referenceDate.getFullYear(), referenceDate.getMonth(), referenceDate.getDate());
+  if (period === "daily") return toLocalDateString(date);
+  if (period === "weekly") {
+    date.setDate(date.getDate() - ((date.getDay() + 6) % 7));
+    return toLocalDateString(date);
+  }
+  if (period === "monthly") return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+  return String(date.getFullYear());
+}
+
+export function calculateExpenseSummary(transactions: Transaction[], selectedWalletIds: string[], range: ExpenseDateRange): { total: number; count: number } {
+  if (!range.start || !range.end || range.start > range.end || selectedWalletIds.length === 0) return { total: 0, count: 0 };
+  const selected = new Set(selectedWalletIds);
+  return transactions.reduce((summary, transaction) => {
+    if (transaction.kind !== "expense" || !selected.has(transaction.walletId) || transaction.date < range.start || transaction.date > range.end) return summary;
+    return { total: summary.total + transaction.amount, count: summary.count + 1 };
+  }, { total: 0, count: 0 });
+}
+
+export function isExpenseLimitExceeded(total: number, settings: Pick<ExpenseWidgetSettings, "limitEnabled" | "monthlyLimit">): boolean {
+  return settings.limitEnabled && settings.monthlyLimit > 0 && total > settings.monthlyLimit;
+}
+
+function normalizePosition(value: unknown, fallback: number): number {
+  return typeof value === "number" && Number.isFinite(value) ? Math.max(0, Math.min(100, value)) : fallback;
+}
+
+function normalizeZoom(value: unknown): number {
+  return typeof value === "number" && Number.isFinite(value) ? Math.max(1, Math.min(2.5, value)) : 1;
+}
+
+export function normalizeExpenseWidgetSettings(value: unknown): ExpenseWidgetSettings {
+  if (!value || typeof value !== "object") return { ...DEFAULT_EXPENSE_WIDGET_SETTINGS };
+  const raw = value as Partial<ExpenseWidgetSettings>;
+  const validPeriods: ExpenseWidgetPeriod[] = ["daily", "weekly", "monthly", "yearly", "custom"];
+  const validDate = (date: unknown) => typeof date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : "";
+  return {
+    title: typeof raw.title === "string" && raw.title.trim() ? raw.title.trim().slice(0, 40) : DEFAULT_EXPENSE_WIDGET_SETTINGS.title,
+    period: validPeriods.includes(raw.period as ExpenseWidgetPeriod) ? raw.period as ExpenseWidgetPeriod : "monthly",
+    walletIds: raw.walletIds === null || raw.walletIds === undefined ? null : Array.isArray(raw.walletIds) ? raw.walletIds.filter((id): id is string => typeof id === "string") : null,
+    startDate: validDate(raw.startDate),
+    endDate: validDate(raw.endDate),
+    limitEnabled: raw.limitEnabled === true,
+    monthlyLimit: Number.isSafeInteger(raw.monthlyLimit) && Number(raw.monthlyLimit) > 0 ? Number(raw.monthlyLimit) : 0,
+    baseImage: typeof raw.baseImage === "string" && raw.baseImage.startsWith("data:image/") ? raw.baseImage : "",
+    beforeImage: typeof raw.beforeImage === "string" && raw.beforeImage.startsWith("data:image/") ? raw.beforeImage : "",
+    afterImage: typeof raw.afterImage === "string" && raw.afterImage.startsWith("data:image/") ? raw.afterImage : "",
+    baseImageX: normalizePosition(raw.baseImageX, 50),
+    baseImageY: normalizePosition(raw.baseImageY, 50),
+    baseImageZoom: normalizeZoom(raw.baseImageZoom),
+    beforeImageX: normalizePosition(raw.beforeImageX, 50),
+    beforeImageY: normalizePosition(raw.beforeImageY, 50),
+    beforeImageZoom: normalizeZoom(raw.beforeImageZoom),
+    afterImageX: normalizePosition(raw.afterImageX, 50),
+    afterImageY: normalizePosition(raw.afterImageY, 50),
+    afterImageZoom: normalizeZoom(raw.afterImageZoom),
+  };
+}

@@ -1,0 +1,1771 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&display=swap');
+
+/* System fonts keep the app independent from third-party font requests. */
+
+:root{--ink:#202820;--muted:#899087;--line:#e9ece6;--paper:#f6f7f4;--green:#a9c9a0;--deep:#243a2c;--mint:#e6efe2;--white:#fff;--orange:#d58b63}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:14px}
+button,input,select{font:inherit}
+button{cursor:pointer}
+a{color:inherit;text-decoration:none}
+.app-shell{min-height:100vh;display:flex}
+.sidebar{width:244px;background:#fff;border-right:1px solid var(--line);padding:30px 20px 20px;display:flex;flex-direction:column;flex-shrink:0}
+.brand{display:flex;align-items:center;gap:10px;font:800 25px 'Manrope',sans-serif;letter-spacing:-1.5px;margin:2px 0 58px 7px}
+.brand-mark{width:31px;height:31px;border-radius:11px;background:var(--deep);color:#d9ebd1;display:grid;place-items:center;font:800 22px 'Manrope',sans-serif;letter-spacing:-2px}
+.brand-period{color:#8fb184}
+.side-label,.section-kicker,.eyebrow{font-size:10px;font-weight:700;letter-spacing:1.45px;color:#9aa196}
+.side-label{padding-left:12px;margin-bottom:14px}
+.side-nav{display:grid;gap:5px}
+.nav-link{height:44px;display:flex;align-items:center;gap:13px;padding:0 13px;border-radius:10px;color:#858d83;font-weight:500}
+.nav-link.active{background:#edf3e9;color:#334d37;font-weight:700}
+.nav-icon{font-size:18px;width:18px;text-align:center}
+.sidebar-bottom{margin-top:auto}
+.privacy-card{background:#f5f7f2;border:1px solid #e9eee5;border-radius:13px;padding:15px;margin-bottom:18px}
+.privacy-icon{font-size:20px;color:#66835f}
+.privacy-card strong{display:block;margin:9px 0 4px;font-size:12px}
+.privacy-card p{font-size:11px;line-height:1.6;color:#899087;margin:0 0 12px}
+.privacy-status{font-size:10px;color:#64825d;display:flex;align-items:center;gap:6px}
+.privacy-status i,.local-indicator i{width:6px;height:6px;border-radius:50%;background:#79a96e;display:inline-block}
+.profile-row{border-top:1px solid var(--line);padding:17px 2px 0;display:flex;align-items:center;gap:10px}
+.avatar{width:33px;height:33px;background:#e8eee4;color:#526d4d;border-radius:50%;display:grid;place-items:center;font-weight:700}
+.profile-row strong,.profile-row span{display:block;font-size:11px}
+.profile-row span{color:#9ba197;margin-top:3px}
+.profile-more{margin-left:auto;letter-spacing:1px}
+.main-panel{min-width:0;flex:1}
+.topbar{height:72px;background:rgba(255,255,255,.72);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 5.2%}
+.breadcrumb{font-size:12px;color:#92998f}.breadcrumb span{padding:0 9px;color:#c5cbc1}
+.topbar-right{display:flex;align-items:center;gap:23px;font-size:11px;color:#8b9388}
+.local-indicator{display:flex;align-items:center;gap:7px;color:#63805c}
+.content{max-width:1330px;margin:0 auto;padding:47px 5.2% 24px}
+.welcome-row{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:43px}
+.eyebrow{margin-bottom:12px;color:#8c9a83}
+h1,h2,p{margin-top:0}
+h1{font:700 clamp(28px,3vw,38px) 'Manrope',sans-serif;letter-spacing:-1.5px;margin-bottom:9px}
+h1 em{font-style:normal;color:#78966e}
+.welcome-copy{color:#92998f;font-size:13px;margin-bottom:0}
+.primary-button{border:0;border-radius:9px;background:var(--deep);color:white;padding:12px 17px;font-size:12px;font-weight:700;box-shadow:0 5px 12px #243a2c18;transition:transform .15s,background .15s}
+.primary-button:hover{background:#34533d;transform:translateY(-1px)}
+.primary-button span{font-size:17px;vertical-align:-1px;margin-right:5px}
+.period-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.period-tabs{display:flex;gap:3px;padding:3px;background:#ecefe9;border-radius:8px}
+.period-tabs button{border:0;background:transparent;padding:7px 12px;border-radius:6px;font-size:10px;color:#92998f}
+.period-tabs button.selected{background:#fff;color:#3f5740;box-shadow:0 1px 3px #1e2b1c12;font-weight:700}
+.stats-grid{display:grid;grid-template-columns:1.35fr 1fr 1fr;gap:14px;margin-bottom:24px}
+.stat-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px 21px;min-height:142px;position:relative;overflow:hidden}
+.balance-card{background:var(--deep);border-color:var(--deep);color:#fff}
+.stat-top{display:flex;justify-content:space-between;align-items:center;color:#92998f;font-size:11px;margin-bottom:17px}
+.balance-card .stat-top{color:#c0cfbd}
+.stat-symbol{color:#c3dec0;font-size:18px}
+.stat-icon{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:14px}
+.income-icon{background:#eaf2e7;color:#64865e}.expense-icon{background:#f8eee8;color:#c27d57}
+.stat-value{font:700 clamp(19px,2vw,25px) 'Manrope',sans-serif;letter-spacing:-.7px;white-space:nowrap}
+.stat-foot{font-size:10px;color:#a1a89d;margin-top:12px}
+.balance-card .stat-foot{color:#c1d0bf}
+.balance-dot{display:inline-block;width:6px;height:6px;background:#b9d8b1;border-radius:50%;margin-right:6px}
+.balance-decoration{position:absolute;right:16px;bottom:-12px;font:800 43px 'Manrope',sans-serif;letter-spacing:4px;color:#ffffff08}
+.lower-grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(260px,1fr);gap:14px}
+.panel-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px}
+.panel-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.panel-heading h2,.insight-card h2,.modal-heading h2{font:700 17px 'Manrope',sans-serif;letter-spacing:-.4px;margin:6px 0 0}
+.text-button{border:0;background:transparent;color:#718b68;font-size:11px;font-weight:700}
+.empty-state{min-height:235px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.empty-art{width:42px;height:42px;border-radius:13px;background:#edf3e9;color:#78966e;display:grid;place-items:center;font-size:22px;margin-bottom:12px}
+.empty-state strong{font-size:12px}
+.empty-state p{font-size:11px;color:#9aa196;margin:7px 0 15px}
+.outline-button{background:white;border:1px solid #dce5d8;border-radius:7px;padding:9px 12px;color:#68815f;font-size:10px;font-weight:700}
+.transaction-list{display:grid}
+.transaction-row{display:flex;align-items:center;gap:11px;padding:13px 0;border-top:1px solid #f0f1ed}
+.transaction-icon{width:34px;height:34px;flex-shrink:0;border-radius:10px;display:grid;place-items:center;font-size:16px}
+.transaction-icon.income{background:#eaf2e7;color:#688b61}.transaction-icon.expense{background:#f8eee8;color:#c27d57}
+.transaction-info{min-width:0;flex:1}
+.transaction-info strong,.transaction-info span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.transaction-info strong{font-size:11px}.transaction-info span{font-size:10px;color:#9ba197;margin-top:4px}
+.transaction-amount{font-size:11px;font-weight:700;white-space:nowrap}
+.transaction-amount.income{color:#6b9463}.transaction-amount.expense{color:#c27d57}
+.delete-button{border:0;background:transparent;color:#b6bcb3;font-size:18px;padding:2px 4px}
+.delete-button:hover{color:#b75c4d}
+.insight-card h2{margin-top:7px}
+.insight-description{font-size:11px;line-height:1.6;color:#9ba197;margin:8px 0 22px}
+.insight-metric{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #eff1ec;padding:13px 0;font-size:10px;color:#92998f}
+.insight-metric strong{font:700 12px 'Manrope',sans-serif;color:#3d493c}
+.insight-note{background:#f4f7f1;border-radius:9px;padding:12px;display:flex;gap:9px;align-items:flex-start;margin-top:10px;color:#75916d}
+.insight-note span{font-size:15px}.insight-note p{font-size:10px;line-height:1.6;color:#84917e;margin:0}
+.footer-note{display:flex;justify-content:space-between;gap:15px;color:#a2a99f;font-size:9px;letter-spacing:.3px;padding:28px 2px 0}
+.footer-lock{color:#78966e;font-weight:700;letter-spacing:1px}
+.error-banner{background:#fff1ed;border:1px solid #f1d2c8;color:#a34e3d;border-radius:8px;padding:10px 13px;margin:-24px 0 22px;font-size:11px;display:flex;justify-content:space-between}
+.error-banner button{border:0;background:transparent;color:inherit;font-size:10px;font-weight:700}
+.modal-backdrop{position:fixed;inset:0;background:#17251c80;display:grid;place-items:center;padding:18px;z-index:10}
+.modal-card{width:min(100%,470px);background:#fff;border-radius:17px;padding:25px;box-shadow:0 25px 80px #0c1b1240}
+.modal-heading{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px}
+.modal-close{border:0;background:#f2f4f0;border-radius:8px;width:30px;height:30px;font-size:20px;color:#788174}
+.kind-switch{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:4px;background:#f1f3ef;border-radius:9px;margin-bottom:21px}
+.kind-switch button{border:0;background:transparent;border-radius:6px;padding:10px;font-size:11px;color:#8e968b}
+.kind-switch button.active{background:#fff;box-shadow:0 1px 4px #15211412;font-weight:700}
+.kind-switch .expense-choice{color:#b87553}.kind-switch .income-choice{color:#64865e}
+.field-label{display:block;font-size:10px;font-weight:700;color:#667160;margin:14px 0 7px}
+.field-label span{font-weight:400;color:#a0a79d}
+.modal-card input,.modal-card select{width:100%;border:1px solid #e5e9e2;border-radius:8px;padding:11px 12px;color:#354032;background:white;outline:none;font-size:12px}
+.modal-card input:focus,.modal-card select:focus{border-color:#9db695;box-shadow:0 0 0 3px #eaf1e7}
+.modal-card .amount-input{font:700 24px 'Manrope',sans-serif;letter-spacing:-.5px;padding:13px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:25px}
+.cancel-button{border:1px solid #e5e9e2;background:#fff;color:#778072;border-radius:8px;padding:11px 15px;font-size:11px;font-weight:600}
+.modal-actions .primary-button{font-size:11px}
+@media(max-width:900px){.sidebar{width:205px}.content{padding-left:3.5%;padding-right:3.5%}.topbar{padding:0 3.5%}.stats-grid{grid-template-columns:1fr 1fr}.balance-card{grid-column:span 2}.lower-grid{grid-template-columns:1fr}}
+@media(max-width:620px){.sidebar{display:none}.topbar{height:58px;padding:0 18px}.top-date{display:none}.content{padding:32px 17px 20px}.welcome-row{align-items:flex-start;flex-direction:column;margin-bottom:30px}.welcome-row .primary-button{width:100%}.period-row{align-items:flex-start;gap:12px;flex-direction:column}.stats-grid{grid-template-columns:1fr 1fr;gap:9px}.balance-card{grid-column:span 2}.stat-card{padding:16px;min-height:125px}.stat-value{font-size:19px}.lower-grid{gap:10px}.panel-card{padding:17px}.footer-note{flex-wrap:wrap;line-height:1.5}.footer-note span:nth-child(2){order:3;width:100%}.transaction-row{gap:8px}.transaction-amount{font-size:10px}.modal-card{padding:20px}.form-grid{grid-template-columns:1fr}}
+
+/* Wallet management */
+.wallet-section{margin:0 0 30px}
+.wallet-section-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}
+.wallet-section-heading h2{font:700 17px 'Manrope',sans-serif;letter-spacing:-.4px;margin:6px 0 0}
+.wallet-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:11px}
+.wallet-card{background:#fff;border:1px solid var(--line);border-radius:13px;padding:16px 17px;min-width:0}
+.wallet-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}
+.wallet-symbol{width:28px;height:28px;border-radius:8px;background:#edf3e9;color:#6d8b65;display:grid;place-items:center}
+.wallet-caption{font-size:9px;letter-spacing:1px;color:#a0a79d;font-weight:700}
+.wallet-name{display:block;font-size:12px;margin-bottom:6px}
+.wallet-balance{font:700 19px 'Manrope',sans-serif;letter-spacing:-.5px;overflow-wrap:anywhere}
+.wallet-start{font-size:10px;color:#9ba197;margin-top:8px}
+.wallet-add-card{min-height:125px;border:1px dashed #cbd8c5;border-radius:13px;background:#f9fbf7;color:#718b68;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
+.wallet-add-card>span{font-size:22px}
+.wallet-add-card strong{font-size:11px}
+.wallet-add-card small{font-size:9px;color:#9aa596}
+.wallet-empty{font-size:11px;color:#9aa196;padding:15px}
+.wallet-form-hint{font-size:10px;line-height:1.6;color:#92998f;margin:10px 0 0}
+@media(max-width:620px){.wallet-grid{grid-template-columns:1fr 1fr}.wallet-section-heading{gap:10px}.wallet-section-heading .outline-button{white-space:nowrap;padding:9px 10px}.wallet-card{padding:13px}.wallet-balance{font-size:16px}.wallet-add-card{min-height:120px}}
+
+
+/* Persistent light/dark theme tokens and component surfaces */
+:root{
+ color-scheme:light;
+ --ink:#202820;--muted:#899087;--line:#e9ece6;--paper:#f6f7f4;
+ --surface:#ffffff;--surface-soft:#f5f7f2;--surface-muted:#ecefe9;
+ --text-secondary:#92998f;--field-bg:#ffffff;--field-border:#e5e9e2;
+ --nav-active:#edf3e9;--nav-active-text:#334d37;
+}
+:root[data-theme="dark"]{
+ color-scheme:dark;
+ --ink:#e8eee6;--muted:#a0aa9d;--line:#303a31;--paper:#151b16;
+ --surface:#1d261f;--surface-soft:#222d24;--surface-muted:#2a352b;
+ --text-secondary:#a2ad9f;--field-bg:#202a22;--field-border:#3a473b;
+ --nav-active:#2c3b2d;--nav-active-text:#d7e7d1;
+}
+body{background:var(--paper);color:var(--ink);transition:background .2s ease,color .2s ease}
+.sidebar,.panel-card,.stat-card:not(.balance-card),.wallet-card,.modal-card{background:var(--surface);color:var(--ink);border-color:var(--line)}
+.topbar{background:var(--surface);border-color:var(--line)}
+.nav-link{color:var(--text-secondary)}
+.nav-link.active{background:var(--nav-active);color:var(--nav-active-text)}
+.privacy-card{background:var(--surface-soft);border-color:var(--line)}
+.profile-row{border-color:var(--line)}
+.avatar{background:var(--surface-muted);color:var(--ink)}
+.period-tabs{background:var(--surface-muted)}
+.period-tabs button{color:var(--text-secondary)}
+.period-tabs button.selected{background:var(--surface);color:var(--ink)}
+.stat-top,.stat-foot,.insight-description,.insight-metric,.transaction-info span,.wallet-start{color:var(--text-secondary)}
+.panel-heading h2,.insight-card h2,.modal-heading h2,.insight-metric strong,.transaction-info strong,.wallet-name,.wallet-balance{color:var(--ink)}
+.transaction-row,.insight-metric{border-color:var(--line)}
+.insight-note{background:var(--surface-soft)}
+.insight-note p{color:var(--text-secondary)}
+.outline-button,.cancel-button{background:var(--surface);border-color:var(--line);color:var(--ink)}
+.wallet-add-card{background:var(--surface-soft);border-color:#718b68;color:#8eae84}
+.wallet-add-card small{color:var(--text-secondary)}
+.wallet-symbol{background:var(--nav-active);color:#8eae84}
+.wallet-caption,.wallet-empty,.wallet-form-hint{color:var(--text-secondary)}
+.modal-close{background:var(--surface-muted);color:var(--ink)}
+.kind-switch{background:var(--surface-muted)}
+.kind-switch button.active{background:var(--surface)}
+.modal-card input,.modal-card select{background:var(--field-bg);border-color:var(--field-border);color:var(--ink)}
+.modal-card input::placeholder{color:var(--muted)}
+.modal-card input:focus,.modal-card select:focus{border-color:#86a77c;box-shadow:0 0 0 3px #86a77c25}
+.field-label{color:var(--ink)}
+.field-label span{color:var(--muted)}
+.error-banner{background:#fff1ed;border-color:#f1d2c8;color:#a34e3d}
+:root[data-theme="dark"] .error-banner{background:#3b2521;border-color:#704137;color:#ffc0ad}
+.theme-toggle{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:8px 11px;font-size:10px;font-weight:700;white-space:nowrap;transition:background .2s,border .2s}
+.theme-toggle:hover{border-color:#8eaa84}
+.theme-toggle span:first-child{font-size:15px;line-height:1}
+@media(max-width:620px){.topbar-right{gap:9px}.theme-toggle{padding:7px 9px}.theme-toggle span:last-child{display:none}}
+
+.transaction-icon.transfer{background:#edf0fb;color:#6678b8}
+.transaction-amount.transfer{color:#7585bd}
+.kind-switch{grid-template-columns:repeat(3,minmax(0,1fr))}
+.kind-switch .transfer-choice{color:#7585bd}
+:root[data-theme="dark"] .transaction-icon.transfer{background:#30364e;color:#bdc8ff}
+:root[data-theme="dark"] .transaction-amount.transfer{color:#bdc8ff}
+
+.currency-input-wrap{position:relative;display:flex;align-items:center}
+.currency-input-wrap>span{position:absolute;left:13px;z-index:1;color:var(--text-secondary);font-size:13px;font-weight:700;pointer-events:none}
+.currency-input-wrap input{width:100%;padding-left:39px!important;font-variant-numeric:tabular-nums}
+
+
+/* Keep the workspace sidebar in view while the main content scrolls. */
+@media(min-width:621px){
+  .sidebar{
+    position:sticky;
+    top:0;
+    height:100vh;
+    max-height:100vh;
+    overflow-y:auto;
+    align-self:flex-start;
+  }
+}
+
+
+/* Dedicated workspace page styling */
+.side-nav .nav-link{width:100%;text-align:left;font:inherit;border:0;cursor:pointer;background:transparent;padding:11px 13px;border-radius:8px;display:flex;align-items:center;gap:11px;font-size:12px}
+.page-section{margin-bottom:24px}
+.transaction-tools{display:flex;gap:10px;margin:15px 0 8px}
+.transaction-tools input,.transaction-tools select{min-width:0;border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--surface);color:var(--ink);font-size:11px}
+.transaction-tools input{flex:1}
+.result-count{font-size:10px;color:var(--text-secondary)}
+.transfer-intro{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:14px}
+.transfer-intro h2,.category-analysis h2{font:700 17px Manrope,sans-serif;margin:7px 0}
+.transfer-intro .insight-description{max-width:650px;margin:0}
+.transfer-wallet-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:11px;margin-bottom:14px}
+.analysis-stats{margin-bottom:20px}
+.category-analysis{padding:22px}
+.category-bar-row{margin-top:20px}
+.category-bar-label{display:flex;justify-content:space-between;gap:12px;font-size:11px;margin-bottom:8px}
+.category-bar-label span{color:var(--text-secondary);white-space:nowrap}
+.category-bar-track{height:8px;background:var(--surface-muted);border-radius:99px;overflow:hidden}
+.category-bar-track span{display:block;height:100%;background:#78966e;border-radius:99px}
+@media(max-width:620px){.transaction-tools{flex-direction:column}.transfer-intro{align-items:flex-start;flex-direction:column}.transfer-intro .primary-button{width:100%}}
+
+.category-remove-button{display:inline-flex;align-items:center;justify-content:center;margin-top:9px;padding:7px 10px;border:1px solid var(--line);border-radius:7px;background:transparent;color:var(--text-secondary);font-size:10px;cursor:pointer}
+.category-remove-button:hover{border-color:#c86d6d;color:#c86d6d}
+
+
+/* Mobile workspace navigation: keep the sidebar available as a compact horizontal bar. */
+@media(max-width:620px){
+  .app-shell{display:flex;flex-direction:column}
+  .sidebar{
+    display:flex;
+    position:relative;
+    width:100%;
+    height:auto;
+    max-height:none;
+    overflow:visible;
+    flex:0 0 auto;
+    padding:12px 14px 10px;
+    border-right:0;
+    border-bottom:1px solid var(--line);
+    gap:10px;
+  }
+  .brand{font-size:21px;margin:0 0 2px 2px}
+  .brand-mark{width:27px;height:27px;font-size:19px}
+  .side-label{padding-left:2px;margin:0}
+  .side-nav{
+    display:flex;
+    gap:6px;
+    width:100%;
+    overflow-x:auto;
+    overflow-y:hidden;
+    padding:1px 0 5px;
+    scrollbar-width:thin;
+    -webkit-overflow-scrolling:touch;
+  }
+  .side-nav .nav-link{
+    flex:0 0 auto;
+    width:auto;
+    min-height:38px;
+    height:38px;
+    white-space:nowrap;
+    padding:0 12px;
+    font-size:11px;
+  }
+  .side-nav .nav-icon{font-size:15px;width:auto}
+  .sidebar-bottom{display:none}
+  .main-panel{width:100%;min-width:0}
+}
+
+
+/* Responsive workspace navigation: desktop sidebar, compact floating mobile dock. */
+@media(min-width:621px){
+  .sidebar{
+    flex:0 0 244px;
+    border-right:1px solid var(--line);
+    box-shadow:1px 0 0 rgba(20,35,20,.015);
+  }
+}
+@media(max-width:620px){
+  .app-shell{display:block;min-height:100vh}
+  .sidebar{
+    position:fixed;
+    z-index:30;
+    left:12px;
+    right:12px;
+    bottom:10px;
+    width:auto;
+    height:auto;
+    max-height:none;
+    display:block;
+    overflow:visible;
+    padding:8px;
+    border:1px solid color-mix(in srgb,var(--line) 78%,transparent);
+    border-radius:19px;
+    background:color-mix(in srgb,var(--surface) 88%,transparent);
+    -webkit-backdrop-filter:blur(16px);
+    backdrop-filter:blur(16px);
+    box-shadow:0 8px 28px rgba(20,30,20,.16);
+  }
+  .sidebar>.brand,
+  .sidebar>.side-label,
+  .sidebar>.sidebar-bottom{display:none}
+  .side-nav{
+    display:grid;
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    gap:2px;
+    width:100%;
+    overflow:visible;
+    padding:0;
+  }
+  .side-nav .nav-link{
+    min-width:0;
+    width:100%;
+    height:54px;
+    min-height:54px;
+    padding:5px 1px;
+    border-radius:12px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    gap:4px;
+    white-space:nowrap;
+    font-size:9px;
+    line-height:1.1;
+  }
+  .side-nav .nav-icon{
+    width:auto;
+    font-size:17px;
+    line-height:1;
+  }
+  .main-panel{width:100%;min-width:0}
+  .content{padding-bottom:132px}
+  .app-shell::after{
+    content:"";
+    position:fixed;
+    z-index:20;
+    left:0;
+    right:0;
+    bottom:0;
+    height:124px;
+    pointer-events:none;
+    background:linear-gradient(
+      to bottom,
+      transparent 0%,
+      color-mix(in srgb,var(--paper) 24%,transparent) 18%,
+      color-mix(in srgb,var(--paper) 72%,transparent) 48%,
+      color-mix(in srgb,var(--paper) 94%,transparent) 76%,
+      var(--paper) 100%
+    );
+  }
+}
+
+
+
+
+
+/* Wallet cards sit below the summary and form a horizontal, scrollable strip. */
+.overview-wallet-panel{
+  width:100%;
+  min-width:0;
+  margin:0 0 24px;
+  padding:16px;
+  border:1px solid var(--line);
+  border-radius:15px;
+  background:var(--surface);
+}
+.overview-wallet-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px}
+.overview-wallet-heading>div{display:grid;gap:5px}
+.overview-wallet-heading strong{font:700 15px Manrope,sans-serif;color:var(--ink)}
+.overview-wallet-heading>button{width:42px;height:42px;flex:0 0 42px;display:grid;place-items:center;padding:0;border:1px solid var(--line);border-radius:11px;background:var(--surface-soft);color:var(--ink);font-size:25px;line-height:1;cursor:pointer}
+.overview-wallet-list{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  width:100%;
+  overflow-x:auto;
+  overflow-y:hidden;
+  padding:1px 1px 8px;
+  scroll-snap-type:x proximity;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;
+}
+.overview-wallet-item{
+  display:flex;
+  flex-direction:column;
+  flex:0 0 210px;
+  width:210px;
+  aspect-ratio:1 / 1;
+  min-width:0;
+  min-height:0;
+  padding:15px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--surface-soft);
+  scroll-snap-align:start;
+}
+.overview-wallet-item-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.overview-wallet-item-top .wallet-name{margin:0;text-align:left}
+.wallet-delete-button{width:26px;height:26px;display:grid;place-items:center;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--muted);font-size:18px;line-height:1;cursor:pointer}
+.wallet-delete-button:hover{border-color:#d9aaa3;color:#b75c4d;background:var(--surface-soft)}
+.wallet-delete-button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.overview-wallet-item .wallet-name{font-size:13px;overflow-wrap:anywhere}
+.overview-wallet-item .wallet-balance{font-size:20px;line-height:1.35;overflow-wrap:anywhere}
+.overview-wallet-bottom{margin-top:auto;padding-top:12px}
+.overview-wallet-item .wallet-start{margin-top:6px}
+.overview-wallet-panel .wallet-empty{flex:0 0 210px;width:210px;aspect-ratio:1 / 1;display:flex;align-items:center;min-height:0;padding:14px;border:1px dashed var(--line);border-radius:12px}
+@media(max-width:620px){
+  .overview-wallet-panel{padding:13px;margin-bottom:20px;border-radius:13px}
+  .overview-wallet-heading{margin-bottom:10px}
+  .overview-wallet-heading strong{font-size:14px}
+  .overview-wallet-list{gap:9px}
+  .overview-wallet-item{flex-basis:min(76vw,210px);width:min(76vw,210px);padding:13px}
+  .overview-wallet-panel .wallet-empty{flex-basis:min(76vw,210px);width:min(76vw,210px)}
+  .overview-wallet-item .wallet-balance{font-size:18px}
+}
+
+
+/* Desktop overview is designed to fit inside one viewport without page scrolling. */
+@media(min-width:1100px){
+  html:has(.overview-content),body:has(.overview-content){height:100%;overflow:hidden}
+  .app-shell:has(.overview-content){height:100vh;min-height:0;overflow:hidden}
+  .main-panel:has(.overview-content){height:100vh;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+  .main-panel:has(.overview-content) .topbar{flex:0 0 62px;height:62px}
+  .overview-content{
+    flex:1 1 auto;
+    min-height:0;
+    height:calc(100vh - 62px);
+    max-width:none;
+    width:100%;
+    overflow:hidden;
+    padding:20px clamp(24px,3vw,48px) 18px;
+    display:flex;
+    flex-direction:column;
+  }
+  .overview-content .welcome-row{flex:0 0 auto;margin-bottom:15px}
+  .overview-content .welcome-row h1{font-size:clamp(25px,2.2vw,32px);margin-bottom:5px}
+  .overview-content .welcome-copy{font-size:11px}
+  .overview-content .period-row{flex:0 0 auto;margin-bottom:9px}
+  .overview-content .stats-grid{flex:0 0 auto;gap:11px;margin-bottom:13px}
+  .overview-content .stat-card{min-height:112px;padding:15px 17px}
+  .overview-content .stat-top{margin-bottom:10px}
+  .overview-content .stat-value{font-size:clamp(18px,1.55vw,23px)}
+  .overview-content .stat-foot{margin-top:8px}
+  .overview-content .overview-wallet-panel{flex:0 0 auto;margin-bottom:13px;padding:12px 14px}
+  .overview-content .overview-wallet-heading{margin-bottom:8px}
+  .overview-content .overview-wallet-item{min-height:112px;padding:10px 13px}
+  .overview-content .overview-wallet-item-top{margin-bottom:6px}
+  .overview-content .overview-wallet-item .wallet-balance{font-size:17px}
+  .overview-content .overview-wallet-item .wallet-start{margin-top:4px}
+  .overview-content .lower-grid{flex:1 1 auto;min-height:0;overflow:hidden;gap:12px}
+  .overview-content .panel-card{min-height:0;overflow:hidden;padding:15px 18px}
+  .overview-content .transactions-card{display:flex;flex-direction:column}
+  .overview-content .transactions-card .panel-heading{flex:0 0 auto;margin-bottom:7px}
+  .overview-content .transactions-card .transaction-list{min-height:0;overflow-y:auto;scrollbar-width:thin}
+  .overview-content .transactions-card .empty-state{min-height:0;flex:1}
+  .overview-content .insight-card{overflow-y:auto}
+  .overview-content .insight-card .insight-metric{padding:10px 0}
+}
+@media(min-width:621px) and (max-width:1099px){
+  .overview-content{padding-top:25px}
+  .overview-content .welcome-row{margin-bottom:24px}
+}
+
+
+/* Use the space freed from the overview chrome to widen the workspace. */
+@media(min-width:621px){
+  .content{width:100%;max-width:none;padding-left:clamp(24px,3.2vw,54px);padding-right:clamp(24px,3.2vw,54px)}
+  .topbar{padding-left:clamp(24px,3.2vw,54px);padding-right:clamp(24px,3.2vw,54px)}
+  .topbar-spacer{flex:1}
+}
+@media(min-width:1100px){
+  .overview-content{padding-left:clamp(28px,3.2vw,58px);padding-right:clamp(28px,3.2vw,58px)}
+}
+
+
+/* Keep the quick-add action styled exactly like every other navigation link. */
+@media(max-width:620px){
+  .welcome-row>.primary-button,
+  .transactions-card .panel-heading>.text-button,
+  .transactions-card .empty-state>.outline-button{display:none}
+}
+
+/* Wallet photo upload and crop editor */
+.visually-hidden-file{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.wallet-photo-button{position:absolute;right:12px;bottom:12px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;padding:0;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--muted);cursor:pointer;z-index:2;transition:background .15s ease,border-color .15s ease,color .15s ease}
+.wallet-photo-button:hover{border-color:var(--accent);color:var(--ink)}
+.overview-wallet-item.has-photo{position:relative;isolation:isolate;overflow:hidden;border-color:#ffffff30;background:#263329}
+.wallet-card-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;pointer-events:none}
+.overview-wallet-item.has-photo::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,#101a1680 0%,#101a1630 42%,#101a16b8 100%);pointer-events:none}
+.overview-wallet-item.has-photo .wallet-name,.overview-wallet-item.has-photo .wallet-balance,.overview-wallet-item.has-photo .wallet-start{color:#fff!important;text-shadow:0 1px 5px #0009}
+.overview-wallet-item.has-photo .wallet-photo-button,.overview-wallet-item.has-photo .wallet-delete-button{background:#17251c99;border-color:#ffffff70;color:#fff;backdrop-filter:blur(8px)}
+.wallet-photo-picker-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:18px 0 10px}
+.wallet-photo-picker-row>div{display:grid;gap:4px}
+.wallet-photo-picker-row strong{font-size:11px}
+.wallet-photo-picker-row span{font-size:10px;color:var(--text-secondary)}
+.wallet-photo-picker-row .outline-button{white-space:nowrap}
+.wallet-photo-mini{display:flex;align-items:center;gap:12px;margin:8px 0 15px;flex-wrap:wrap}
+.wallet-photo-mini img{width:54px;height:54px;object-fit:cover;border-radius:9px}
+.photo-editor-backdrop{z-index:20}
+.photo-editor-card{width:min(100%,430px)}
+.photo-crop-preview{width:min(100%,300px);aspect-ratio:1/1;margin:0 auto 14px;border-radius:13px;overflow:hidden;background:#202a23;position:relative}
+.photo-crop-preview img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-empty-preview{width:min(100%,300px);aspect-ratio:1/1;margin:0 auto 14px;border:1px dashed var(--line);border-radius:13px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--text-secondary);text-align:center}
+.photo-empty-preview>span{font-size:30px}
+.photo-empty-preview strong{font-size:12px;color:var(--ink)}
+.photo-empty-preview p{font-size:10px;margin:0}
+.photo-choose-button{display:block;width:100%;margin:0 0 17px}
+.photo-adjustments{display:grid;gap:13px}
+.photo-adjustments label{display:grid;gap:7px;font-size:11px;font-weight:600;color:var(--ink)}
+.photo-adjustments .photo-range{width:100%;padding:0!important;border:0!important;accent-color:var(--accent);background:transparent!important;box-shadow:none!important}
+@media(max-width:620px){.photo-editor-card{max-height:calc(100dvh - 24px);overflow:auto}.photo-crop-preview,.photo-empty-preview{width:min(100%,260px)}.wallet-photo-picker-row{align-items:flex-start}}
+
+
+/* Wishlist workspace */
+.wishlist-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}
+.wishlist-toolbar h2{font:700 17px Manrope,sans-serif;margin:7px 0 0}
+.wishlist-tabs{max-width:390px;margin-bottom:14px}
+.wishlist-tabs button{flex:1}
+.wishlist-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.wishlist-item{display:flex;align-items:center;gap:12px;min-width:0;padding:16px}
+.wishlist-item-icon{width:40px;height:40px;flex:0 0 40px;display:grid;place-items:center;border-radius:12px;background:var(--surface-soft);color:#78966e;font-size:23px}
+.wishlist-item-main{flex:1;min-width:0;display:grid;gap:5px}
+.wishlist-item-main strong{font-size:12px;overflow-wrap:anywhere}
+.wishlist-item-main span,.wishlist-purchase-detail span{font-size:10px;color:var(--text-secondary)}
+.wishlist-item>.primary-button{padding:9px 12px;white-space:nowrap}
+.wishlist-purchase-detail{display:grid;gap:4px;text-align:right}
+.wishlist-purchase-detail strong{font:700 12px Manrope,sans-serif;white-space:nowrap}
+.wishlist-item>.delete-button{flex:0 0 auto}
+.wishlist-page>.empty-state{min-height:250px}
+@media(max-width:620px){
+  .wishlist-toolbar{align-items:flex-start;flex-direction:column}
+  .wishlist-toolbar>.primary-button{width:100%}
+  .wishlist-grid{grid-template-columns:1fr}
+  .wishlist-item{gap:9px;padding:13px}
+  .wishlist-item-icon{width:34px;height:34px;flex-basis:34px}
+  .wishlist-item-main strong{font-size:11px}
+  .wishlist-item>.primary-button{padding:8px 10px;font-size:10px}
+  .wishlist-tabs{max-width:none}
+  .side-nav{grid-template-columns:repeat(6,minmax(0,1fr))}
+  .side-nav .nav-add-transaction{grid-column:3;grid-row:1}
+}
+
+
+/* Keep the image-plus control anchored even when a wallet has no photo. */
+.overview-wallet-item{position:relative}
+
+
+/* Five-item mobile dock: the third item is the centered, ordinary nav action. */
+@media(max-width:620px){
+  .side-nav{grid-template-columns:repeat(5,minmax(0,1fr))}
+  .side-nav > .nav-link:nth-child(1){grid-column:1;grid-row:1}
+  .side-nav > .nav-link:nth-child(2){grid-column:2;grid-row:1}
+  .side-nav > .nav-link:nth-child(3){grid-column:4;grid-row:1}
+  .side-nav > button[aria-label="Tambah transaksi"]{grid-column:3;grid-row:1}
+  .side-nav > .nav-link:nth-child(5){grid-column:5;grid-row:1}
+}
+
+
+/* Mobile layout fixes: prevent page-level horizontal drift and keep transaction text inside its card. */
+@media(max-width:620px){
+  html,body{max-width:100%;overflow-x:hidden}
+  .app-shell,.main-panel,.overview-content,.content{width:100%;min-width:0;max-width:100%}
+  .overview-content{overflow-x:clip}
+  .overview-content>*{min-width:0;max-width:100%}
+  .overview-content .stats-grid,
+  .overview-content .lower-grid{min-width:0;width:100%}
+  .overview-content .stat-card{min-width:0}
+  .overview-content .stat-value{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+  #transactions{min-width:0;width:100%;overflow:hidden}
+  #transactions .panel-heading{min-width:0;gap:8px}
+  #transactions .transaction-list{width:100%;min-width:0;overflow-x:hidden}
+  #transactions .transaction-row{
+    display:grid;
+    grid-template-columns:30px minmax(0,1fr) auto 20px;
+    align-items:center;
+    gap:8px;
+    min-width:0;
+    width:100%;
+  }
+  #transactions .transaction-info{min-width:0;width:100%}
+  #transactions .transaction-info strong,
+  #transactions .transaction-info span{
+    white-space:normal;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+    line-height:1.35;
+  }
+  #transactions .transaction-amount{max-width:104px;white-space:normal;text-align:right;overflow-wrap:anywhere}
+  #transactions .delete-button{padding:2px 0;width:20px}
+  .wishlist-item{min-width:0}
+  .wishlist-item-main{min-width:0}
+}
+
+
+/* Desktop visual polish: softer depth, quieter surfaces, and fluid interactions. */
+@media (min-width: 621px) {
+  :root {
+    --desktop-shadow-soft: 0 8px 24px rgba(31, 48, 32, .045);
+    --desktop-shadow-hover: 0 14px 32px rgba(31, 48, 32, .085);
+    --desktop-ease: cubic-bezier(.2, .75, .25, 1);
+  }
+
+  body {
+    background:
+      radial-gradient(ellipse at 82% 0%, rgba(169, 201, 160, .10), transparent 34%),
+      var(--paper);
+  }
+
+  .sidebar {
+    background: color-mix(in srgb, var(--surface) 96%, var(--paper));
+    transition: background .25s ease, border-color .25s ease;
+  }
+
+  .brand-mark {
+    box-shadow: 0 4px 10px rgba(36, 58, 44, .12);
+    transition: transform .28s var(--desktop-ease), box-shadow .28s ease;
+  }
+
+  .brand:hover .brand-mark {
+    transform: rotate(-5deg) translateY(-1px);
+    box-shadow: 0 7px 15px rgba(36, 58, 44, .17);
+  }
+
+  .nav-link {
+    position: relative;
+    transition:
+      color .2s ease,
+      background .22s ease,
+      transform .22s var(--desktop-ease);
+  }
+
+  .nav-link:hover {
+    background: var(--surface-soft);
+    color: var(--ink);
+    transform: translateX(2px);
+  }
+
+  .nav-link.active {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--nav-active-text) 7%, transparent);
+  }
+
+  .nav-link.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 11px;
+    bottom: 11px;
+    width: 3px;
+    border-radius: 0 4px 4px 0;
+    background: #8eae84;
+  }
+
+  .topbar {
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    transition: background .25s ease, border-color .25s ease;
+  }
+
+  .content {
+    animation: caesh-content-in .42s var(--desktop-ease) both;
+  }
+
+  .stat-card,
+  .panel-card,
+  .overview-wallet-panel,
+  .overview-wallet-item,
+  .privacy-card {
+    box-shadow: var(--desktop-shadow-soft);
+    transition:
+      box-shadow .28s var(--desktop-ease),
+      border-color .25s ease,
+      background-color .25s ease,
+      transform .28s var(--desktop-ease);
+  }
+
+  .stat-card:not(.balance-card):hover,
+  .panel-card:hover,
+  .overview-wallet-item:hover {
+    box-shadow: var(--desktop-shadow-hover);
+    border-color: color-mix(in srgb, var(--accent, #8eae84) 24%, var(--line));
+  }
+
+  .overview-wallet-item:hover {
+    transform: translateY(-2px);
+  }
+
+  .balance-card {
+    background:
+      radial-gradient(circle at 92% 10%, rgba(185, 216, 177, .13), transparent 34%),
+      var(--deep);
+    box-shadow: 0 10px 28px rgba(36, 58, 44, .14);
+    transition: box-shadow .28s ease, transform .28s var(--desktop-ease);
+  }
+
+  .balance-card:hover {
+    box-shadow: 0 15px 34px rgba(36, 58, 44, .19);
+    transform: translateY(-2px);
+  }
+
+  .primary-button,
+  .outline-button,
+  .cancel-button,
+  .text-button,
+  .theme-toggle,
+  .wallet-photo-button,
+  .wallet-delete-button,
+  .delete-button,
+  .period-tabs button,
+  .kind-switch button,
+  .overview-wallet-heading > button {
+    transition:
+      color .2s ease,
+      background-color .2s ease,
+      border-color .2s ease,
+      box-shadow .22s ease,
+      transform .22s var(--desktop-ease);
+  }
+
+  .primary-button:hover,
+  .outline-button:hover,
+  .cancel-button:hover,
+  .theme-toggle:hover,
+  .wallet-photo-button:hover,
+  .wallet-delete-button:hover,
+  .overview-wallet-heading > button:hover {
+    transform: translateY(-1px);
+  }
+
+  .period-tabs button.selected,
+  .kind-switch button.active {
+    box-shadow: 0 2px 7px rgba(25, 40, 25, .08);
+  }
+
+  .transaction-row {
+    transition: background-color .2s ease, padding .2s ease;
+  }
+
+  .transaction-row:hover {
+    background: color-mix(in srgb, var(--surface-soft) 72%, transparent);
+  }
+
+  .transaction-row .delete-button {
+    opacity: .48;
+    transition: opacity .2s ease, color .2s ease, transform .2s ease;
+  }
+
+  .transaction-row:hover .delete-button {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+
+  .category-bar-track span {
+    transition: width .55s var(--desktop-ease);
+  }
+
+  .modal-backdrop {
+    animation: caesh-fade-in .2s ease both;
+    -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(5px);
+  }
+
+  .modal-card {
+    animation: caesh-modal-in .28s var(--desktop-ease) both;
+  }
+
+  .modal-close:hover {
+    transform: rotate(90deg);
+  }
+
+  .modal-card input,
+  .modal-card select,
+  .transaction-tools input,
+  .transaction-tools select {
+    transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
+  }
+
+  .nav-link:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible {
+    outline: 2px solid color-mix(in srgb, #8eae84 75%, transparent);
+    outline-offset: 3px;
+  }
+
+  .nav-link:focus-visible {
+    outline-offset: 1px;
+  }
+
+  .wallet-photo-button:hover,
+  .wallet-delete-button:hover {
+    transform: translateY(-1px) scale(1.04);
+  }
+}
+
+@keyframes caesh-content-in {
+  from { opacity: 0; transform: translateY(7px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes caesh-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes caesh-modal-in {
+  from { opacity: 0; transform: translateY(9px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+
+/* Desktop brand placement in the topbar: keep the full mark vertically inside the header. */
+@media (min-width: 621px) {
+  .sidebar > .brand { display: none; }
+  .topbar {
+    min-height: 72px;
+    height: auto;
+    box-sizing: border-box;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    overflow: visible;
+  }
+  .topbar .topbar-brand {
+    display: inline-flex;
+    align-items: center;
+    align-self: center;
+    gap: 10px;
+    height: 36px;
+    margin: 0;
+    padding: 0;
+    flex: 0 0 auto;
+    font-size: 23px;
+    line-height: 1.2;
+    letter-spacing: -1.5px;
+    overflow: visible;
+  }
+  .topbar .topbar-brand > span:last-child {
+    display: inline-block;
+    line-height: 1.2;
+    padding: 2px 0;
+  }
+  .topbar .topbar-brand .brand-mark {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    border-radius: 10px;
+  }
+}
+@media (max-width: 620px) {
+  .topbar .topbar-brand { display: none; }
+}
+
+
+/* Mobile header: show the brand in the topbar and keep theme control on the right. */
+@media (max-width: 620px) {
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 58px;
+    height: 58px;
+    padding: 0 18px;
+  }
+
+  .topbar .topbar-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex: 0 0 auto;
+    height: 32px;
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+    line-height: 1.2;
+    letter-spacing: -1.2px;
+    white-space: nowrap;
+  }
+
+  .topbar .topbar-brand .brand-mark {
+    width: 27px;
+    height: 27px;
+    flex: 0 0 27px;
+    border-radius: 9px;
+    font-size: 19px;
+  }
+
+  .topbar .topbar-brand > span:last-child {
+    display: inline-block;
+    line-height: 1.2;
+    padding: 1px 0;
+  }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0;
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+
+  .topbar-right .theme-toggle {
+    margin-left: auto;
+  }
+}
+
+
+/* Compact desktop workspace sidebar: keep navigation readable without wasting width. */
+@media (min-width: 621px) {
+  .sidebar {
+    width: 190px;
+    flex: 0 0 190px;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .side-nav .nav-link {
+    padding-left: 10px;
+    padding-right: 10px;
+    gap: 9px;
+  }
+}
+
+
+/* Desktop workspace: compact icon-only dock floating at the vertical center-left. */
+@media (min-width: 621px) {
+  .sidebar {
+    position: fixed;
+    z-index: 30;
+    left: 22px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 60px;
+    height: auto;
+    max-height: calc(100vh - 40px);
+    overflow: visible;
+    align-self: auto;
+    flex: 0 0 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: var(--surface);
+    box-shadow: 0 12px 34px rgba(25, 40, 25, .10);
+  }
+
+  .sidebar > .side-label,
+  .sidebar > .sidebar-bottom { display: none; }
+
+  .sidebar > .side-nav.desktop-icon-dock {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    width: 100%;
+    overflow: visible;
+    padding: 0;
+  }
+
+  .desktop-icon-dock .nav-link {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
+    min-height: 42px;
+    padding: 0;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0;
+    line-height: 0;
+    cursor: pointer;
+    transition: color .2s ease, background .2s ease, transform .2s ease;
+  }
+
+  .desktop-icon-dock .nav-link:hover {
+    background: var(--surface-soft);
+    color: var(--ink);
+    transform: translateY(-1px);
+  }
+
+  .desktop-icon-dock .nav-link.active {
+    background: var(--nav-active);
+    color: var(--nav-active-text);
+    box-shadow: none;
+  }
+
+  .desktop-icon-dock .nav-link.active::before { display: none; }
+
+  .desktop-icon-dock .nav-icon {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    font-size: 0;
+  }
+
+  .desktop-icon-dock .nav-icon svg {
+    display: block;
+    width: 21px;
+    height: 21px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .main-panel { width: 100%; min-width: 0; }
+}
+
+@media (min-width: 621px) and (max-width: 900px) {
+  .sidebar { left: 14px; }
+}
+
+
+/* Reserve a permanent gutter for the floating desktop navigation so it never covers page content. */
+@media (min-width: 621px) {
+  .content,
+  .overview-content {
+    padding-left: clamp(104px, 9vw, 140px) !important;
+  }
+
+  .topbar {
+    padding-left: clamp(104px, 9vw, 140px) !important;
+  }
+}
+
+
+/* SVG navigation icons must remain visible in the mobile bottom dock too. */
+@media (max-width: 620px) {
+  .side-nav .nav-icon {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    font-size: 0;
+    flex: 0 0 20px;
+  }
+
+  .side-nav .nav-icon svg {
+    display: block;
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+
+/* Keep icon-only labels on desktop, but show icon + text in the mobile bottom navigation. */
+@media (min-width: 621px) {
+  .desktop-icon-dock .nav-label { display: none; }
+}
+@media (max-width: 620px) {
+  .side-nav.desktop-icon-dock .nav-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    height: 48px;
+    min-height: 48px;
+    padding: 3px 2px;
+    font-size: 10px;
+    line-height: 1.1;
+  }
+
+  .side-nav.desktop-icon-dock .nav-icon {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+  }
+
+  .side-nav.desktop-icon-dock .nav-label {
+    display: block;
+    font-size: 9px;
+    line-height: 1.1;
+    white-space: nowrap;
+  }
+}
+
+
+/* Transaction history: keep the page fixed to the viewport and scroll only its list. */
+.main-panel:has(.page-section#transactions) {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-panel:has(.page-section#transactions) > .content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 18px;
+}
+
+.main-panel:has(.page-section#transactions) > .content > .welcome-row {
+  flex: 0 0 auto;
+  margin-bottom: 22px;
+}
+
+.main-panel .page-section#transactions {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0;
+}
+
+.main-panel .page-section#transactions > .panel-heading,
+.main-panel .page-section#transactions > .transaction-tools {
+  flex: 0 0 auto;
+}
+
+.main-panel .page-section#transactions > .transaction-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+@media (max-width: 620px) {
+  .main-panel:has(.page-section#transactions) > .content {
+    padding-bottom: 96px;
+  }
+
+  .main-panel .page-section#transactions > .transaction-list {
+    scrollbar-width: thin;
+  }
+}
+
+
+/* Consistent slim scrollbars across the app, with breathing room beside scrollable content. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--muted) 42%, transparent) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--muted) 42%, transparent);
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--muted) 65%, transparent);
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+
+/* Keep the scrollbar visually separated from rows and text in scrollable lists. */
+.transaction-list,
+.side-nav,
+.wallet-grid,
+.wishlist-grid {
+  scrollbar-gutter: stable;
+}
+
+.transaction-list {
+  padding-right: 8px;
+}
+
+@media (max-width: 620px) {
+  .transaction-list {
+    padding-right: 6px;
+  }
+}
+
+
+/* In-app update prompt */
+.update-backdrop{z-index:120;}
+.update-modal{text-align:center;max-width:390px;padding:30px 26px 24px;}
+.update-mark{width:48px;height:48px;margin:0 auto 17px;border-radius:15px;background:#edf3e9;color:#526f4d;display:grid;place-items:center;font-size:27px;}
+.update-modal h2{font:700 20px 'Manrope',sans-serif;letter-spacing:-.5px;margin:8px 0 10px;}
+.update-modal>p{font-size:12px;line-height:1.65;color:#818a7f;margin:0 0 15px;}
+.update-notes{font-size:11px;line-height:1.6;color:#65715f;background:#f5f7f2;border-radius:9px;padding:11px;margin-bottom:15px;text-align:left;}.update-release-list{display:grid;gap:10px;margin-top:9px;max-height:220px;overflow-y:auto}.update-release-item{display:grid;gap:3px;padding-top:9px;border-top:1px solid #dfe6da}.update-release-item>strong{color:#435b3e;font-size:11px}.update-release-item>span{white-space:pre-line}
+.update-actions{margin-top:20px;}
+.update-modal>small{display:block;margin-top:15px;color:#9aa196;font-size:10px;line-height:1.5;}
+
+.update-progress{margin:17px 0 4px;text-align:left}
+.update-progress-label{display:flex;justify-content:space-between;gap:12px;font-size:10px;color:#7f897a;margin-bottom:8px}
+.update-progress-label strong{color:#435b3e;font-variant-numeric:tabular-nums}
+.update-progress-track{height:7px;background:#edf1e9;border-radius:99px;overflow:hidden}
+.update-progress-track span{display:block;height:100%;background:#78966e;border-radius:99px;transition:width .15s ease}
+.update-error{margin-top:13px;padding:10px 12px;border-radius:8px;background:#fff1ed;color:#a34e3d;font-size:10px;line-height:1.55;text-align:left}
+.update-modal .primary-button:disabled,.update-modal .cancel-button:disabled{opacity:.55;cursor:wait}
+
+
+/* Expense summary widget */
+.expense-widget{margin-bottom:14px}
+.expense-widget-heading{align-items:flex-start;gap:12px;margin-bottom:12px}
+.expense-widget-heading h2{font:700 17px 'Manrope',sans-serif;letter-spacing:-.4px;margin:6px 0 0}
+.expense-widget-range{font-size:10px;color:#9aa196;margin:5px 0 0}
+.expense-widget-total{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.expense-widget-total strong{font:700 clamp(23px,2.2vw,30px) 'Manrope',sans-serif;letter-spacing:-.8px;color:var(--deep)}
+.expense-widget-total span{font-size:10px;color:#92998f}
+.expense-widget-settings{border-top:1px solid var(--line);margin-top:15px;padding-top:12px;display:grid;grid-template-columns:minmax(150px,.8fr) minmax(220px,1.2fr);gap:10px 20px}
+.expense-widget-setting-block select,.expense-widget-date-grid input{width:100%;border:1px solid #e5e9e2;border-radius:8px;padding:10px 11px;color:#354032;background:#fff;font-size:11px}
+.expense-widget-date-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.expense-widget-wallets{grid-column:1/-1;display:flex;align-items:center;gap:9px 16px;flex-wrap:wrap}
+.expense-widget-wallets>.field-label{width:100%;margin:2px 0 0}
+.expense-widget-wallet-option{display:inline-flex;align-items:center;gap:7px;font-size:11px;color:var(--ink);cursor:pointer}
+.expense-widget-wallet-option input{accent-color:#718b68;width:15px;height:15px}
+.expense-widget-select-all{padding:4px 0}
+.expense-widget-empty{font-size:11px;color:#92998f;margin:0}
+@media(max-width:620px){.expense-widget-settings{grid-template-columns:1fr}.expense-widget-wallets{grid-column:auto}.expense-widget-date-grid{grid-template-columns:1fr 1fr}.expense-widget-total{gap:6px 10px}}
+
+
+/* CAESH v1.2.6: remove the topbar mark and restyle only the app name. */
+.topbar .topbar-brand { gap: 0; }
+.topbar .topbar-brand-name {
+  display: inline-block;
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  font-weight: 900;
+  letter-spacing: -0.8px;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+
+/* CAESH v1.3.6: independent wallet selection for the overview total balance. */
+.balance-filter-trigger{position:relative;z-index:2;margin-top:10px;padding:0;border:0;background:transparent;color:#dce8d6;font:600 10px 'Manrope',sans-serif;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.balance-filter-panel{position:relative;z-index:3;margin-top:12px;padding:12px;border:1px solid rgba(255,255,255,.2);border-radius:11px;background:rgba(19,35,24,.94);display:flex;flex-wrap:wrap;gap:10px 16px}
+.balance-filter-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;font-size:10px;color:#fff}
+.balance-filter-select-all{padding:2px 0;border:0;background:transparent;color:#dce8d6;font:600 10px 'Manrope',sans-serif;text-decoration:underline;cursor:pointer}
+.balance-filter-option{display:inline-flex;align-items:center;gap:7px;color:#f2f6ef;font-size:10px;cursor:pointer}
+.balance-filter-option input{width:14px;height:14px;margin:0;accent-color:#a9c49d}
+.balance-filter-panel .expense-widget-empty{color:#dce8d6}
+
+
+/* CAESH v1.4.6: wallet detail view and persistent wallet notes. */
+.overview-wallet-item[role="button"]{cursor:pointer}
+.overview-wallet-item[role="button"]:focus-visible{outline:2px solid var(--accent,#8aa77c);outline-offset:3px}
+.wallet-detail-modal{width:min(100%,620px);max-height:min(88vh,820px);overflow-y:auto}
+.wallet-detail-balance{display:flex;flex-direction:column;gap:6px;padding:18px;border-radius:14px;background:var(--surface-soft,#f3f5f1);margin:4px 0 14px}
+.wallet-detail-balance span,.wallet-detail-totals span{font-size:12px;color:var(--muted,#777)}
+.wallet-detail-balance strong{font-size:clamp(24px,5vw,32px);font-weight:800;letter-spacing:-1px}
+.wallet-detail-totals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:18px}
+.wallet-detail-totals>div{display:flex;flex-direction:column;gap:7px;padding:13px;border:1px solid var(--border,#e7e9e5);border-radius:12px;min-width:0}
+.wallet-detail-totals strong{font-size:14px;overflow-wrap:anywhere}
+.wallet-detail-totals strong.income{color:var(--income,#24845a)}
+.wallet-detail-totals strong.expense{color:var(--expense,#c35c50)}
+.wallet-detail-history{margin:8px 0 18px}
+.wallet-detail-history .panel-heading{margin-bottom:10px}
+.wallet-detail-history .panel-heading h3{font-size:15px;margin:0}
+.wallet-detail-history .transaction-list{max-height:260px;overflow-y:auto}
+.wallet-detail-history .transaction-row{padding:10px 0}
+.wallet-detail-history .transaction-amount{white-space:nowrap;font-size:12px}
+.wallet-detail-note textarea{width:100%;resize:vertical;min-height:76px;padding:11px 12px;border:1px solid var(--border,#dfe3dc);border-radius:10px;background:var(--surface,#fff);color:var(--text,#222);font:inherit}
+.wallet-detail-note-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:9px}
+.wallet-detail-note-footer>span{font-size:11px;color:var(--muted,#777)}
+@media(max-width:480px){.wallet-detail-totals{grid-template-columns:1fr}.wallet-detail-modal{padding:18px}.wallet-detail-history .transaction-row{gap:8px}.wallet-detail-history .transaction-info{min-width:0}}
+
+
+/* CAESH v1.5.6: debt Notes, payment actions, and transaction history. */
+.debt-create-fields{margin-top:12px;padding:13px;border:1px solid var(--line);border-radius:11px;background:var(--surface-soft)}
+.debt-create-fields .wallet-form-hint{margin:9px 0 0}
+.debt-detail-actions{padding:14px;border:1px solid var(--line);border-radius:12px;margin:0 0 16px}
+.debt-detail-actions p{font-size:12px;color:var(--muted);margin:0 0 12px}
+.debt-detail-actions .modal-actions{margin-top:0;justify-content:flex-start}
+.debt-detail-actions .modal-actions button{flex:1}
+
+
+/* CAESH v1.6.6: grouped wallet privacy and management controls. */
+.balance-card{position:relative}
+.summary-privacy-toggle{position:static;z-index:2;flex:0 0 auto;min-width:76px;width:auto;height:34px;padding:0 9px;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;border:1px solid #ffffff35;border-radius:10px;background:#ffffff12;color:#fff;font:600 11px 'DM Sans',sans-serif;cursor:pointer}
+.summary-privacy-toggle:hover{background:#ffffff22}
+.wallet-add-button{padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:600 11px 'Manrope',sans-serif;cursor:pointer}
+.wallet-settings-trigger{width:30px;height:30px;flex:0 0 30px;display:flex;align-items:center;justify-content:center;padding:0;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--muted);font-family:Arial,sans-serif;font-size:15px;line-height:1;letter-spacing:0;cursor:pointer}
+.wallet-settings-trigger:hover{border-color:var(--accent);color:var(--ink)}
+.wallet-settings-menu{position:absolute;z-index:5;top:44px;right:10px;min-width:178px;padding:6px;border:1px solid var(--line);border-radius:12px;background:var(--surface);box-shadow:0 12px 30px #14201524;display:grid;gap:3px}
+.wallet-settings-menu button{width:100%;padding:10px 11px;border:0;border-radius:8px;background:transparent;color:var(--ink);text-align:left;font:500 11px 'DM Sans',sans-serif;cursor:pointer}
+.wallet-settings-menu button:hover{background:var(--surface-soft,#f1f3ef)}
+.wallet-settings-menu button.wallet-settings-danger{color:#b75c4d}
+
+
+/* v1.8.10: lock the page behind dialogs while keeping the dialog itself scrollable. */
+html.caesh-modal-open,
+body.caesh-modal-open {
+  overflow: hidden !important;
+  overscroll-behavior: none;
+}
+
+.modal-backdrop {
+  overscroll-behavior: contain;
+}
+
+.modal-card {
+  max-height: calc(100dvh - 36px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* CAESH v1.10.10: dedicated home-screen expense widget settings. */
+.expense-widget-modal{width:min(100%,560px);max-height:min(90dvh,900px);overflow-y:auto}
+.expense-widget-modal>input:not([type=file]),.expense-widget-modal>select{width:100%;border:1px solid var(--line);border-radius:8px;padding:11px 12px;background:var(--surface);color:var(--ink);font-size:12px}
+.expense-widget-modal .expense-widget-wallets{display:flex;align-items:center;gap:10px 16px;flex-wrap:wrap;margin:14px 0;padding:13px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.expense-widget-modal .expense-widget-wallets>.field-label{width:100%;margin:0}
+.expense-widget-modal .expense-widget-date-grid{margin-top:8px}
+.expense-widget-modal .expense-widget-date-grid input{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;background:var(--surface);color:var(--ink)}
+.expense-widget-limit{display:grid;gap:10px;padding:14px 0;border-bottom:1px solid var(--line)}
+.expense-widget-limit>.expense-widget-wallet-option{align-items:flex-start;line-height:1.5}
+.expense-widget-limit>.expense-widget-wallet-option input{margin-top:2px}
+.expense-widget-photo-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 0;border-top:1px solid var(--line)}
+.expense-widget-photo-row>div{display:flex;flex:1;min-width:170px;flex-direction:column;gap:4px}
+.expense-widget-photo-row strong,.expense-widget-install strong{font-size:12px;color:var(--ink)}
+.expense-widget-photo-row span,.expense-widget-install p,.expense-widget-install li{font-size:11px;color:var(--muted);line-height:1.55}
+.expense-widget-preview{display:flex;flex-direction:column;gap:7px;padding:16px;margin-top:14px;border-radius:12px;background:var(--surface-soft);color:var(--ink)}
+.expense-widget-preview>strong{font-size:24px;font-weight:800}
+.expense-widget-preview>span:not(.section-kicker){font-size:10px;color:var(--muted)}
+.expense-widget-preview em{font-size:11px;font-style:normal;font-weight:700;color:#b65d48}
+.expense-widget-install{display:grid;gap:7px;padding:15px 0}
+.expense-widget-install ol{margin:0;padding-left:20px}
+.expense-widget-install .outline-button{justify-self:start}
+@media(max-width:620px){.expense-widget-modal{padding:20px}.expense-widget-photo-row{align-items:flex-start}}
+
+
+/* CAESH v1.10.11: unified, high-contrast dialogs across light and dark themes. */
+.modal-backdrop {
+  z-index: 2000;
+  padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+  background: rgba(10, 17, 12, .68);
+  -webkit-backdrop-filter: blur(7px) saturate(.82);
+  backdrop-filter: blur(7px) saturate(.82);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  box-sizing: border-box;
+}
+.modal-card {
+  box-sizing: border-box;
+  width: min(100%, 520px);
+  max-height: calc(100dvh - max(32px, env(safe-area-inset-top)) - max(32px, env(safe-area-inset-bottom)));
+  margin: auto;
+  padding: clamp(20px, 4vw, 28px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid color-mix(in srgb, var(--line) 82%, var(--ink) 18%);
+  border-radius: 22px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 28px 90px rgba(0,0,0,.34), 0 5px 18px rgba(0,0,0,.16);
+  scrollbar-gutter: stable;
+}
+.modal-heading {
+  position: relative;
+  gap: 16px;
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+.modal-heading h2 { color: var(--ink); font-size: clamp(18px,4vw,21px); line-height: 1.3; }
+.modal-close {
+  flex: 0 0 34px; width: 34px; height: 34px;
+  border: 1px solid var(--line); border-radius: 11px;
+  background: var(--surface-muted); color: var(--ink); font-size: 21px;
+  transition: background .18s ease, transform .18s ease;
+}
+.modal-close:hover { background: var(--nav-active); transform: scale(1.04); }
+.modal-card .field-label { color: var(--ink); font-size: 11px; }
+.modal-card input,.modal-card select,.modal-card textarea {
+  box-sizing: border-box; min-height: 42px; border-color: var(--field-border);
+  border-radius: 11px; background: var(--field-bg); color: var(--ink);
+}
+.modal-card input:focus,.modal-card select:focus,.modal-card textarea:focus {
+  border-color: #86a77c; box-shadow: 0 0 0 3px rgba(134,167,124,.2);
+}
+.modal-actions {
+  flex-wrap: wrap; padding-top: 16px; margin-top: 20px;
+  border-top: 1px solid var(--line);
+}
+.modal-actions > button { min-height: 42px; border-radius: 11px; }
+.update-backdrop { z-index: 2010; }
+.update-modal { width: min(100%,440px); max-height: calc(100dvh - 40px); text-align: left; }
+.update-mark { margin: 0 0 14px; background: var(--nav-active); color: var(--nav-active-text); }
+.update-modal h2 { color: var(--ink); font-size: 21px; }
+.update-modal > p,.update-modal > small,.update-progress-label { color: var(--text-secondary); }
+.update-notes { border: 1px solid var(--line); background: var(--surface-soft); color: var(--ink); border-radius: 12px; }
+.update-release-item { border-color: var(--line); }
+.update-release-item > strong { color: var(--ink); }
+.update-progress-track { background: var(--surface-muted); }
+.update-progress-track span { background: #86a77c; }
+.update-progress-label strong { color: var(--ink); }
+.update-error { border: 1px solid #e7b7aa; background: #fff1ed; color: #963f31; border-radius: 11px; }
+:root[data-theme="dark"] .update-error { border-color: #704137; background: #3b2521; color: #ffc0ad; }
+@media (max-width:620px) {
+  .modal-backdrop { place-items: center; padding: max(12px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom)); }
+  .modal-card { width: 100%; max-height: calc(100dvh - max(24px,env(safe-area-inset-top)) - max(24px,env(safe-area-inset-bottom))); padding: 20px; border-radius: 20px; }
+  .modal-actions { position: static; gap: 8px; }
+  .modal-actions > button { flex: 1 1 auto; }
+  .update-modal { padding: 22px 20px; }
+}
+
+
+/* CAESH v1.11.14: normalize checkbox controls inside the widget settings dialog. */
+.expense-widget-modal .expense-widget-wallet-option input[type="checkbox"] {
+  appearance: auto;
+  -webkit-appearance: checkbox;
+  display: inline-block;
+  flex: 0 0 18px;
+  width: 18px;
+  min-width: 18px;
+  height: 18px;
+  min-height: 18px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  accent-color: #8eae84;
+}
+.expense-widget-modal .expense-widget-limit > .expense-widget-wallet-option input[type="checkbox"] {
+  margin-top: 2px;
+}
+
+
+/* CAESH v1.12.0: branded transaction deletion confirmation. */
+.delete-confirm-modal { width: min(100%, 390px); text-align: center; padding: 28px; }
+.delete-confirm-icon { width: 46px; height: 46px; margin: 0 auto 16px; display: grid; place-items: center; border-radius: 15px; background: #b75c4d18; color: #b75c4d; font: 800 24px 'Manrope',sans-serif; }
+.delete-confirm-modal > .section-kicker { margin-bottom: 7px; }
+.delete-confirm-modal h2 { margin: 0; color: var(--ink); font: 750 19px 'Manrope',sans-serif; letter-spacing: -.45px; }
+.delete-confirm-modal p { margin: 12px 0 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.delete-confirm-modal p strong { color: var(--ink); }
+.delete-confirm-modal .modal-actions { display: grid; grid-template-columns: 1fr 1fr; margin-top: 23px; }
+.delete-confirm-modal .modal-actions button { min-height: 43px; border-radius: 11px; font-size: 12px; font-weight: 700; }
+.delete-confirm-button { border: 1px solid #b75c4d; background: #b75c4d; color: #fff; cursor: pointer; }
+.delete-confirm-button:hover { background: #a64d40; }
+@media (max-width: 620px) { .delete-confirm-modal { width: 100%; padding: 23px 20px; } }
+
+
+.debt-delete-history-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 18px 0 6px;
+  padding: 12px 14px;
+  border: 1px solid var(--border, rgba(128, 128, 128, .25));
+  border-radius: 12px;
+  font-size: .92rem;
+  line-height: 1.45;
+  cursor: pointer;
+}
+.debt-delete-history-option input {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  margin: 1px 0 0;
+  accent-color: var(--accent, #6d5dfc);
+}
+
+.debt-detail-actions .modal-actions {
+  flex-wrap: wrap;
+}
+.debt-detail-actions .modal-actions > button {
+  flex: 1 1 130px;
+}
+
+/* v1.11.20: dialogs use z-index 2000; the debt action dialog must render above wallet details. */
+.debt-action-backdrop {
+  z-index: 2001;
+}
+
+
+/* CAESH v1.11.22: remove native checkbox focus/paint artifacts in debt deletion option. */
+.debt-delete-history-option input[type="checkbox"] {
+  appearance: auto;
+  -webkit-appearance: checkbox;
+  display: inline-block;
+  width: 18px;
+  min-width: 18px;
+  height: 18px;
+  min-height: 18px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  accent-color: #8eae84;
+}
+.debt-delete-history-option input[type="checkbox"]:focus,
+.debt-delete-history-option input[type="checkbox"]:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.settle-debt-backdrop { z-index: 2100; }
+.settle-debt-modal { width: min(100%, 390px); text-align: center; padding: 28px; }
+.settle-debt-icon { width: 48px; height: 48px; margin: 0 auto 16px; display: grid; place-items: center; border-radius: 15px; background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); font: 800 24px 'Manrope',sans-serif; }
+.settle-debt-modal > .section-kicker { margin-bottom: 7px; }
+.settle-debt-modal h2 { margin: 0; color: var(--ink); font: 750 19px 'Manrope',sans-serif; letter-spacing: -.45px; }
+.settle-debt-modal p { margin: 12px 0 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.settle-debt-modal p strong { color: var(--ink); }
+.settle-debt-modal .modal-actions { display: grid; grid-template-columns: 1fr 1fr; margin-top: 23px; gap: 10px; }
+.settle-debt-modal .modal-actions button { min-height: 45px; border-radius: 12px; font-size: 12px; font-weight: 700; }
+.settle-debt-confirm-button { border: 1px solid var(--accent); background: var(--accent); color: #fff; cursor: pointer; }
+.settle-debt-confirm-button:hover { filter: brightness(.94); }
+@media (max-width: 620px) { .settle-debt-modal { width: 100%; padding: 23px 20px; } }
+
+
+/* CAESH v1.11.24: custom wishlist deletion confirmation matching CAESH dialogs. */
+.delete-wishlist-backdrop { z-index: 2100; }
+.delete-wishlist-modal { width: min(100%, 390px); text-align: center; padding: 28px; }
+.delete-wishlist-icon { width: 48px; height: 48px; margin: 0 auto 16px; display: grid; place-items: center; border-radius: 15px; background: color-mix(in srgb, #d96c65 14%, transparent); color: #d96c65; font: 500 28px 'Manrope',sans-serif; }
+.delete-wishlist-modal > .section-kicker { margin-bottom: 7px; }
+.delete-wishlist-modal h2 { margin: 0; color: var(--ink); font: 750 19px 'Manrope',sans-serif; letter-spacing: -.45px; }
+.delete-wishlist-modal p { margin: 12px 0 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.delete-wishlist-modal p strong { color: var(--ink); }
+.delete-wishlist-modal .modal-actions { display: grid; grid-template-columns: 1fr 1fr; margin-top: 23px; gap: 10px; }
+.delete-wishlist-modal .modal-actions button { min-height: 45px; border-radius: 12px; font-size: 12px; font-weight: 700; }
+.delete-wishlist-confirm-button { border: 1px solid #d96c65; background: #d96c65; color: #fff; cursor: pointer; }
+.delete-wishlist-confirm-button:hover { filter: brightness(.94); }
+@media (max-width: 620px) { .delete-wishlist-modal { width: 100%; padding: 23px 20px; } }
+
+
+/* Widget background image positioning controls */
+.expense-widget-position-editor{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:16px;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--paper);margin:12px 0 16px}
+.expense-widget-position-preview{width:100%;aspect-ratio:1/1;overflow:hidden;border-radius:10px;background:#243a2c;position:relative}
+.expense-widget-position-preview img{width:100%;height:100%;object-fit:cover;display:block;transition:object-position .12s ease,transform .12s ease}
+.expense-widget-position-editor label{display:grid;gap:7px;font-size:11px;color:var(--muted);min-width:0}
+.expense-widget-position-editor .photo-range{width:100%;min-width:0;accent-color:var(--deep)}
+.expense-widget-position-editor>.text-button{grid-column:2;justify-self:start}
+@media(max-width:420px){.expense-widget-position-editor{gap:10px;padding:10px}.expense-widget-position-editor label{font-size:10px}.expense-widget-position-editor>.text-button{font-size:11px}}
+
+
+/* CAESH v1.13.0 — Bordeaux Estate luxury palette */
+:root{
+  color-scheme:light;
+  --paper:#EFE5DF;
+  --surface:#FAF5EF;
+  --surface-soft:#F4EBE5;
+  --surface-muted:#E7D8D1;
+  --ink:#302328;
+  --muted:#8B7775;
+  --text-secondary:#8B7775;
+  --line:#E5D5CE;
+  --field-bg:#FFFAF6;
+  --field-border:#E1CFC7;
+  --nav-active:#E9D8D8;
+  --nav-active-text:#713B45;
+  --deep:#713B45;
+  --green:#B77B80;
+  --mint:#F0E4D9;
+  --accent:#713B45;
+  --accent-strong:#5E3039;
+  --accent-soft:#E9D8D8;
+  --accent-contrast:#FFFFFF;
+  --gold:#B28A69;
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#201719;
+  --surface:#302226;
+  --surface-soft:#38292D;
+  --surface-muted:#463238;
+  --ink:#F0E4D9;
+  --muted:#B99FA0;
+  --text-secondary:#B99FA0;
+  --line:#49343A;
+  --field-bg:#38292D;
+  --field-border:#594047;
+  --nav-active:#493039;
+  --nav-active-text:#F0DCE0;
+  --deep:#4C2932;
+  --green:#B77B80;
+  --mint:#493039;
+  --accent:#C18A8D;
+  --accent-strong:#D09A9D;
+  --accent-soft:#493039;
+  --accent-contrast:#201719;
+  --gold:#C4A17C;
+}
+body{
+  background:
+    radial-gradient(ellipse at 88% 0%,color-mix(in srgb,var(--gold) 8%,transparent),transparent 34%),
+    var(--paper);
+}
+.sidebar{background:color-mix(in srgb,var(--surface) 97%,var(--paper))}
+.nav-link.active{background:var(--nav-active);color:var(--nav-active-text)}
+.nav-link.active::before{background:var(--accent)}
+.brand-mark{background:var(--deep);color:#F0E4D9;box-shadow:0 4px 12px color-mix(in srgb,var(--deep) 20%,transparent)}
+.brand-period,h1 em,.section-kicker,.eyebrow{color:var(--accent)}
+.primary-button{
+  background:var(--deep);
+  color:#fff;
+  box-shadow:0 6px 15px color-mix(in srgb,var(--deep) 18%,transparent);
+}
+.primary-button:hover{background:var(--accent-strong)}
+.text-button,.outline-button{color:var(--accent)}
+.outline-button{border-color:color-mix(in srgb,var(--accent) 28%,var(--line))}
+.outline-button:hover,.theme-toggle:hover{border-color:var(--accent)}
+.theme-toggle{border-color:var(--line)}
+.theme-toggle:hover{color:var(--accent)}
+.period-tabs button.selected,.kind-switch button.active{color:var(--accent)}
+.period-tabs button.selected{box-shadow:0 2px 8px color-mix(in srgb,var(--deep) 9%,transparent)}
+.balance-card{
+  background:
+    radial-gradient(circle at 92% 10%,color-mix(in srgb,var(--gold) 22%,transparent),transparent 36%),
+    var(--deep);
+  border-color:var(--deep);
+  box-shadow:0 10px 28px color-mix(in srgb,var(--deep) 18%,transparent);
+}
+.balance-card .stat-top,.balance-card .stat-foot{color:#F0DCE0}
+.balance-card .stat-symbol{color:var(--gold)}
+.balance-dot{background:var(--gold)}
+.balance-decoration{color:#FFFFFF0D}
+.stat-icon.income-icon,.transaction-icon.income{background:#E8F0E6;color:#64865E}
+.transaction-amount.income{color:#6B9463}
+.stat-icon.expense-icon,.transaction-icon.expense{background:#F6E9E4;color:#B66B58}
+.transaction-amount.expense{color:#B66B58}
+.transaction-icon.transfer{background:#E9EAF4;color:#6678B8}
+.transaction-amount.transfer,.kind-switch .transfer-choice{color:#7585BD}
+:root[data-theme="dark"] .stat-icon.income-icon,
+:root[data-theme="dark"] .transaction-icon.income{background:#293A30;color:#9BC18F}
+:root[data-theme="dark"] .transaction-amount.income{color:#9BC18F}
+:root[data-theme="dark"] .stat-icon.expense-icon,
+:root[data-theme="dark"] .transaction-icon.expense{background:#482E2D;color:#D99480}
+:root[data-theme="dark"] .transaction-amount.expense{color:#D99480}
+:root[data-theme="dark"] .transaction-icon.transfer{background:#30364E;color:#BDC8FF}
+:root[data-theme="dark"] .transaction-amount.transfer{color:#BDC8FF}
+.wallet-symbol,.empty-art,.wishlist-item-icon{background:var(--accent-soft);color:var(--accent)}
+.wallet-add-card{background:var(--surface-soft);border-color:color-mix(in srgb,var(--accent) 40%,var(--line));color:var(--accent)}
+.wallet-add-card>span{color:var(--accent)}
+.wallet-photo-button:hover,.wallet-delete-button:focus-visible{border-color:var(--accent);color:var(--accent)}
+.photo-adjustments .photo-range,.expense-widget-position-editor .photo-range{accent-color:var(--accent)}
+.modal-card input:focus,.modal-card select:focus,.modal-card textarea:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 15%,transparent);
+}
+.category-bar-track span{background:var(--accent)}
+.insight-note{background:var(--surface-soft);color:var(--accent)}
+.insight-note p{color:var(--text-secondary)}
+.local-indicator{color:var(--accent)}
+.local-indicator i,.privacy-status i{background:var(--accent)}
+.privacy-icon,.privacy-status{color:var(--accent)}
+.avatar{background:var(--accent-soft);color:var(--accent)}
+.error-banner{background:#F8EAE5;border-color:#E9CFC6;color:#963F31}
+:root[data-theme="dark"] .error-banner{background:#482E2D;border-color:#704137;color:#FFC0AD}
+.delete-confirm-icon{background:#B75C4D18;color:#B75C4D}
+.delete-wishlist-icon{background:#D96C651F;color:#D96C65}
+.expense-widget-position-preview{background:var(--deep)}
+.expense-widget-position-editor{background:var(--surface-soft);border-color:var(--line)}
+@media(min-width:621px){
+  .balance-card:hover{box-shadow:0 15px 34px color-mix(in srgb,var(--deep) 24%,transparent)}
+  .stat-card:not(.balance-card):hover,.panel-card:hover,.overview-wallet-item:hover{
+    border-color:color-mix(in srgb,var(--accent) 22%,var(--line));
+  }
+  .nav-link.active::before{background:var(--accent)}
+  .nav-link:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{
+    outline-color:color-mix(in srgb,var(--accent) 75%,transparent);
+  }
+}
+@media(prefers-reduced-motion:no-preference){
+  .primary-button,.theme-toggle,.nav-link,.wallet-symbol,.empty-art{transition:background-color .22s ease,color .22s ease,border-color .22s ease,box-shadow .22s ease,transform .22s ease}
+}
+
+
+/* CAESH Liquid Silk balance-card ornament */
+.balance-decoration{
+ position:absolute;inset:0;width:100%;height:100%;right:0;bottom:0;
+ z-index:0;pointer-events:none;font-size:0;color:transparent;
+ background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20720%20340%22%20fill%3D%22none%22%3E%0A%3Cdefs%3E%0A%20%3ClinearGradient%20id%3D%22silk1%22%20x1%3D%22310%22%20y1%3D%2218%22%20x2%3D%22650%22%20y2%3D%22286%22%20gradientUnits%3D%22userSpaceOnUse%22%3E%3Cstop%20stop-color%3D%22%23F6DCCB%22%20stop-opacity%3D%22.02%22%2F%3E%3Cstop%20offset%3D%22.34%22%20stop-color%3D%22%23E9BBAA%22%20stop-opacity%3D%22.72%22%2F%3E%3Cstop%20offset%3D%22.62%22%20stop-color%3D%22%23A95E68%22%20stop-opacity%3D%22.88%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%234B202D%22%20stop-opacity%3D%22.08%22%2F%3E%3C%2FlinearGradient%3E%0A%20%3ClinearGradient%20id%3D%22silk2%22%20x1%3D%22390%22%20y1%3D%220%22%20x2%3D%22580%22%20y2%3D%22320%22%20gradientUnits%3D%22userSpaceOnUse%22%3E%3Cstop%20stop-color%3D%22%23FFF0DF%22%20stop-opacity%3D%22.7%22%2F%3E%3Cstop%20offset%3D%22.42%22%20stop-color%3D%22%23D99B91%22%20stop-opacity%3D%22.44%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%235A2635%22%20stop-opacity%3D%22.1%22%2F%3E%3C%2FlinearGradient%3E%0A%20%3ClinearGradient%20id%3D%22silk3%22%20x1%3D%22250%22%20y1%3D%22155%22%20x2%3D%22710%22%20y2%3D%22330%22%20gradientUnits%3D%22userSpaceOnUse%22%3E%3Cstop%20stop-color%3D%22%23F5D9C6%22%20stop-opacity%3D%22.05%22%2F%3E%3Cstop%20offset%3D%22.38%22%20stop-color%3D%22%23D99C91%22%20stop-opacity%3D%22.72%22%2F%3E%3Cstop%20offset%3D%22.72%22%20stop-color%3D%22%23743442%22%20stop-opacity%3D%22.96%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%233A1D28%22%20stop-opacity%3D%22.3%22%2F%3E%3C%2FlinearGradient%3E%0A%20%3ClinearGradient%20id%3D%22shine%22%20x1%3D%22330%22%20y1%3D%2290%22%20x2%3D%22670%22%20y2%3D%22255%22%20gradientUnits%3D%22userSpaceOnUse%22%3E%3Cstop%20stop-color%3D%22%23FFF0DF%22%20stop-opacity%3D%220%22%2F%3E%3Cstop%20offset%3D%22.48%22%20stop-color%3D%22%23F8DCCB%22%20stop-opacity%3D%22.82%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23E7B7A5%22%20stop-opacity%3D%220%22%2F%3E%3C%2FlinearGradient%3E%0A%20%3Cfilter%20id%3D%22soft%22%20x%3D%22-20%25%22%20y%3D%22-20%25%22%20width%3D%22140%25%22%20height%3D%22140%25%22%3E%3CfeGaussianBlur%20stdDeviation%3D%227%22%2F%3E%3C%2Ffilter%3E%0A%3C%2Fdefs%3E%0A%3Cpath%20d%3D%22M420%20-34C500%2023%20505%2071%20610%2094C676%20108%20706%2075%20760%2042V-34H420Z%22%20fill%3D%22url(%23silk2)%22%2F%3E%0A%3Cpath%20d%3D%22M355%20-20C438%2038%20451%2085%20541%20111C613%20132%20661%20107%20748%2063%22%20stroke%3D%22url(%23shine)%22%20stroke-width%3D%2232%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.72%22%20filter%3D%22url(%23soft)%22%2F%3E%0A%3Cpath%20d%3D%22M382%20-22C456%2041%20467%2092%20555%20119C629%20142%20685%20119%20748%2077C691%20151%20622%20174%20548%20150C463%20122%20444%2062%20382%20-22Z%22%20fill%3D%22url(%23silk1)%22%2F%3E%0A%3Cpath%20d%3D%22M290%2045C385%2070%20424%20126%20505%20150C590%20176%20656%20142%20742%20103C684%20190%20608%20222%20520%20191C427%20158%20386%2095%20290%2045Z%22%20fill%3D%22url(%23silk2)%22%20opacity%3D%22.78%22%2F%3E%0A%3Cpath%20d%3D%22M280%20112C378%20116%20425%20169%20498%20194C581%20222%20658%20190%20750%20143C686%20239%20600%20270%20511%20237C427%20206%20374%20146%20280%20112Z%22%20fill%3D%22url(%23silk3)%22%2F%3E%0A%3Cpath%20d%3D%22M310%20174C404%20165%20454%20214%20527%20243C598%20272%20674%20249%20751%20207C696%20294%20612%20329%20530%20296C445%20263%20405%20207%20310%20174Z%22%20fill%3D%22url(%23silk1)%22%20opacity%3D%22.95%22%2F%3E%0A%3Cpath%20d%3D%22M390%20238C467%20226%20504%20263%20571%20287C635%20310%20691%20297%20748%20269V360H390C461%20327%20476%20287%20390%20238Z%22%20fill%3D%22%234A202D%22%20fill-opacity%3D%22.44%22%2F%3E%0A%3Cpath%20d%3D%22M365%2018C433%2073%20455%20118%20536%20143C606%20164%20664%20139%20728%20106%22%20stroke%3D%22%23FFE8D8%22%20stroke-opacity%3D%22.55%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%2F%3E%0A%3Cpath%20d%3D%22M300%20111C388%20125%20432%20176%20504%20198C583%20222%20654%20194%20728%20156%22%20stroke%3D%22%23F6D7C6%22%20stroke-opacity%3D%22.46%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%2F%3E%0A%3Cpath%20d%3D%22M304%20173C400%20179%20447%20224%20522%20249C593%20274%20662%20250%20730%20217%22%20stroke%3D%22%23F3CABB%22%20stroke-opacity%3D%22.38%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%2F%3E%0A%3Cpath%20d%3D%22M386%2035C453%2092%20470%20131%20548%20157C620%20181%20677%20156%20742%20124%22%20stroke%3D%22%236F3442%22%20stroke-opacity%3D%22.55%22%20stroke-width%3D%2211%22%20stroke-linecap%3D%22round%22%20filter%3D%22url(%23soft)%22%2F%3E%0A%3C%2Fsvg%3E");
+ background-repeat:no-repeat;background-position:right center;background-size:cover;
+ opacity:.98;overflow:hidden;
+}
+.balance-card>.stat-top,.balance-card>.stat-value,.balance-card>.stat-foot,
+.balance-card>.balance-filter-trigger,.balance-card>.balance-filter-panel{position:relative;z-index:1}
+.balance-card>.balance-filter-panel{z-index:3}
+@media(max-width:620px){
+ .balance-decoration{background-size:auto 100%;background-position:right center}
+}
+
+
+/* CAESH v1.14.1 — DM Serif Display brand, native status bar, mobile date, and tap feedback. */
+.topbar .topbar-brand-name{
+  font-family:"DM Serif Display",Georgia,serif;
+  font-size:1.18em;
+  font-weight:400;
+  letter-spacing:0;
+  text-transform:none;
+  line-height:1;
+}
+*{-webkit-tap-highlight-color:transparent}
+button,a,[role="button"],input,select,textarea{-webkit-tap-highlight-color:transparent}
+button:focus:not(:focus-visible),a:focus:not(:focus-visible),[role="button"]:focus:not(:focus-visible){outline:none}
+button:focus-visible,a:focus-visible,[role="button"]:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:2px solid color-mix(in srgb,var(--accent) 78%,transparent);
+  outline-offset:2px;
+}
+@media(max-width:620px){
+  .top-date{
+    display:inline-flex;
+    align-items:center;
+    flex:0 1 auto;
+    min-width:0;
+    white-space:nowrap;
+    font-size:9px;
+    line-height:1;
+    color:var(--muted);
+    margin-right:2px;
+  }
+  .topbar-right{gap:7px}
+  .topbar-right .theme-toggle{margin-left:0}
+  .topbar .topbar-brand-name{font-size:25px}
+}
+
+
+/* CAESH v1.14.2 — edge-to-edge Android status bar. The WebView draws the header behind the transparent system bar. */
+.caesh-native .topbar{
+  padding-top:var(--caesh-statusbar-height, env(safe-area-inset-top, 0px));
+  height:calc(72px + var(--caesh-statusbar-height, env(safe-area-inset-top, 0px)));
+}
+@media(max-width:620px){
+  .caesh-native .topbar{
+    height:calc(58px + var(--caesh-statusbar-height, env(safe-area-inset-top, 0px)));
+    padding-top:var(--caesh-statusbar-height, env(safe-area-inset-top, 0px));
+  }
+}
