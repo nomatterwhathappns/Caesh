@@ -40,6 +40,8 @@ export type Transaction = {
   toWalletName?: string;
   createdAt: number;
   hiddenFromHistory?: boolean;
+  debtNoteId?: string;
+  debtAction?: "initial" | "add" | "payment";
 };
 
 const DB_NAME = "caesh-local";
@@ -296,7 +298,7 @@ export async function createDebtNote(wallet: Wallet, transaction: Transaction): 
           throw new Error("Saldo wallet sumber tidak mencukupi untuk memberikan utang.");
         }
         walletStore.add(wallet);
-        transactionStore.add(transaction);
+        transactionStore.add({ ...transaction, debtNoteId: wallet.id, debtAction: "initial" });
       } catch (reason) {
         failure = reason instanceof Error ? reason : new Error("Notes gagal dibuat.");
         try { tx.abort(); } catch { /* The transaction may already be aborting. */ }
@@ -359,7 +361,7 @@ export async function recordDebtMovement(
         const nextBalance = current + signedChange;
         if (action === "add" && nextBalance * sign <= 0) throw new Error("Penambahan utang menghasilkan saldo yang tidak valid.");
         if (action === "payment" && nextBalance * sign < 0) throw new Error("Nominal pembayaran melebihi sisa utang.");
-        transactionStore.add(transaction);
+        transactionStore.add({ ...transaction, debtNoteId: noteWallet.id, debtAction: action });
         const closed = action === "payment" && nextBalance === 0;
         if (closed) walletStore.delete(noteWalletId);
         result = { closed, remaining: Math.abs(nextBalance) };
@@ -429,34 +431,39 @@ export async function removeTransaction(id: string, includeDebtHistory = false):
         return;
       }
       if (!includeDebtHistory) {
-        // Keep the financial movement in storage so wallet/debt balances remain unchanged;
-        // only hide this record from history screens.
+        // Hide only this selected row; retain its financial effect in the ledger.
         transactionStore.put({ ...target, hiddenFromHistory: true });
         return;
       }
 
+      // Identify the Notes ledger from explicit linkage, with endpoint fallback for
+      // debt records created by app versions before linkage metadata existed.
       const noteWallet = wallets.find((wallet) => wallet.category === "notes"
-        && (wallet.id === target.walletId || wallet.id === target.toWalletId));
-      let noteWalletId = noteWallet?.id;
-      if (!noteWalletId) {
-        // A fully paid Notes wallet is already closed; identify its stable ID by
-        // finding the endpoint shared by the debt's transfer history.
-        const debtRecords = transactions.filter((item) => item.category === "Utang" && item.kind === "transfer");
-        const endpointIds = [target.walletId, target.toWalletId].filter((value): value is string => !!value);
-        noteWalletId = endpointIds.find((candidate) =>
-          debtRecords.filter((item) => item.walletId === candidate || item.toWalletId === candidate).length > 1
-        );
-      }
-      if (!noteWalletId) {
-        failure = new Error("Riwayat utang terkait tidak dapat dikenali. Data tidak diubah.");
-        tx.abort();
+        && (wallet.id === target.debtNoteId || wallet.id === target.walletId || wallet.id === target.toWalletId));
+      const noteWalletId = target.debtNoteId ?? noteWallet?.id;
+      const isInitialDebt = target.debtAction === "initial"
+        || (!target.debtAction && !!noteWallet && (noteWallet.id === target.walletId || noteWallet.id === target.toWalletId)
+          && noteWallet.id === target.debtNoteId);
+
+      if (isInitialDebt) {
+        if (!noteWalletId) {
+          failure = new Error("Notes dari utang awal tidak dapat dikenali. Data tidak diubah.");
+          tx.abort();
+          return;
+        }
+        // Removing the original debt closes that debt entirely: remove only records
+        // linked to this Notes wallet, leaving unrelated debts and transactions alone.
+        transactions.filter((item) => item.category === "Utang"
+          && (item.debtNoteId === noteWalletId
+            || (!item.debtNoteId && item.kind === "transfer"
+              && (item.walletId === noteWalletId || item.toWalletId === noteWalletId))))
+          .forEach((item) => transactionStore.delete(item.id));
+        if (noteWallet) walletStore.delete(noteWalletId);
         return;
       }
-      transactions.filter((item) => item.category === "Utang"
-        && item.kind === "transfer"
-        && (item.walletId === noteWalletId || item.toWalletId === noteWalletId))
-        .forEach((item) => transactionStore.delete(item.id));
-      if (noteWallet) walletStore.delete(noteWalletId);
+
+      // A payment or additional-debt row is independent: reverse only this row.
+      transactionStore.delete(id);
     };
     transactionsRequest.onsuccess = process;
     walletsRequest.onsuccess = process;
