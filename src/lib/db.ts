@@ -472,7 +472,7 @@ export async function saveTransaction(transaction: Transaction): Promise<void> {
   });
 }
 
-export async function removeTransaction(id: string, includeDebtHistory = false): Promise<void> {
+export async function removeTransaction(id: string, includeDebtHistory = true): Promise<void> {
   const db = await openDatabase();
   return new Promise((resolve, reject) => {
     const tx = db.transaction([TRANSACTION_STORE, WALLET_STORE], "readwrite");
