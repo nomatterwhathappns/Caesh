@@ -120,7 +120,6 @@ export default function CaeshApp() {
   const [walletPrivacyLoaded, setWalletPrivacyLoaded] = useState(false);
   const [walletSettingsOpenId, setWalletSettingsOpenId] = useState<string | null>(null);
   const [deleteTransactionTarget, setDeleteTransactionTarget] = useState<Transaction | null>(null);
-  const [deleteDebtWithHistory, setDeleteDebtWithHistory] = useState(false);
   const [settleDebtTarget, setSettleDebtTarget] = useState<Wallet | null>(null);
   const [deleteWishlistTarget, setDeleteWishlistTarget] = useState<WishlistItem | null>(null);
 
@@ -883,19 +882,17 @@ export default function CaeshApp() {
 
   async function handleDelete(id: string) {
     const target = transactions.find((item) => item.id === id && !item.hiddenFromHistory);
-    setDeleteDebtWithHistory(false);
     setDeleteTransactionTarget(target ?? null);
   }
 
   async function confirmDeleteTransaction() {
     if (!deleteTransactionTarget) return;
     try {
-      await removeTransaction(deleteTransactionTarget.id, deleteTransactionTarget.category === "Utang" && deleteDebtWithHistory);
+      await removeTransaction(deleteTransactionTarget.id, deleteTransactionTarget.category === "Utang");
       const [savedTransactions, savedWallets] = await Promise.all([getTransactions(), getWallets()]);
       setTransactions(savedTransactions);
       setWallets(savedWallets);
       setDeleteTransactionTarget(null);
-      setDeleteDebtWithHistory(false);
       if (detailWalletId && !savedWallets.some((wallet) => wallet.id === detailWalletId)) {
         setDetailWalletId(null);
         setDetailWalletNote("");
@@ -1112,7 +1109,7 @@ export default function CaeshApp() {
       </section></div>}
       {deleteWishlistTarget && <div className="modal-backdrop delete-wishlist-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteWishlistTarget(null); }}><section className="modal-card delete-wishlist-modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-wishlist-title" aria-describedby="delete-wishlist-description"><div className="delete-wishlist-icon" aria-hidden="true">×</div><div className="section-kicker">KONFIRMASI WISHLIST</div><h2 id="delete-wishlist-title">Hapus wishlist?</h2><p id="delete-wishlist-description">Item <strong>{deleteWishlistTarget.name}</strong> akan dihapus dari wishlist. Tindakan ini tidak bisa dibatalkan.</p><div className="modal-actions"><button type="button" className="cancel-button" onClick={() => setDeleteWishlistTarget(null)}>Batal</button><button type="button" className="delete-wishlist-confirm-button" onClick={handleWishlistDelete}>Ya, hapus</button></div></section></div>}
       {settleDebtTarget && <div className="modal-backdrop settle-debt-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setSettleDebtTarget(null); }}><section className="modal-card settle-debt-modal" role="alertdialog" aria-modal="true" aria-labelledby="settle-debt-title" aria-describedby="settle-debt-description"><div className="settle-debt-icon" aria-hidden="true">✓</div><div className="section-kicker">KONFIRMASI UTANG</div><h2 id="settle-debt-title">Selesaikan utang?</h2><p id="settle-debt-description">Tandai utang dengan <strong>{settleDebtTarget.name}</strong> sebagai lunas dengan sisa <strong>{rupiah(Math.abs(walletBalances.find((item) => item.id === settleDebtTarget.id)?.balance ?? 0))}</strong>. Tidak ada pembayaran tambahan dan saldo wallet tidak akan berubah.</p><div className="modal-actions"><button type="button" className="cancel-button" onClick={() => setSettleDebtTarget(null)}>Batal</button><button type="button" className="settle-debt-confirm-button" onClick={handleSettleDebt}>Ya, selesaikan</button></div></section></div>}
-      {deleteTransactionTarget && <div className="modal-backdrop delete-confirm-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteTransactionTarget(null); }}><section className="modal-card delete-confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-confirm-title" aria-describedby="delete-confirm-description"><div className="delete-confirm-icon" aria-hidden="true">!</div><div className="section-kicker">KONFIRMASI HAPUS</div><h2 id="delete-confirm-title">Hapus transaksi ini?</h2><p id="delete-confirm-description">Transaksi <strong>{deleteTransactionTarget.note || deleteTransactionTarget.category}</strong> sebesar <strong>{rupiah(deleteTransactionTarget.amount)}</strong> akan dihapus dari riwayat. Tindakan ini tidak bisa dibatalkan.</p>{deleteTransactionTarget.category === "Utang" && <label className="debt-delete-history-option"><input type="checkbox" checked={deleteDebtWithHistory} onChange={(event) => setDeleteDebtWithHistory(event.target.checked)} /><span>Hapus transaksi termasuk riwayat</span></label>}<div className="modal-actions"><button type="button" className="cancel-button" onClick={() => setDeleteTransactionTarget(null)}>Batal</button><button type="button" className="delete-confirm-button" onClick={confirmDeleteTransaction}>Ya, hapus</button></div></section></div>}
+      {deleteTransactionTarget && <div className="modal-backdrop delete-confirm-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteTransactionTarget(null); }}><section className="modal-card delete-confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-confirm-title" aria-describedby="delete-confirm-description"><div className="delete-confirm-icon" aria-hidden="true">!</div><div className="section-kicker">KONFIRMASI HAPUS</div><h2 id="delete-confirm-title">Hapus transaksi ini?</h2><p id="delete-confirm-description">Transaksi <strong>{deleteTransactionTarget.note || deleteTransactionTarget.category}</strong> sebesar <strong>{rupiah(deleteTransactionTarget.amount)}</strong> akan dihapus dari riwayat. Tindakan ini tidak bisa dibatalkan.</p><div className="modal-actions"><button type="button" className="cancel-button" onClick={() => setDeleteTransactionTarget(null)}>Batal</button><button type="button" className="delete-confirm-button" onClick={confirmDeleteTransaction}>Ya, hapus</button></div></section></div>}
 
       {showForm && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowForm(false); }}><section className="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div className="modal-heading"><div><div className="section-kicker">CATATAN BARU</div><h2 id="modal-title">Tambah transaksi</h2></div><button className="modal-close" onClick={() => setShowForm(false)} aria-label="Tutup">×</button></div>
         <form onSubmit={handleSubmit}><div className="kind-switch"><button type="button" className={kind === "expense" ? "active expense-choice" : ""} onClick={() => changeKind("expense")}>Pengeluaran</button><button type="button" className={kind === "income" ? "active income-choice" : ""} onClick={() => changeKind("income")}>Pemasukan</button><button type="button" className={kind === "transfer" ? "active transfer-choice" : ""} onClick={() => changeKind("transfer")}>Transfer</button></div>
