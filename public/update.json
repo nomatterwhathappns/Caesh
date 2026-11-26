@@ -1,8 +1,12 @@
 {
-  "version": "1.14.1",
-  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.14.1/Caesh.apk",
-  "notes": "Menyelaraskan warna status bar Android dengan header Light/Dark Mode, mengganti wordmark menjadi DM Serif Display, menghilangkan tap highlight biru, dan menampilkan tanggal pada header mode portrait.",
+  "version": "1.14.2",
+  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.14.2/Caesh.apk",
+  "notes": "Memperbaiki status bar Android dengan mode edge-to-edge: latar transparan menyatu dengan header Bordeaux Estate, ikon terang di Dark Mode dan gelap di Light Mode.",
   "releases": [
+    {
+      "version": "1.14.2",
+      "notes": "Memperbaiki status bar Android dengan mode edge-to-edge: latar transparan menyatu dengan header Bordeaux Estate, ikon terang di Dark Mode dan gelap di Light Mode."
+    },
     {
       "version": "1.14.1",
       "notes": "Menyelaraskan warna status bar Android dengan header Light/Dark Mode, mengganti wordmark menjadi DM Serif Display, menghilangkan tap highlight biru, dan menampilkan tanggal pada header mode portrait."
