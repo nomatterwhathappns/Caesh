@@ -1,8 +1,12 @@
 {
-  "version": "1.11.18",
-  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.11.18/Caesh.apk",
-  "notes": "Memperbaiki tombol Bayar dan Tambah Utang yang tertutup dialog detail wallet.",
+  "version": "1.11.19",
+  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.11.19/Caesh.apk",
+  "notes": "Memperbaiki penghapusan transaksi utang agar hanya memengaruhi transaksi yang dipilih; menghapus utang awal akan menghapus Notes dan riwayat terkait.",
   "releases": [
+    {
+      "version": "1.11.19",
+      "notes": "Memperbaiki penghapusan transaksi utang agar hanya memengaruhi transaksi yang dipilih; menghapus utang awal akan menghapus Notes dan riwayat terkait."
+    },
     {
       "version": "1.11.18",
       "notes": "Memperbaiki tombol Bayar dan Tambah Utang yang tertutup dialog detail wallet."
