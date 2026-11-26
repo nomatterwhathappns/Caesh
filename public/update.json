@@ -1,8 +1,12 @@
 {
-  "version": "1.11.23",
-  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.11.23/Caesh.apk",
-  "notes": "Memperbaiki wishlist agar data yang tersimpan di database lokal dimuat kembali saat aplikasi dibuka.",
+  "version": "1.11.24",
+  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.11.24/Caesh.apk",
+  "notes": "Mengganti konfirmasi hapus wishlist bawaan Android dengan popup custom CAESH.",
   "releases": [
+    {
+      "version": "1.11.24",
+      "notes": "Mengganti konfirmasi hapus wishlist bawaan Android dengan popup custom CAESH."
+    },
     {
       "version": "1.11.23",
       "notes": "Memperbaiki wishlist agar data yang tersimpan di database lokal dimuat kembali saat aplikasi dibuka."
