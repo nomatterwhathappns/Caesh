@@ -1,8 +1,12 @@
 {
-  "version": "1.17.0",
-  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.17.0/Caesh.apk",
-  "notes": "Menambahkan fitur edit riwayat transaksi. Ketuk transaksi biasa di halaman Transaksi untuk langsung membuka form edit.",
+  "version": "1.17.1",
+  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.17.1/Caesh.apk",
+  "notes": "Mengganti konfirmasi hapus wallet dan kategori yang masih memakai dialog bawaan Android/browser dengan popup custom CAESH.",
   "releases": [
+    {
+      "version": "1.17.1",
+      "notes": "Mengganti konfirmasi hapus wallet dan kategori yang masih memakai dialog bawaan Android/browser dengan popup custom CAESH."
+    },
     {
       "version": "1.17.0",
       "notes": "Menambahkan fitur edit riwayat transaksi. Ketuk transaksi biasa di halaman Transaksi untuk langsung membuka form edit."
