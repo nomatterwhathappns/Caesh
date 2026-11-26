@@ -120,7 +120,7 @@ await writeFile(`${resDir}/layout/expense_widget.xml`, layoutXml(16, 13, 23, 10)
 await writeFile(`${resDir}/layout/expense_widget_large.xml`, layoutXml(20, 15, 27, 12));
 await writeFile(`${resDir}/drawable/expense_widget_shape.xml`, `<?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
-    <solid android:color="#24352B" />
+    <solid android:color="#713B45" />
     <corners android:radius="22dp" />
 </shape>
 `);
