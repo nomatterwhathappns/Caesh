@@ -2,6 +2,7 @@
 
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Capacitor, CapacitorHttp } from "@capacitor/core";
+import { StatusBar, Style } from "@capacitor/status-bar";
 import { App } from "@capacitor/app";
 import { Directory, Filesystem } from "@capacitor/filesystem";
 import { FileTransfer } from "@capacitor/file-transfer";
@@ -384,6 +385,14 @@ export default function CaeshApp() {
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     window.localStorage.setItem("caesh-theme", theme);
+    const statusBarColor = theme === "dark" ? "#302226" : "#FAF5EF";
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", statusBarColor);
+    if (Capacitor.isNativePlatform()) {
+      void Promise.all([
+        StatusBar.setBackgroundColor({ color: statusBarColor }),
+        StatusBar.setStyle({ style: theme === "dark" ? Style.Light : Style.Dark }),
+      ]).catch((reason: unknown) => console.warn("CAESH status bar could not be synchronized.", reason));
+    }
   }, [theme]);
 
   useEffect(() => {
@@ -1003,7 +1012,7 @@ export default function CaeshApp() {
       </aside>
 
       <section className="main-panel" id="overview">
-        <header className="topbar"><a className="brand topbar-brand" href="#" aria-label="Caesh beranda"><span className="topbar-brand-name">caesh<span className="brand-period">.</span></span></a><div className="topbar-right"><span className="top-date">{todayLabel}</span><button className="theme-toggle" onClick={() => setShowExpenseWidgetSettings(true)} aria-label="Pengaturan widget CAESH" title="Widget CAESH"><span aria-hidden="true">▦</span><span>Widget</span></button><button className="theme-toggle" onClick={() => setTheme((current) => current === "light" ? "dark" : "light")} aria-label={theme === "light" ? "Aktifkan tema gelap" : "Aktifkan tema terang"} title={theme === "light" ? "Tema gelap" : "Tema terang"}><span aria-hidden="true">{theme === "light" ? "☾" : "☀"}</span><span>{theme === "light" ? "Gelap" : "Terang"}</span></button></div></header>
+        <header className="topbar"><a className="brand topbar-brand" href="#" aria-label="Caesh beranda"><span className="topbar-brand-name">Caesh<span className="brand-period">.</span></span></a><div className="topbar-right"><span className="top-date">{todayLabel}</span><button className="theme-toggle" onClick={() => setShowExpenseWidgetSettings(true)} aria-label="Pengaturan widget CAESH" title="Widget CAESH"><span aria-hidden="true">▦</span><span>Widget</span></button><button className="theme-toggle" onClick={() => setTheme((current) => current === "light" ? "dark" : "light")} aria-label={theme === "light" ? "Aktifkan tema gelap" : "Aktifkan tema terang"} title={theme === "light" ? "Tema gelap" : "Tema terang"}><span aria-hidden="true">{theme === "light" ? "☾" : "☀"}</span><span>{theme === "light" ? "Gelap" : "Terang"}</span></button></div></header>
         <div className={activeNav === "overview" ? "content overview-content" : "content"}>
           <div className="welcome-row"><div><div className="eyebrow">{({ overview: "PERSONAL FINANCE OVERVIEW", wallets: "MONEY STORAGE", transactions: "TRANSACTION HISTORY", insights: "FINANCIAL INSIGHTS", wishlist: "YOUR WISHLIST" })[activeNav]}</div><h1>{({ overview: <>Uangmu, lebih <em>terarah.</em></>, wallets: <>Kelola <em>wallet.</em></>, transactions: <>Semua <em>transaksi.</em></>, insights: <>Kenali pola <em>keuangan.</em></>, wishlist: <>Daftar <em>keinginan.</em></> })[activeNav]}</h1></div>{activeNav !== "wishlist" && <button className="primary-button" onClick={() => { setKind("expense"); setShowForm(true); }}><span>＋</span> Tambah transaksi</button>}</div>
           {error && <div className="error-banner" role="alert">{error}<button onClick={() => setError("")}>Tutup</button></div>}
