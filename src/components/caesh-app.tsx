@@ -422,7 +422,7 @@ export default function CaeshApp() {
         setDebtAction(null);
         setDebtTargetWalletId(null);
       } else if (showForm) {
-        setShowForm(false);
+        closeTransactionForm();
       } else if (availableUpdate) {
         setAvailableUpdate(null);
       } else if (detailWalletId) {
