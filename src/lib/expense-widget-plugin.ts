@@ -16,6 +16,15 @@ export interface ExpenseWidgetBridge {
     imagePositionX?: number;
     imagePositionY?: number;
     imageZoom?: number;
+    baseImageX?: number;
+    baseImageY?: number;
+    baseImageZoom?: number;
+    beforeImageX?: number;
+    beforeImageY?: number;
+    beforeImageZoom?: number;
+    afterImageX?: number;
+    afterImageY?: number;
+    afterImageZoom?: number;
     enabled: boolean;
   }): Promise<{ installed: boolean }>;
   getExpenseWidgetStatus(): Promise<{ installed: boolean }>;
