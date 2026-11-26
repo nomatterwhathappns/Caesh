@@ -12,6 +12,15 @@ export type ExpenseWidgetSettings = {
   baseImage: string;
   beforeImage: string;
   afterImage: string;
+  baseImageX: number;
+  baseImageY: number;
+  baseImageZoom: number;
+  beforeImageX: number;
+  beforeImageY: number;
+  beforeImageZoom: number;
+  afterImageX: number;
+  afterImageY: number;
+  afterImageZoom: number;
 };
 export type ExpenseDateRange = { start: string; end: string };
 
@@ -26,6 +35,15 @@ export const DEFAULT_EXPENSE_WIDGET_SETTINGS: ExpenseWidgetSettings = {
   baseImage: "",
   beforeImage: "",
   afterImage: "",
+  baseImageX: 50,
+  baseImageY: 50,
+  baseImageZoom: 1,
+  beforeImageX: 50,
+  beforeImageY: 50,
+  beforeImageZoom: 1,
+  afterImageX: 50,
+  afterImageY: 50,
+  afterImageZoom: 1,
 };
 
 function toLocalDateString(date: Date): string {
@@ -77,6 +95,14 @@ export function isExpenseLimitExceeded(total: number, settings: Pick<ExpenseWidg
   return settings.limitEnabled && settings.monthlyLimit > 0 && total > settings.monthlyLimit;
 }
 
+function normalizePosition(value: unknown, fallback: number): number {
+  return typeof value === "number" && Number.isFinite(value) ? Math.max(0, Math.min(100, value)) : fallback;
+}
+
+function normalizeZoom(value: unknown): number {
+  return typeof value === "number" && Number.isFinite(value) ? Math.max(1, Math.min(2.5, value)) : 1;
+}
+
 export function normalizeExpenseWidgetSettings(value: unknown): ExpenseWidgetSettings {
   if (!value || typeof value !== "object") return { ...DEFAULT_EXPENSE_WIDGET_SETTINGS };
   const raw = value as Partial<ExpenseWidgetSettings>;
@@ -93,5 +119,14 @@ export function normalizeExpenseWidgetSettings(value: unknown): ExpenseWidgetSet
     baseImage: typeof raw.baseImage === "string" && raw.baseImage.startsWith("data:image/") ? raw.baseImage : "",
     beforeImage: typeof raw.beforeImage === "string" && raw.beforeImage.startsWith("data:image/") ? raw.beforeImage : "",
     afterImage: typeof raw.afterImage === "string" && raw.afterImage.startsWith("data:image/") ? raw.afterImage : "",
+    baseImageX: normalizePosition(raw.baseImageX, 50),
+    baseImageY: normalizePosition(raw.baseImageY, 50),
+    baseImageZoom: normalizeZoom(raw.baseImageZoom),
+    beforeImageX: normalizePosition(raw.beforeImageX, 50),
+    beforeImageY: normalizePosition(raw.beforeImageY, 50),
+    beforeImageZoom: normalizeZoom(raw.beforeImageZoom),
+    afterImageX: normalizePosition(raw.afterImageX, 50),
+    afterImageY: normalizePosition(raw.afterImageY, 50),
+    afterImageZoom: normalizeZoom(raw.afterImageZoom),
   };
 }
