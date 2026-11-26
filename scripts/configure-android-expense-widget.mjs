@@ -193,7 +193,11 @@ public class ExpenseWidgetProvider extends AppWidgetProvider {
         String label = "monthly".equals(period) ? "Bulan ini" : "yearly".equals(period) ? "Tahun ini" : "weekly".equals(period) ? "Minggu ini" : "Hari ini";
         String beforeImage = prefs.getString("beforeImage", "");
         String baseImage = prefs.getString("baseImage", "");
-        String image = beforeImage.isEmpty() ? baseImage : beforeImage;
+        boolean useBeforeImage = !beforeImage.isEmpty();
+        String image = useBeforeImage ? beforeImage : baseImage;
+        String positionX = prefs.getString(useBeforeImage ? "beforeImageX" : "baseImageX", "50");
+        String positionY = prefs.getString(useBeforeImage ? "beforeImageY" : "baseImageY", "50");
+        String zoom = prefs.getString(useBeforeImage ? "beforeImageZoom" : "baseImageZoom", "1");
         prefs.edit()
             .putString("periodKey", currentKey)
             .putString("amount", "Rp0")
@@ -201,6 +205,9 @@ public class ExpenseWidgetProvider extends AppWidgetProvider {
             .putString("periodLabel", label)
             .putString("transactionCount", "0")
             .putString("image", image)
+            .putString("imagePositionX", positionX)
+            .putString("imagePositionY", positionY)
+            .putString("imageZoom", zoom)
             .putBoolean("overLimit", false)
             .apply();
     }
@@ -244,7 +251,6 @@ public class ExpenseWidgetProvider extends AppWidgetProvider {
         String transactionCount = prefs.getString("transactionCount", "0");
         if (prefs.getBoolean("overLimit", false)) periodLabel = "Batas pengeluaran terlampaui";
         String image = prefs.getString("image", "");
-        Bitmap bitmap = decodeImage(image);
         Intent launch = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
         PendingIntent pending = null;
         if (launch != null) {
@@ -255,6 +261,12 @@ public class ExpenseWidgetProvider extends AppWidgetProvider {
         Bundle options = manager.getAppWidgetOptions(id);
         int availableWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH);
         int availableHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT);
+        float density = context.getResources().getDisplayMetrics().density;
+        float targetAspect = availableHeight > 0 ? (availableWidth / density) / (float) (availableHeight / density) : 1.5f;
+        float positionX = parseFloat(prefs.getString("imagePositionX", "50"), 50f);
+        float positionY = parseFloat(prefs.getString("imagePositionY", "50"), 50f);
+        float zoom = parseFloat(prefs.getString("imageZoom", "1"), 1f);
+        Bitmap bitmap = decodeImage(image, positionX, positionY, zoom, targetAspect);
         int layoutId = R.layout.expense_widget;
         if (availableWidth < 135 || availableHeight < 135) {
             layoutId = R.layout.expense_widget_small;
@@ -264,13 +276,35 @@ public class ExpenseWidgetProvider extends AppWidgetProvider {
         manager.updateAppWidget(id, createViews(context, layoutId, title, amount, periodLabel, transactionCount, bitmap, pending));
     }
 
-    private static Bitmap decodeImage(String dataUrl) {
+    private static float parseFloat(String value, float fallback) {
+        try { return Float.parseFloat(value); } catch (Exception ignored) { return fallback; }
+    }
+
+    private static Bitmap decodeImage(String dataUrl, float positionX, float positionY, float zoom, float targetAspect) {
         if (dataUrl == null || !dataUrl.startsWith("data:image/")) return null;
         try {
             int comma = dataUrl.indexOf(',');
             if (comma < 0) return null;
             byte[] bytes = Base64.decode(dataUrl.substring(comma + 1), Base64.DEFAULT);
-            return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+            Bitmap source = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+            if (source == null) return null;
+            float aspect = targetAspect > 0f ? targetAspect : 1.5f;
+            float cropWidth = source.getWidth();
+            float cropHeight = source.getHeight();
+            if (cropWidth / cropHeight > aspect) cropWidth = cropHeight * aspect;
+            else cropHeight = cropWidth / aspect;
+            float safeZoom = Math.max(1f, Math.min(2.5f, zoom));
+            cropWidth = Math.max(1f, cropWidth / safeZoom);
+            cropHeight = Math.max(1f, cropHeight / safeZoom);
+            float maxLeft = Math.max(0f, source.getWidth() - cropWidth);
+            float maxTop = Math.max(0f, source.getHeight() - cropHeight);
+            float left = maxLeft * Math.max(0f, Math.min(100f, positionX)) / 100f;
+            float top = maxTop * Math.max(0f, Math.min(100f, positionY)) / 100f;
+            Bitmap cropped = Bitmap.createBitmap(source, Math.round(left), Math.round(top),
+                Math.min(source.getWidth() - Math.round(left), Math.max(1, Math.round(cropWidth))),
+                Math.min(source.getHeight() - Math.round(top), Math.max(1, Math.round(cropHeight))));
+            if (cropped != source) source.recycle();
+            return cropped;
         } catch (Exception ignored) {
             return null;
         }
@@ -340,7 +374,12 @@ public class ExpenseWidgetPlugin extends Plugin {
         String beforeImage = call.getString("beforeImage", "");
         String afterImage = call.getString("afterImage", "");
         boolean limitEnabled = call.getBoolean("limitEnabled", false);
-        String image = overLimit && !afterImage.isEmpty() ? afterImage : limitEnabled && !beforeImage.isEmpty() ? beforeImage : baseImage;
+        boolean useAfterImage = overLimit && !afterImage.isEmpty();
+        boolean useBeforeImage = !useAfterImage && limitEnabled && !beforeImage.isEmpty();
+        String image = useAfterImage ? afterImage : useBeforeImage ? beforeImage : baseImage;
+        String positionX = String.valueOf(call.getInt("imagePositionX", 50));
+        String positionY = String.valueOf(call.getInt("imagePositionY", 50));
+        String imageZoom = String.valueOf(call.getDouble("imageZoom", 1.0));
         if (!enabled) image = "";
         String caption = periodLabel + " · " + transactionCount + " transaksi";
         if (overLimit) caption = "Batas pengeluaran terlampaui";
@@ -357,6 +396,18 @@ public class ExpenseWidgetPlugin extends Plugin {
             .putString("baseImage", baseImage)
             .putString("beforeImage", beforeImage)
             .putString("afterImage", afterImage)
+            .putString("baseImageX", String.valueOf(call.getInt("baseImageX", 50)))
+            .putString("baseImageY", String.valueOf(call.getInt("baseImageY", 50)))
+            .putString("baseImageZoom", String.valueOf(call.getDouble("baseImageZoom", 1.0)))
+            .putString("beforeImageX", String.valueOf(call.getInt("beforeImageX", 50)))
+            .putString("beforeImageY", String.valueOf(call.getInt("beforeImageY", 50)))
+            .putString("beforeImageZoom", String.valueOf(call.getDouble("beforeImageZoom", 1.0)))
+            .putString("afterImageX", String.valueOf(call.getInt("afterImageX", 50)))
+            .putString("afterImageY", String.valueOf(call.getInt("afterImageY", 50)))
+            .putString("afterImageZoom", String.valueOf(call.getDouble("afterImageZoom", 1.0)))
+            .putString("imagePositionX", positionX)
+            .putString("imagePositionY", positionY)
+            .putString("imageZoom", imageZoom)
             .putBoolean("limitEnabled", limitEnabled)
             .putBoolean("overLimit", overLimit)
             .apply();
