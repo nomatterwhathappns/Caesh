@@ -1,7 +1,7 @@
 {
-  "version": "1.11.24",
-  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.11.24/Caesh.apk",
-  "notes": "Mengganti konfirmasi hapus wishlist bawaan Android dengan popup custom CAESH.",
+  "version": "1.12.0",
+  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.12.0/Caesh.apk",
+  "notes": "Menambahkan pengaturan posisi horizontal, vertikal, dan zoom untuk setiap foto background widget.",
   "releases": [
     {
       "version": "1.11.24",
@@ -74,6 +74,10 @@
     {
       "version": "1.7.9",
       "notes": "Merapikan tampilan Wallet: tombol tambah hanya ikon plus dan ikon titik tiga diratakan di tengah."
+    },
+    {
+      "version": "1.12.0",
+      "notes": "Menambahkan pengaturan posisi horizontal, vertikal, dan zoom untuk setiap foto background widget."
     }
   ]
 }
