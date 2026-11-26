@@ -24,7 +24,7 @@
 - Pencatatan pemasukan, pengeluaran, dan transfer antar-wallet.
 - Riwayat transaksi, pencarian, dan filter.
 - Pencatatan utang/piutang per orang.
-- Pembayaran utang bertahap, pelunasan, dan riwayat pergerakan utang.
+- Pembayaran utang bertahap, pelunasan otomatis/manual, dan riwayat penyelesaian utang beserta nominal dibayar serta sisa yang dihapus.
 
 ### Wishlist
 - Menyimpan daftar barang atau tujuan yang ingin dibeli.
@@ -45,9 +45,9 @@
 
 ## Unduh CAESH Android
 
-**Versi terbaru: v1.14.2**
+**Versi terbaru: v1.15.0**
 
-[Unduh CAESH v1.14.2 (APK)](https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.14.2/Caesh.apk)
+[Unduh CAESH v1.15.0 (APK)](https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.15.0/Caesh.apk)
 
 [Semua rilis CAESH](https://github.com/nomatterwhappns/Caesh/releases)
 

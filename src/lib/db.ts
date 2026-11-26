@@ -41,7 +41,11 @@ export type Transaction = {
   createdAt: number;
   hiddenFromHistory?: boolean;
   debtNoteId?: string;
-  debtAction?: "initial" | "add" | "payment";
+  debtAction?: "initial" | "add" | "payment" | "settled";
+  debtDirection?: DebtDirection;
+  debtInitialAmount?: number;
+  debtPaidAmount?: number;
+  debtRemainingAmount?: number;
 };
 
 const DB_NAME = "caesh-local";
@@ -397,9 +401,36 @@ export async function recordDebtMovement(
         const nextBalance = current + signedChange;
         if (action === "add" && nextBalance * sign <= 0) throw new Error("Penambahan utang menghasilkan saldo yang tidak valid.");
         if (action === "payment" && nextBalance * sign < 0) throw new Error("Nominal pembayaran melebihi sisa utang.");
-        transactionStore.add({ ...transaction, debtNoteId: noteWallet.id, debtAction: action });
+        transactionStore.add({ ...transaction, debtNoteId: noteWallet.id, debtAction: action, debtDirection: noteWallet.debtDirection });
         const closed = action === "payment" && nextBalance === 0;
-        if (closed) walletStore.delete(noteWalletId);
+        if (closed) {
+          const debtRecords = transactions.filter((item) => item.debtNoteId === noteWallet.id);
+          const initialAmount = debtRecords
+            .filter((item) => item.debtAction === "initial" || item.debtAction === "add")
+            .reduce((sum, item) => sum + item.amount, 0);
+          const paidAmount = debtRecords
+            .filter((item) => item.debtAction === "payment")
+            .reduce((sum, item) => sum + item.amount, 0)
+            + transaction.amount;
+          transactionStore.add({
+            id: crypto.randomUUID(),
+            kind: "transfer",
+            amount: 0,
+            category: "Utang",
+            note: "Utang lunas",
+            date: transaction.date,
+            walletId: noteWallet.id,
+            walletName: noteWallet.name,
+            createdAt: Math.max(Date.now(), transaction.createdAt + 1),
+            debtNoteId: noteWallet.id,
+            debtAction: "settled",
+            debtDirection: noteWallet.debtDirection,
+            debtInitialAmount: initialAmount,
+            debtPaidAmount: paidAmount,
+            debtRemainingAmount: 0,
+          });
+          walletStore.delete(noteWalletId);
+        }
         result = { closed, remaining: Math.abs(nextBalance) };
       } catch (reason) {
         failure = reason instanceof Error ? reason : new Error("Transaksi utang gagal disimpan.");
@@ -536,8 +567,33 @@ export async function settleDebtNote(noteWalletId: string): Promise<void> {
         tx.abort();
         return;
       }
-      // Removing only the Notes ledger closes the debt; cash-wallet transactions
-      // are intentionally retained, so no wallet balance is changed.
+      // Preserve a dedicated closure record in the Utang history. It is metadata-only:
+      // it does not touch any regular wallet balance or alter the original ledger rows.
+      const debtRecords = records.filter((item) => item.debtNoteId === note.id);
+      const initialAmount = debtRecords
+        .filter((item) => item.debtAction === "initial" || item.debtAction === "add")
+        .reduce((sum, item) => sum + item.amount, 0);
+      const paidAmount = debtRecords
+        .filter((item) => item.debtAction === "payment")
+        .reduce((sum, item) => sum + item.amount, 0);
+      const settlementDate = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+      tx.objectStore(TRANSACTION_STORE).add({
+        id: crypto.randomUUID(),
+        kind: "transfer",
+        amount: 0,
+        category: "Utang",
+        note: "Utang diselesaikan",
+        date: settlementDate,
+        walletId: note.id,
+        walletName: note.name,
+        createdAt: Date.now(),
+        debtNoteId: note.id,
+        debtAction: "settled",
+        debtDirection: note.debtDirection,
+        debtInitialAmount: initialAmount,
+        debtPaidAmount: paidAmount,
+        debtRemainingAmount: Math.abs(balance),
+      } satisfies Transaction);
       walletStore.delete(noteWalletId);
     };
     transactionsRequest.onsuccess = process;
