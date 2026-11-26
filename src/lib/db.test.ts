@@ -234,22 +234,40 @@ test("debt operations reject insufficient cash and overpayment without writing p
 });
 
 
-test("hiding a debt transaction keeps wallet balances; deleting including history reverses all debt movements", async () => {
+test("deleting one debt payment reverses only that payment; deleting original debt removes its linked ledger", async () => {
   await seedDebtDatabase();
   const note: Wallet = { id: "notes-delete", name: "Dina", initialBalance: 0, createdAt: 1767312000000, category: "notes", debtDirection: "lent" };
   await createDebtNote(note, debtTransaction("delete-1", 300000, cashWallet.id, cashWallet.name, note.id, note.name, "Utang awal"));
   await recordDebtMovement(note.id, debtTransaction("delete-2", 100000, note.id, note.name, cashWallet.id, cashWallet.name, "Pembayaran sebagian"), "payment");
-  await removeTransaction("delete-2");
+  await recordDebtMovement(note.id, debtTransaction("delete-3", 50000, note.id, note.name, cashWallet.id, cashWallet.name, "Pembayaran kedua"), "payment");
+
+  await removeTransaction("delete-2", true);
   let transactions = await getTransactions();
-  assert.equal(transactions.find((item) => item.id === "delete-2")?.hiddenFromHistory, true);
+  assert.equal(transactions.some((item) => item.id === "delete-2"), false);
+  assert.equal(transactions.some((item) => item.id === "delete-1"), true);
+  assert.equal(transactions.some((item) => item.id === "delete-3"), true);
+  assert.equal((await getWallets()).some((item) => item.id === note.id), true);
   let cash = cashWallet.initialBalance + transactions.reduce((sum, item) => sum + (item.toWalletId === cashWallet.id ? item.amount : item.walletId === cashWallet.id ? -item.amount : 0), 0);
-  assert.equal(cash, 800000);
+  assert.equal(cash, 750000);
+
   await removeTransaction("delete-1", true);
   transactions = await getTransactions();
   assert.equal(transactions.length, 0);
   assert.equal((await getWallets()).some((item) => item.id === note.id), false);
   cash = cashWallet.initialBalance + transactions.reduce((sum, item) => sum + (item.toWalletId === cashWallet.id ? item.amount : item.walletId === cashWallet.id ? -item.amount : 0), 0);
   assert.equal(cash, cashWallet.initialBalance);
+});
+
+test("unchecked debt deletion hides only the selected history row and preserves its ledger effect", async () => {
+  await seedDebtDatabase();
+  const note: Wallet = { id: "notes-hide", name: "Rani", initialBalance: 0, createdAt: 1767312000000, category: "notes", debtDirection: "lent" };
+  await createDebtNote(note, debtTransaction("hide-1", 200000, cashWallet.id, cashWallet.name, note.id, note.name, "Utang awal"));
+  await recordDebtMovement(note.id, debtTransaction("hide-2", 50000, note.id, note.name, cashWallet.id, cashWallet.name, "Pembayaran"), "payment");
+  await removeTransaction("hide-2");
+  const transactions = await getTransactions();
+  assert.equal(transactions.find((item) => item.id === "hide-2")?.hiddenFromHistory, true);
+  assert.equal(transactions.find((item) => item.id === "hide-1")?.hiddenFromHistory, undefined);
+  assert.equal((await getWallets()).some((item) => item.id === note.id), true);
 });
 
 test("manual debt settlement closes Notes without changing cash balance or deleting history", async () => {
