@@ -5,7 +5,13 @@ const config: CapacitorConfig = {
   appName: "Caesh",
   webDir: "out",
   android: {
-    backgroundColor: "#f6f7f4",
+    backgroundColor: "#FAF5EF",
+  },
+  plugins: {
+    StatusBar: {
+      overlaysWebView: true,
+      style: "LIGHT",
+    },
   },
 };
 
