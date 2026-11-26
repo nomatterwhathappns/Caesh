@@ -1,8 +1,12 @@
 {
-  "version": "1.11.22",
-  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.11.22/Caesh.apk",
-  "notes": "Memperbaiki tampilan checkbox penghapusan utang dan mengganti konfirmasi Selesaikan Utang dengan popup custom CAESH.",
+  "version": "1.11.23",
+  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.11.23/Caesh.apk",
+  "notes": "Memperbaiki wishlist agar data yang tersimpan di database lokal dimuat kembali saat aplikasi dibuka.",
   "releases": [
+    {
+      "version": "1.11.23",
+      "notes": "Memperbaiki wishlist agar data yang tersimpan di database lokal dimuat kembali saat aplikasi dibuka."
+    },
     {
       "version": "1.11.22",
       "notes": "Memperbaiki tampilan checkbox penghapusan utang dan mengganti konfirmasi Selesaikan Utang dengan popup custom CAESH."
