@@ -1,8 +1,12 @@
 {
-  "version": "1.16.0",
-  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.16.0/Caesh.apk",
-  "notes": "Penghapusan transaksi utang kini otomatis menghapus riwayat yang terkait dengan transaksi terpilih, tanpa checkbox. Riwayat utang lain tetap dipertahankan.",
+  "version": "1.17.0",
+  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.17.0/Caesh.apk",
+  "notes": "Menambahkan fitur edit riwayat transaksi. Ketuk transaksi biasa di halaman Transaksi untuk langsung membuka form edit.",
   "releases": [
+    {
+      "version": "1.17.0",
+      "notes": "Menambahkan fitur edit riwayat transaksi. Ketuk transaksi biasa di halaman Transaksi untuk langsung membuka form edit."
+    },
     {
       "version": "1.16.0",
       "notes": "Penghapusan transaksi utang kini otomatis menghapus riwayat yang terkait dengan transaksi terpilih, tanpa checkbox. Riwayat utang lain tetap dipertahankan."
