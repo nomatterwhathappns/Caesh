@@ -388,9 +388,16 @@ export default function CaeshApp() {
     const statusBarColor = theme === "dark" ? "#302226" : "#FAF5EF";
     document.querySelector('meta[name="theme-color"]')?.setAttribute("content", statusBarColor);
     if (Capacitor.isNativePlatform()) {
+      document.documentElement.classList.add("caesh-native");
       void Promise.all([
-        StatusBar.setBackgroundColor({ color: statusBarColor }),
-        StatusBar.setStyle({ style: theme === "dark" ? Style.Light : Style.Dark }),
+        StatusBar.setOverlaysWebView({ overlay: true }),
+        // Capacitor: Style.Dark = light icons; Style.Light = dark icons.
+        StatusBar.setStyle({ style: theme === "dark" ? Style.Dark : Style.Light }),
+        StatusBar.getInfo().then(({ height }) => {
+          if (Number.isFinite(height) && height > 0) {
+            document.documentElement.style.setProperty("--caesh-statusbar-height", `${height}px`);
+          }
+        }),
       ]).catch((reason: unknown) => console.warn("CAESH status bar could not be synchronized.", reason));
     }
   }, [theme]);
