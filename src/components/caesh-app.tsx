@@ -9,7 +9,7 @@ import { AppInstallPlugin } from "../lib/app-install-plugin";
 import { calculateExpenseSummary, getExpenseDateRange, getExpensePeriodKey, isExpenseLimitExceeded, normalizeExpenseWidgetSettings, DEFAULT_EXPENSE_WIDGET_SETTINGS, ExpenseWidgetPeriod, ExpenseWidgetSettings } from "@/lib/expense-widget";
 import { ExpenseWidgetPlugin } from "@/lib/expense-widget-plugin";
 import {
-  createDebtNote, recordDebtMovement, getTransactions, getWallets, removeTransaction, removeWallet, settleDebtNote, saveTransaction, saveWallet,
+  createDebtNote, recordDebtMovement, cleanupClosedDebtNotes, getTransactions, getWallets, removeTransaction, removeWallet, settleDebtNote, saveTransaction, saveWallet,
   DebtDirection, Transaction, TransactionKind, Wallet, WishlistItem, getWishlist, saveWishlist, removeWishlist, purchaseWishlist,
 } from "@/lib/db";
 
@@ -198,7 +198,8 @@ export default function CaeshApp() {
       }
     } catch { /* Keep built-in categories if local settings are unreadable. */ }
     setTodayLabel(new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }));
-    Promise.all([getTransactions(), getWallets()])
+    cleanupClosedDebtNotes()
+      .then(() => Promise.all([getTransactions(), getWallets()]))
       .then(([savedTransactions, savedWallets]) => {
         setTransactions(savedTransactions);
         setWallets(savedWallets);
