@@ -176,7 +176,12 @@ test("lent debt supports adding before settlement, partial payment, and auto-clo
   transactions = await getTransactions();
   assert.deepEqual(closed, { closed: true, remaining: 0 });
   assert.equal(wallets.some((item) => item.id === note.id), false);
-  assert.equal(transactions.length, 4);
+  assert.equal(transactions.length, 5);
+  const closure = transactions.find((item) => item.debtAction === "settled");
+  assert.equal(closure?.note, "Utang lunas");
+  assert.equal(closure?.debtInitialAmount, 600000);
+  assert.equal(closure?.debtPaidAmount, 600000);
+  assert.equal(closure?.debtRemainingAmount, 0);
   assert.equal(transactions.every((item) => item.category === "Utang"), true);
   assert.equal(transactions.every((item) => item.walletName === note.name || item.toWalletName === note.name), true);
   const nextNote: Wallet = { id: "notes-andi-new", name: "Andi", initialBalance: 0, createdAt: 1768003200000, category: "notes", debtDirection: "lent" };
@@ -185,7 +190,7 @@ test("lent debt supports adding before settlement, partial payment, and auto-clo
   transactions = await getTransactions();
   assert.equal(wallets.some((item) => item.id === nextNote.id), true);
   assert.equal(wallets.some((item) => item.id === note.id), false);
-  assert.equal(transactions.length, 5);
+  assert.equal(transactions.length, 6);
 });
 
 test("borrowed debt increases destination cash and repayment decreases it without double counting", async () => {
@@ -208,7 +213,12 @@ test("borrowed debt increases destination cash and repayment decreases it withou
   wallets = await getWallets();
   transactions = await getTransactions();
   assert.equal(wallets.some((item) => item.id === note.id), false);
-  assert.equal(transactions.length, 3);
+  assert.equal(transactions.length, 4);
+  const closure = transactions.find((item) => item.debtAction === "settled");
+  assert.equal(closure?.debtDirection, "borrowed");
+  assert.equal(closure?.debtInitialAmount, 300000);
+  assert.equal(closure?.debtPaidAmount, 300000);
+  assert.equal(closure?.debtRemainingAmount, 0);
 });
 
 test("debt operations reject insufficient cash and overpayment without writing partial records", async () => {
@@ -280,7 +290,12 @@ test("manual debt settlement closes Notes without changing cash balance or delet
   await settleDebtNote(note.id);
   const after = await getTransactions();
   const cashAfter = cashWallet.initialBalance + after.reduce((sum, item) => sum + (item.toWalletId === cashWallet.id ? item.amount : item.walletId === cashWallet.id ? -item.amount : 0), 0);
-  assert.equal(after.length, 2);
+  assert.equal(after.length, 3);
+  const closure = after.find((item) => item.debtAction === "settled");
+  assert.equal(closure?.note, "Utang diselesaikan");
+  assert.equal(closure?.debtInitialAmount, 250000);
+  assert.equal(closure?.debtPaidAmount, 50000);
+  assert.equal(closure?.debtRemainingAmount, 200000);
   assert.equal(cashAfter, cashBefore);
   assert.equal((await getWallets()).some((item) => item.id === note.id), false);
 });

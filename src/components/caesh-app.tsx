@@ -706,7 +706,7 @@ export default function CaeshApp() {
     try {
       const transaction = buildDebtTransaction(noteWallet, cashWallet, value, debtAction);
       const result = await recordDebtMovement(noteWallet.id, transaction, debtAction);
-      setTransactions((current) => [transaction, ...current].sort((a, b) => b.date.localeCompare(a.date) || b.createdAt - a.createdAt));
+      setTransactions(await getTransactions());
       if (result.closed) setWallets((current) => current.filter((wallet) => wallet.id !== noteWallet.id));
       setDebtAction(null);
       setDebtTargetWalletId(null);
@@ -911,6 +911,7 @@ export default function CaeshApp() {
     const wallet = settleDebtTarget;
     try {
       await settleDebtNote(wallet.id);
+      setTransactions(await getTransactions());
       setWallets((current) => current.filter((item) => item.id !== wallet.id));
       setSettleDebtTarget(null);
       setDetailWalletId(null);
@@ -1059,7 +1060,7 @@ export default function CaeshApp() {
           {activeNav === "transactions" && <section className="panel-card page-section" id="transactions">
             <div className="panel-heading"><div><div className="section-kicker">RIWAYAT LENGKAP</div><h2>Semua transaksi</h2></div><span className="result-count">{visibleTransactions.length} catatan</span></div>
             <div className="transaction-tools"><input aria-label="Cari transaksi" type="search" placeholder="Cari catatan, kategori, atau wallet..." value={transactionSearch} onChange={(event) => setTransactionSearch(event.target.value)} /><select aria-label="Filter jenis transaksi" value={transactionFilter} onChange={(event) => setTransactionFilter(event.target.value as "all" | TransactionKind | "debt")}><option value="all">Semua jenis</option><option value="income">Pemasukan</option><option value="expense">Pengeluaran</option><option value="transfer">Transfer</option><option value="debt">Utang</option></select></div>
-            {!ready ? <div className="empty-state">Memuat data lokal...</div> : visibleTransactions.length === 0 ? <div className="empty-state"><strong>Tidak ada transaksi ditemukan</strong><p>Coba ubah kata pencarian atau filter yang dipilih.</p></div> : <div className="transaction-list">{visibleTransactions.map((item) => <div className="transaction-row" key={item.id}><div className={`transaction-icon ${item.kind}`}>{item.kind === "income" ? "↙" : item.kind === "expense" ? "↗" : "⇄"}</div><div className="transaction-info"><strong>{item.note || item.category}</strong><span>{item.kind === "transfer" ? `${walletName(item.walletId)} → ${walletName(item.toWalletId ?? "")}` : `${item.category} · ${walletName(item.walletId)}`} · {new Date(item.date + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</span></div><div className={`transaction-amount ${item.kind}`}>{item.kind === "income" ? "+" : item.kind === "expense" ? "−" : "⇄"}{rupiah(item.amount)}</div>{!item.hiddenFromHistory && <button className="delete-button" aria-label="Hapus transaksi" onClick={() => handleDelete(item.id)}>×</button>}</div>)}</div>}
+            {!ready ? <div className="empty-state">Memuat data lokal...</div> : visibleTransactions.length === 0 ? <div className="empty-state"><strong>Tidak ada transaksi ditemukan</strong><p>Coba ubah kata pencarian atau filter yang dipilih.</p></div> : <div className="transaction-list">{visibleTransactions.map((item) => <div className="transaction-row" key={item.id}><div className={`transaction-icon ${item.kind}`}>{item.kind === "income" ? "↙" : item.kind === "expense" ? "↗" : "⇄"}</div><div className="transaction-info"><strong>{item.note || item.category}</strong><span>{item.debtAction === "settled" ? `${item.debtDirection === "borrowed" ? "Utang" : "Piutang"} · Total ${rupiah(item.debtInitialAmount ?? 0)} · Dibayar ${rupiah(item.debtPaidAmount ?? 0)} · ${(item.debtRemainingAmount ?? 0) > 0 ? `Sisa dihapus ${rupiah(item.debtRemainingAmount ?? 0)}` : "Lunas dibayar penuh"}` : item.kind === "transfer" ? `${walletName(item.walletId)} → ${walletName(item.toWalletId ?? "")}` : `${item.category} · ${walletName(item.walletId)}`} · {new Date(item.date + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</span></div><div className={`transaction-amount ${item.kind}`}>{item.debtAction === "settled" ? ((item.debtRemainingAmount ?? 0) > 0 ? "SELESAI" : "LUNAS") : <>{item.kind === "income" ? "+" : item.kind === "expense" ? "−" : "⇄"}{rupiah(item.amount)}</>}</div>{!item.hiddenFromHistory && <button className="delete-button" aria-label="Hapus transaksi" onClick={() => handleDelete(item.id)}>×</button>}</div>)}</div>}
           </section>}
 
           {activeNav === "wishlist" && <section className="page-section wishlist-page">

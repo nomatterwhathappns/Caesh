@@ -1,8 +1,12 @@
 {
-  "version": "1.14.2",
-  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.14.2/Caesh.apk",
-  "notes": "Memperbaiki status bar Android dengan mode edge-to-edge: latar transparan menyatu dengan header Bordeaux Estate, ikon terang di Dark Mode dan gelap di Light Mode.",
+  "version": "1.15.0",
+  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.15.0/Caesh.apk",
+  "notes": "Menambahkan riwayat penyelesaian utang dan pelunasan otomatis di Transaksi → Utang, lengkap dengan total utang, jumlah pembayaran, dan sisa yang dihapus.",
   "releases": [
+    {
+      "version": "1.15.0",
+      "notes": "Menambahkan riwayat penyelesaian utang dan pelunasan otomatis di Transaksi → Utang, lengkap dengan total utang, jumlah pembayaran, dan sisa yang dihapus."
+    },
     {
       "version": "1.14.2",
       "notes": "Memperbaiki status bar Android dengan mode edge-to-edge: latar transparan menyatu dengan header Bordeaux Estate, ikon terang di Dark Mode dan gelap di Light Mode."
