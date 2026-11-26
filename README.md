@@ -1,80 +1,139 @@
 # Caesh
 
-**Caesh** adalah aplikasi pengelola keuangan pribadi dengan arah pengembangan local-first. Web app Next.js saat ini digunakan sebagai preview dan tempat pengembangan. Target akhirnya adalah aplikasi desktop dan Android yang menyimpan data masing-masing pengguna di perangkatnya.
+**CAESH** adalah aplikasi pengelola keuangan pribadi dengan pendekatan **local-first**. Aplikasi ini dirancang untuk membantu pengguna mencatat uang, memantau saldo, mengelola wallet, dan merencanakan pembelian tanpa harus menyimpan data keuangan di server.
+
+<p align="center">
+  <strong>Bordeaux Estate · Personal Finance Manager</strong>
+</p>
+
+## Fitur
+
+### Ringkasan keuangan
+- Ringkasan total saldo, pemasukan, dan pengeluaran.
+- Filter periode ringkasan: bulan ini, tahun ini, dan semua.
+- Filter wallet yang dihitung dalam total saldo.
+- Preferensi privasi untuk menyembunyikan nominal wallet.
+
+### Wallet
+- Membuat dan mengelola beberapa wallet dengan saldo awal.
+- Foto background per wallet, termasuk pengaturan posisi dan zoom.
+- Detail wallet dan catatan.
+- Kategori Notes untuk mencatat utang dan piutang.
+
+### Transaksi dan utang
+- Pencatatan pemasukan, pengeluaran, dan transfer antar-wallet.
+- Riwayat transaksi, pencarian, dan filter.
+- Pencatatan utang/piutang per orang.
+- Pembayaran utang bertahap, pelunasan, dan riwayat pergerakan utang.
+
+### Wishlist
+- Menyimpan daftar barang atau tujuan yang ingin dibeli.
+- Melacak status wishlist.
+- Mencatat pembelian dan wallet yang digunakan.
+
+### Widget dan tampilan
+- Widget pengeluaran Android dengan pilihan wallet dan periode.
+- Pengaturan background widget, posisi gambar, dan zoom.
+- Tema **Bordeaux Estate** Light dan Dark.
+- Tampilan kartu saldo dengan motif **Liquid Silk**.
+- Antarmuka responsif untuk portrait dan landscape.
+
+### Pembaruan aplikasi Android
+- Pemeriksaan pembaruan dari dalam aplikasi.
+- Verifikasi file APK menggunakan SHA-256 sebelum proses instalasi.
+- APK Android ditandatangani menggunakan signing key rilis.
+
+## Unduh CAESH Android
+
+**Versi terbaru: v1.14.2**
+
+[Unduh CAESH v1.14.2 (APK)](https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.14.2/Caesh.apk)
+
+[Semua rilis CAESH](https://github.com/nomatterwhappns/Caesh/releases)
+
+Aplikasi juga dapat memeriksa pembaruan ketika dibuka. Jika pembaruan tersedia, ikuti instruksi yang muncul di aplikasi. Verifikasi SHA-256 dilakukan sebelum APK diteruskan ke installer Android.
 
 ## Menjalankan versi web secara lokal
 
-Persyaratan: Node.js 20.9 atau lebih baru.
+Persyaratan:
+- Node.js 22 atau lebih baru.
+- npm.
+
+Clone repository dan pasang dependensi:
 
 ```bash
+git clone https://github.com/nomatterwhathappns/Caesh.git
+cd Caesh
 npm install
 npm run dev
 ```
 
-Buka http://localhost:3000.
+Buka [http://localhost:3000](http://localhost:3000).
 
-Periksa build produksi dengan:
-
-```bash
-npm run build
-npm run start
-```
-
-## Pengujian dan build
-
-Jalankan pengujian migrasi database dan backup:
+Untuk menjalankan pemeriksaan:
 
 ```bash
 npm test
-```
-
-Build produksi otomatis menjalankan pengujian tersebut terlebih dahulu:
-
-```bash
+npm run lint
 npm run build
 ```
 
-GitHub Actions juga menjalankan pengujian dan build pada setiap push ke `main` serta pull request.
+Perintah `npm run build` menjalankan pengujian terlebih dahulu sebelum build Next.js.
 
-## Deploy preview ke Vercel
+## Build Android
 
-1. Import repository GitHub `nomatterwhathappns/Caesh` ke Vercel.
-2. Framework Preset: Next.js.
-3. Root Directory: `./`.
-4. Build Command: `npm run build`.
-5. Output Directory: biarkan default.
-6. Deploy.
+Build APK rilis dikelola melalui GitHub Actions pada branch `caesh`.
 
-Vercel digunakan untuk hosting preview web, bukan sebagai tempat penyimpanan data keuangan pengguna.
+Workflow Android melakukan:
+1. Instalasi dependensi Node.js.
+2. Pengujian data dan database.
+3. Export aplikasi web untuk Android.
+4. Sinkronisasi project Capacitor Android.
+5. Konfigurasi updater dan widget Android.
+6. Build APK.
+7. Penandatanganan APK rilis jika Android signing secrets tersedia.
+8. Publikasi APK ke GitHub Releases dan pembuatan manifest pembaruan SHA-256.
 
-## Privasi dan penyimpanan
+Lihat [workflow Build Android APK](https://github.com/nomatterwhathappns/Caesh/actions/workflows/android-apk.yml).
 
-- Data keuangan disimpan secara lokal pada perangkat pengguna.
-- Tidak ada backend keuangan, akun pengguna, database cloud, atau sinkronisasi antarperangkat yang direncanakan.
-- Data antar pengguna dan antar perangkat tidak otomatis bercampur atau tersinkron.
-- Penyimpanan lokal aplikasi saat ini menggunakan IndexedDB di browser.
-- Data lokal belum dienkripsi oleh aplikasi. Menghapus data situs/browser dapat menghapus data.
-- Fitur Backup dan Pulihkan tersedia untuk mengekspor atau memulihkan transaksi, wallet, foto wallet, wishlist, serta preferensi ke file JSON. Simpan file backup di lokasi aman di luar perangkat.
+## Privasi dan penyimpanan data
 
-## Kebijakan perlindungan data
+CAESH menggunakan pendekatan local-first:
+- Data transaksi, wallet, dan wishlist disimpan di perangkat melalui IndexedDB.
+- Preferensi tampilan dan pengaturan tertentu disimpan secara lokal di perangkat.
+- CAESH tidak menggunakan backend keuangan, akun pengguna, atau database cloud untuk menyimpan data keuangan.
+- Data tidak otomatis tersinkron antarperangkat.
+- Data lokal aplikasi **belum dienkripsi oleh CAESH**. Keamanan perangkat dan akun sistem operasi tetap penting.
+- Menghapus data aplikasi, data browser, atau penyimpanan perangkat dapat menghilangkan data CAESH.
 
-Menjaga data pengguna agar tidak hilang atau rusak saat aplikasi diperbarui adalah persyaratan utama pengembangan Caesh.
+**Catatan:** pemeriksaan SHA-256 pada updater digunakan untuk memeriksa integritas file APK yang diunduh. SHA-256 bukan enkripsi data keuangan dan bukan pengganti keamanan perangkat.
 
-- Pembaruan normal tidak boleh menghapus atau membuat ulang database pengguna.
-- Perubahan struktur database harus memakai versi dan migrasi bertahap.
-- Migrasi harus mempertahankan transaksi, wallet, wishlist, dan foto wallet yang sudah ada.
-- Jika migrasi gagal, proses harus dibatalkan; aplikasi tidak boleh diam-diam mengganti data dengan database kosong.
-- Perubahan yang berpotensi menghapus atau mengubah data secara destruktif harus didahului backup/restore dan pengujian pemulihan.
-- Setiap versi aplikasi harus diuji agar data tetap tersedia setelah update.
+## Perlindungan data saat pembaruan
 
-Kebijakan ini sudah didokumentasikan. Caesh memiliki pengujian otomatis untuk migrasi database versi 1, 2, dan 3 serta alur backup/restore. Pengujian perangkat nyata dan verifikasi update pada aplikasi desktop/Android tetap wajib sebelum rilis publik.
+Pembaruan aplikasi harus mempertahankan database lokal pengguna:
+- Pembaruan normal tidak boleh menghapus atau membuat ulang database.
+- Perubahan struktur database harus menggunakan migrasi bertahap yang mempertahankan data lama.
+- Jika migrasi gagal, aplikasi tidak boleh diam-diam mengganti database dengan database kosong.
+- Pengujian migrasi database dilakukan sebagai bagian dari pemeriksaan proyek.
 
-## Fitur saat ini
+Meskipun demikian, selalu pertimbangkan risiko kehilangan data pada perangkat dan jangan menghapus data aplikasi saat memasang pembaruan.
 
-- Ringkasan saldo dan arus uang.
-- Beberapa wallet dengan saldo awal dan foto.
-- Transaksi pemasukan, pengeluaran, dan transfer.
-- Riwayat dan pencarian transaksi.
-- Analisis pengeluaran.
-- Wishlist dengan pencatatan pembelian.
-- Penyimpanan lokal melalui IndexedDB.
+## Teknologi
+
+- [Next.js](https://nextjs.org/)
+- [React](https://react.dev/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Capacitor](https://capacitorjs.com/)
+- IndexedDB
+- GitHub Actions
+
+## Status proyek
+
+CAESH dikembangkan secara bertahap. Versi Android saat ini tersedia sebagai APK melalui GitHub Releases. Versi web dapat dijalankan secara lokal untuk pengembangan dan pengujian.
+
+---
+
+<p align="center">
+  <strong>CAESH</strong><br/>
+  Personal finance, kept personal.
+</p>
