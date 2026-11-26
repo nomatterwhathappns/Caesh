@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&display=swap');
+
 /* System fonts keep the app independent from third-party font requests. */
 
 :root{--ink:#202820;--muted:#899087;--line:#e9ece6;--paper:#f6f7f4;--green:#a9c9a0;--deep:#243a2c;--mint:#e6efe2;--white:#fff;--orange:#d58b63}
@@ -1719,4 +1721,38 @@ body{
 .balance-card>.balance-filter-panel{z-index:3}
 @media(max-width:620px){
  .balance-decoration{background-size:auto 100%;background-position:right center}
+}
+
+
+/* CAESH v1.14.1 — DM Serif Display brand, native status bar, mobile date, and tap feedback. */
+.topbar .topbar-brand-name{
+  font-family:"DM Serif Display",Georgia,serif;
+  font-size:1.18em;
+  font-weight:400;
+  letter-spacing:0;
+  text-transform:none;
+  line-height:1;
+}
+*{-webkit-tap-highlight-color:transparent}
+button,a,[role="button"],input,select,textarea{-webkit-tap-highlight-color:transparent}
+button:focus:not(:focus-visible),a:focus:not(:focus-visible),[role="button"]:focus:not(:focus-visible){outline:none}
+button:focus-visible,a:focus-visible,[role="button"]:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:2px solid color-mix(in srgb,var(--accent) 78%,transparent);
+  outline-offset:2px;
+}
+@media(max-width:620px){
+  .top-date{
+    display:inline-flex;
+    align-items:center;
+    flex:0 1 auto;
+    min-width:0;
+    white-space:nowrap;
+    font-size:9px;
+    line-height:1;
+    color:var(--muted);
+    margin-right:2px;
+  }
+  .topbar-right{gap:7px}
+  .topbar-right .theme-toggle{margin-left:0}
+  .topbar .topbar-brand-name{font-size:25px}
 }
