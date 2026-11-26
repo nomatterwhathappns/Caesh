@@ -238,9 +238,9 @@ test("debt operations reject insufficient cash and overpayment without writing p
   assert.equal((await getTransactions()).length, 1);
   assert.equal((await getWallets()).some((item) => item.id === note.id), true);
   await removeTransaction("good-lend");
-  assert.equal((await getTransactions()).length, 1);
-  assert.equal((await getTransactions())[0].hiddenFromHistory, true);
-  assert.equal((await getWallets()).find((item) => item.id === note.id)?.id, note.id);
+  // Deleting the initial debt removes its linked Notes ledger and all linked debt rows.
+  assert.equal((await getTransactions()).length, 0);
+  assert.equal((await getWallets()).some((item) => item.id === note.id), false);
 });
 
 
