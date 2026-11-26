@@ -1,8 +1,12 @@
 {
-  "version": "1.12.0",
-  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.12.0/Caesh.apk",
-  "notes": "Menambahkan pengaturan posisi horizontal, vertikal, dan zoom untuk setiap foto background widget.",
+  "version": "1.12.1",
+  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.12.1/Caesh.apk",
+  "notes": "Menyempurnakan pengaturan posisi background widget dengan preview foto persegi dan kontrol di sisi kanan.",
   "releases": [
+    {
+      "version": "1.12.1",
+      "notes": "Menyempurnakan pengaturan posisi background widget dengan preview foto persegi dan kontrol di sisi kanan."
+    },
     {
       "version": "1.11.24",
       "notes": "Mengganti konfirmasi hapus wishlist bawaan Android dengan popup custom CAESH."
