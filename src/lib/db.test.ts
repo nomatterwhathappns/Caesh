@@ -251,7 +251,7 @@ test("deleting one debt payment reverses only that payment; deleting original de
   await recordDebtMovement(note.id, debtTransaction("delete-2", 100000, note.id, note.name, cashWallet.id, cashWallet.name, "Pembayaran sebagian"), "payment");
   await recordDebtMovement(note.id, debtTransaction("delete-3", 50000, note.id, note.name, cashWallet.id, cashWallet.name, "Pembayaran kedua"), "payment");
 
-  await removeTransaction("delete-2", true);
+  await removeTransaction("delete-2");
   let transactions = await getTransactions();
   assert.equal(transactions.some((item) => item.id === "delete-2"), false);
   assert.equal(transactions.some((item) => item.id === "delete-1"), true);
@@ -260,7 +260,7 @@ test("deleting one debt payment reverses only that payment; deleting original de
   let cash = cashWallet.initialBalance + transactions.reduce((sum, item) => sum + (item.toWalletId === cashWallet.id ? item.amount : item.walletId === cashWallet.id ? -item.amount : 0), 0);
   assert.equal(cash, 750000);
 
-  await removeTransaction("delete-1", true);
+  await removeTransaction("delete-1");
   transactions = await getTransactions();
   assert.equal(transactions.length, 0);
   assert.equal((await getWallets()).some((item) => item.id === note.id), false);
@@ -268,15 +268,18 @@ test("deleting one debt payment reverses only that payment; deleting original de
   assert.equal(cash, cashWallet.initialBalance);
 });
 
-test("unchecked debt deletion hides only the selected history row and preserves its ledger effect", async () => {
+test("default debt deletion removes only the selected payment and preserves other debt history", async () => {
   await seedDebtDatabase();
   const note: Wallet = { id: "notes-hide", name: "Rani", initialBalance: 0, createdAt: 1767312000000, category: "notes", debtDirection: "lent" };
   await createDebtNote(note, debtTransaction("hide-1", 200000, cashWallet.id, cashWallet.name, note.id, note.name, "Utang awal"));
-  await recordDebtMovement(note.id, debtTransaction("hide-2", 50000, note.id, note.name, cashWallet.id, cashWallet.name, "Pembayaran"), "payment");
+  await recordDebtMovement(note.id, debtTransaction("hide-2", 50000, note.id, note.name, cashWallet.id, cashWallet.name, "Pembayaran pertama"), "payment");
+  await recordDebtMovement(note.id, debtTransaction("hide-3", 25000, note.id, note.name, cashWallet.id, cashWallet.name, "Pembayaran kedua"), "payment");
   await removeTransaction("hide-2");
   const transactions = await getTransactions();
-  assert.equal(transactions.find((item) => item.id === "hide-2")?.hiddenFromHistory, true);
-  assert.equal(transactions.find((item) => item.id === "hide-1")?.hiddenFromHistory, undefined);
+  assert.equal(transactions.some((item) => item.id === "hide-2"), false);
+  assert.equal(transactions.some((item) => item.id === "hide-1"), true);
+  assert.equal(transactions.some((item) => item.id === "hide-3"), true);
+  assert.equal(transactions.some((item) => item.hiddenFromHistory), false);
   assert.equal((await getWallets()).some((item) => item.id === note.id), true);
 });
 
