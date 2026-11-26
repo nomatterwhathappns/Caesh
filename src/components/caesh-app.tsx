@@ -510,6 +510,15 @@ export default function CaeshApp() {
       imagePositionX: expenseWidgetSettings[expenseWidgetSettings.limitEnabled && expenseWidgetOverLimit ? "afterImageX" : expenseWidgetSettings.limitEnabled ? "beforeImageX" : "baseImageX"],
       imagePositionY: expenseWidgetSettings[expenseWidgetSettings.limitEnabled && expenseWidgetOverLimit ? "afterImageY" : expenseWidgetSettings.limitEnabled ? "beforeImageY" : "baseImageY"],
       imageZoom: expenseWidgetSettings[expenseWidgetSettings.limitEnabled && expenseWidgetOverLimit ? "afterImageZoom" : expenseWidgetSettings.limitEnabled ? "beforeImageZoom" : "baseImageZoom"],
+      baseImageX: expenseWidgetSettings.baseImageX,
+      baseImageY: expenseWidgetSettings.baseImageY,
+      baseImageZoom: expenseWidgetSettings.baseImageZoom,
+      beforeImageX: expenseWidgetSettings.beforeImageX,
+      beforeImageY: expenseWidgetSettings.beforeImageY,
+      beforeImageZoom: expenseWidgetSettings.beforeImageZoom,
+      afterImageX: expenseWidgetSettings.afterImageX,
+      afterImageY: expenseWidgetSettings.afterImageY,
+      afterImageZoom: expenseWidgetSettings.afterImageZoom,
       enabled: true,
     }).then((status) => setExpenseWidgetInstalled(status.installed))
       .catch((reason: unknown) => console.warn("CAESH widget could not refresh.", reason));
