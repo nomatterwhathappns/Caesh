@@ -1,8 +1,12 @@
 {
-  "version": "1.15.0",
-  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.15.0/Caesh.apk",
-  "notes": "Menambahkan riwayat penyelesaian utang dan pelunasan otomatis di Transaksi → Utang, lengkap dengan total utang, jumlah pembayaran, dan sisa yang dihapus.",
+  "version": "1.16.0",
+  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.16.0/Caesh.apk",
+  "notes": "Mengubah penghapusan transaksi utang agar langsung memakai perilaku hapus termasuk riwayat terkait tanpa checkbox.",
   "releases": [
+    {
+      "version": "1.16.0",
+      "notes": "Mengubah penghapusan transaksi utang agar langsung memakai perilaku hapus termasuk riwayat terkait tanpa checkbox."
+    },
     {
       "version": "1.15.0",
       "notes": "Menambahkan riwayat penyelesaian utang dan pelunasan otomatis di Transaksi → Utang, lengkap dengan total utang, jumlah pembayaran, dan sisa yang dihapus."
