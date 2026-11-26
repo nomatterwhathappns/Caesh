@@ -1756,3 +1756,16 @@ button:focus-visible,a:focus-visible,[role="button"]:focus-visible,input:focus-v
   .topbar-right .theme-toggle{margin-left:0}
   .topbar .topbar-brand-name{font-size:25px}
 }
+
+
+/* CAESH v1.14.2 — edge-to-edge Android status bar. The WebView draws the header behind the transparent system bar. */
+.caesh-native .topbar{
+  padding-top:var(--caesh-statusbar-height, env(safe-area-inset-top, 0px));
+  height:calc(72px + var(--caesh-statusbar-height, env(safe-area-inset-top, 0px)));
+}
+@media(max-width:620px){
+  .caesh-native .topbar{
+    height:calc(58px + var(--caesh-statusbar-height, env(safe-area-inset-top, 0px)));
+    padding-top:var(--caesh-statusbar-height, env(safe-area-inset-top, 0px));
+  }
+}
