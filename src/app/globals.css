@@ -1547,3 +1547,18 @@ body.caesh-modal-open {
 .settle-debt-confirm-button { border: 1px solid var(--accent); background: var(--accent); color: #fff; cursor: pointer; }
 .settle-debt-confirm-button:hover { filter: brightness(.94); }
 @media (max-width: 620px) { .settle-debt-modal { width: 100%; padding: 23px 20px; } }
+
+
+/* CAESH v1.11.24: custom wishlist deletion confirmation matching CAESH dialogs. */
+.delete-wishlist-backdrop { z-index: 2100; }
+.delete-wishlist-modal { width: min(100%, 390px); text-align: center; padding: 28px; }
+.delete-wishlist-icon { width: 48px; height: 48px; margin: 0 auto 16px; display: grid; place-items: center; border-radius: 15px; background: color-mix(in srgb, #d96c65 14%, transparent); color: #d96c65; font: 500 28px 'Manrope',sans-serif; }
+.delete-wishlist-modal > .section-kicker { margin-bottom: 7px; }
+.delete-wishlist-modal h2 { margin: 0; color: var(--ink); font: 750 19px 'Manrope',sans-serif; letter-spacing: -.45px; }
+.delete-wishlist-modal p { margin: 12px 0 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.delete-wishlist-modal p strong { color: var(--ink); }
+.delete-wishlist-modal .modal-actions { display: grid; grid-template-columns: 1fr 1fr; margin-top: 23px; gap: 10px; }
+.delete-wishlist-modal .modal-actions button { min-height: 45px; border-radius: 12px; font-size: 12px; font-weight: 700; }
+.delete-wishlist-confirm-button { border: 1px solid #d96c65; background: #d96c65; color: #fff; cursor: pointer; }
+.delete-wishlist-confirm-button:hover { filter: brightness(.94); }
+@media (max-width: 620px) { .delete-wishlist-modal { width: 100%; padding: 23px 20px; } }
