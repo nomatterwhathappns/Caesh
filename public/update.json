@@ -1,8 +1,12 @@
 {
-  "version": "1.11.20",
-  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.11.20/Caesh.apk",
-  "notes": "Memperbaiki lapisan dialog agar tombol Bayar dan Tambah utang dapat ditekan dari detail Notes.",
+  "version": "1.11.21",
+  "apkUrl": "https://github.com/nomatterwhathappns/Caesh/releases/download/caesh-v1.11.21/Caesh.apk",
+  "notes": "Membersihkan Notes utang bersaldo Rp0 secara otomatis saat aplikasi dibuka, tanpa menghapus riwayat transaksi.",
   "releases": [
+    {
+      "version": "1.11.21",
+      "notes": "Membersihkan Notes utang bersaldo Rp0 secara otomatis saat aplikasi dibuka, tanpa menghapus riwayat transaksi."
+    },
     {
       "version": "1.11.20",
       "notes": "Memperbaiki lapisan dialog agar tombol Bayar dan Tambah utang dapat ditekan dari detail Notes."
